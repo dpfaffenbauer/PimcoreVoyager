@@ -1,11 +1,11 @@
 /**
  * Object List Screen
- * Displays list of Pimcore data objects for a specific class
+ * Displays tree structure of Pimcore data objects and folders for a specific class
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
-import { Card, Title, Paragraph, ActivityIndicator, Chip } from 'react-native-paper';
+import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { Card, Title, Paragraph, ActivityIndicator, Chip, IconButton } from 'react-native-paper';
 import { PimcoreService } from '../apis/pimcoreService';
 import { PimcoreDataObject, PimcoreClassDefinition } from '../types/pimcore';
 
@@ -13,24 +13,37 @@ interface ObjectListScreenProps {
   route: {
     params: {
       classDefinition: PimcoreClassDefinition;
+      parentId?: number;
+      parentPath?: string;
     };
   };
   navigation: any;
 }
 
 export default function ObjectListScreen({ route, navigation }: ObjectListScreenProps) {
-  const { classDefinition } = route.params;
+  const { classDefinition, parentId, parentPath } = route.params;
   const [objects, setObjects] = useState<PimcoreDataObject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPath, setCurrentPath] = useState(parentPath || '/');
 
   useEffect(() => {
     loadObjects();
-  }, []);
+    
+    // Update navigation title to show current path
+    navigation.setOptions({
+      title: currentPath === '/' ? classDefinition.name : currentPath,
+    });
+  }, [parentId]);
 
   const loadObjects = async () => {
     setLoading(true);
     try {
-      const response = await PimcoreService.getDataObjects(classDefinition.id);
+      const response = await PimcoreService.getDataObjects(
+        classDefinition.id,
+        1,
+        100,
+        parentId
+      );
       setObjects(response.data);
     } catch (error) {
       console.error('Error loading objects:', error);
@@ -39,34 +52,65 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
     }
   };
 
-  const handleObjectPress = (object: PimcoreDataObject) => {
-    navigation.navigate('ObjectDetail', { object, classDefinition });
+  const handleItemPress = (item: PimcoreDataObject) => {
+    // Check if it's a folder (type = 'folder')
+    if (item.type === 'folder') {
+      // Navigate to folder contents
+      navigation.push('ObjectList', {
+        classDefinition,
+        parentId: item.id,
+        parentPath: item.path,
+      });
+    } else {
+      // Navigate to object detail view
+      navigation.navigate('ObjectDetail', { object: item, classDefinition });
+    }
   };
 
-  const renderObjectItem = ({ item }: { item: PimcoreDataObject }) => (
-    <Card
-      style={styles.card}
-      onPress={() => handleObjectPress(item)}
-    >
-      <Card.Content>
-        <View style={styles.header}>
-          <Title style={styles.title}>{item.key}</Title>
-          <Chip
-            mode="outlined"
-            compact
-            style={styles.chip}
-          >
-            {item.published ? 'Published' : 'Draft'}
-          </Chip>
-        </View>
-        <Paragraph style={styles.path}>{item.path}</Paragraph>
-        <Paragraph style={styles.meta}>
-          ID: {item.id} • Modified:{' '}
-          {new Date(item.modificationDate * 1000).toLocaleDateString()}
-        </Paragraph>
-      </Card.Content>
-    </Card>
-  );
+  const renderObjectItem = ({ item }: { item: PimcoreDataObject }) => {
+    const isFolder = item.type === 'folder';
+    
+    return (
+      <Card
+        style={styles.card}
+        onPress={() => handleItemPress(item)}
+      >
+        <Card.Content>
+          <View style={styles.header}>
+            <View style={styles.titleRow}>
+              <IconButton
+                icon={isFolder ? 'folder' : 'file-document'}
+                size={20}
+                style={styles.icon}
+              />
+              <Title style={styles.title}>{item.key}</Title>
+            </View>
+            {!isFolder && (
+              <Chip
+                mode="outlined"
+                compact
+                style={styles.chip}
+              >
+                {item.published ? 'Published' : 'Draft'}
+              </Chip>
+            )}
+          </View>
+          <Paragraph style={styles.path}>{item.path}</Paragraph>
+          <Paragraph style={styles.meta}>
+            ID: {item.id} • Type: {item.type || 'object'}
+            {item.modificationDate && (
+              <> • Modified: {new Date(item.modificationDate * 1000).toLocaleDateString()}</>
+            )}
+          </Paragraph>
+          {isFolder && (
+            <Paragraph style={styles.folderHint}>
+              Tap to explore folder contents →
+            </Paragraph>
+          )}
+        </Card.Content>
+      </Card>
+    );
+  };
 
   if (loading && objects.length === 0) {
     return (
@@ -141,5 +185,20 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 32,
     alignItems: 'center',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  icon: {
+    margin: 0,
+    marginRight: 4,
+  },
+  folderHint: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#2196F3',
+    fontStyle: 'italic',
   },
 });

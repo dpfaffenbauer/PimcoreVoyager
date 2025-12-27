@@ -60,7 +60,51 @@ Based on official Pimcore Studio API OpenAPI specification:
 
 **Response**: Data object details
 
-### List Data Objects
+### List Data Objects (Tree View)
+
+**Endpoint**: `GET /pimcore-studio/api/data-objects/tree`
+
+**Query Parameters** (all optional except page and pageSize):
+- `page` (required) - Page number for pagination
+- `pageSize` (required) - Number of items per page
+- `parentId` - Filter by parent folder/object ID
+- `classIds` - Filter by class IDs (JSON string array, e.g., `["Product"]`)
+- `className` - Filter by specific class name
+- `excludeFolders` - Set to `true` to exclude folders from results
+- `path` - Filter by path
+- `pathIncludeParent` - Include parent item in result
+- `pathIncludeDescendants` - Include all descendants
+- `idSearchTerm` - Filter by ID (supports wildcards with `*`)
+- `pqlQuery` - PQL query filter (e.g., `series = empty AND color="red"`)
+
+**Response**: 
+```json
+{
+  "totalItems": 100,
+  "items": [
+    {
+      "id": 123,
+      "key": "product-1",
+      "path": "/products/product-1",
+      "type": "object",
+      "className": "Product",
+      "published": true,
+      "modificationDate": 1640000000
+    },
+    {
+      "id": 124,
+      "key": "subfolder",
+      "path": "/products/subfolder",
+      "type": "folder",
+      "hasChildren": true
+    }
+  ]
+}
+```
+
+**Note**: This endpoint provides tree structure including folders and data objects, suitable for hierarchical navigation.
+
+### List Data Objects (Grid View)
 
 **Endpoint**: `GET /pimcore-studio/api/data-objects`
 
@@ -71,7 +115,7 @@ Based on official Pimcore Studio API OpenAPI specification:
 
 **Response**: Paginated list of data objects
 
-**Note**: For grid-based listing, use `/pimcore-studio/api/data-object/grid/*` endpoints
+**Note**: For grid-based listing with advanced filtering, use `/pimcore-studio/api/data-object/grid/*` endpoints
 
 ### Create Data Object
 

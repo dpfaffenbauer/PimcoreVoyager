@@ -57,29 +57,41 @@ export class PimcoreService {
   }
 
   /**
-   * Fetch data objects by class
-   * Endpoint: GET /pimcore-studio/api/data-objects (with filtering)
-   * Note: Actual endpoint structure may vary, check API docs for pagination
+   * Fetch data objects by class using tree endpoint
+   * Endpoint: GET /pimcore-studio/api/data-objects/tree
+   * This endpoint provides tree structure with folders and data objects
    */
   static async getDataObjects(
     classId: string,
     page: number = 1,
-    limit: number = 20
+    limit: number = 50,
+    parentId?: number
   ): Promise<PimcoreListResponse<PimcoreDataObject>> {
     try {
       const apiClient = getApiClient();
-      // Note: The exact query parameters depend on the grid configuration
-      // This is a simplified version
-      const response = await apiClient.get('/data-objects', {
-        params: {
-          classId,
-          page,
-          pageSize: limit,
-        },
+      const params: any = {
+        page,
+        pageSize: limit,
+        excludeFolders: false, // Include folders in tree view
+      };
+      
+      // Add classIds filter if provided
+      if (classId) {
+        params.classIds = JSON.stringify([classId]);
+      }
+      
+      // Add parentId filter if provided
+      if (parentId !== undefined) {
+        params.parentId = parentId;
+      }
+      
+      const response = await apiClient.get('/data-objects/tree', {
+        params,
       });
+      
       return {
-        data: response.data.items || response.data,
-        total: response.data.totalItems || response.data.length,
+        data: response.data.items || [],
+        total: response.data.totalItems || 0,
       };
     } catch (error) {
       console.error('Error fetching data objects:', error);
