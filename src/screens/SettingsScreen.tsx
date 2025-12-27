@@ -35,7 +35,7 @@ export default function SettingsScreen() {
         <Card.Content>
           <Title>API Configuration</Title>
           <Paragraph style={styles.configItem}>
-            API URL: {ENV.PIMCORE_API_URL}
+            Studio API: {ENV.PIMCORE_STUDIO_API_URL}
           </Paragraph>
           <Paragraph style={styles.configItem}>
             Environment: {ENV.APP_ENV}

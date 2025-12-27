@@ -1,6 +1,6 @@
 /**
  * API Client Configuration
- * Axios instance with interceptors for authentication
+ * Configured for Pimcore Studio API
  */
 
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
@@ -8,10 +8,11 @@ import { ENV } from '../config/env';
 import { useAuthStore } from '../store/authStore';
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: ENV.PIMCORE_API_URL,
+  baseURL: ENV.PIMCORE_STUDIO_API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
 });
 

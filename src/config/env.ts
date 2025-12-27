@@ -4,11 +4,9 @@
  */
 
 export const ENV = {
-  PIMCORE_API_URL: process.env.PIMCORE_API_URL || 'https://demo.pimcore.com/api',
-  PIMCORE_CLIENT_ID: process.env.PIMCORE_CLIENT_ID || '',
-  PIMCORE_CLIENT_SECRET: process.env.PIMCORE_CLIENT_SECRET || '',
-  OAUTH_REDIRECT_URI: process.env.OAUTH_REDIRECT_URI || 'pimcorevoyager://oauth/callback',
-  OAUTH_AUTHORIZATION_ENDPOINT: process.env.OAUTH_AUTHORIZATION_ENDPOINT || '/oauth/authorize',
-  OAUTH_TOKEN_ENDPOINT: process.env.OAUTH_TOKEN_ENDPOINT || '/oauth/token',
+  // Pimcore Studio API URL (typically: https://your-instance.com/studio/api)
+  PIMCORE_STUDIO_API_URL: process.env.PIMCORE_STUDIO_API_URL || 'https://demo.pimcore.com/studio/api',
+  
+  // Application environment
   APP_ENV: process.env.APP_ENV || 'development',
 };

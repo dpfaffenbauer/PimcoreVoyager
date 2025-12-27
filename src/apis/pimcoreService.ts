@@ -1,6 +1,7 @@
 /**
  * Pimcore API Service
- * Handles communication with Pimcore REST/GraphQL APIs
+ * Handles communication with Pimcore Studio API
+ * API Documentation: Pimcore Studio API endpoints
  */
 
 import apiClient from './apiClient';
@@ -12,12 +13,13 @@ import {
 
 export class PimcoreService {
   /**
-   * Fetch all class definitions from Pimcore
+   * Fetch all class definitions from Pimcore Studio API
+   * Endpoint: GET /studio/api/data-objects/classes
    */
   static async getClassDefinitions(): Promise<PimcoreClassDefinition[]> {
     try {
-      const response = await apiClient.get('/classes');
-      return response.data;
+      const response = await apiClient.get('/data-objects/classes');
+      return response.data.items || response.data;
     } catch (error) {
       console.error('Error fetching class definitions:', error);
       // Return mock data for development
@@ -27,10 +29,11 @@ export class PimcoreService {
 
   /**
    * Fetch a specific class definition
+   * Endpoint: GET /studio/api/data-objects/classes/{id}
    */
   static async getClassDefinition(classId: string): Promise<PimcoreClassDefinition> {
     try {
-      const response = await apiClient.get(`/classes/${classId}`);
+      const response = await apiClient.get(`/data-objects/classes/${classId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching class definition:', error);
@@ -40,6 +43,7 @@ export class PimcoreService {
 
   /**
    * Fetch data objects by class
+   * Endpoint: GET /studio/api/data-objects
    */
   static async getDataObjects(
     className: string,
@@ -47,14 +51,17 @@ export class PimcoreService {
     limit: number = 20
   ): Promise<PimcoreListResponse<PimcoreDataObject>> {
     try {
-      const response = await apiClient.get('/objects', {
+      const response = await apiClient.get('/data-objects', {
         params: {
-          className,
+          classId: className,
           page,
-          limit,
+          pageSize: limit,
         },
       });
-      return response.data;
+      return {
+        data: response.data.items || response.data,
+        total: response.data.totalItems || response.data.length,
+      };
     } catch (error) {
       console.error('Error fetching data objects:', error);
       return { data: [], total: 0 };
@@ -63,10 +70,11 @@ export class PimcoreService {
 
   /**
    * Fetch a single data object by ID
+   * Endpoint: GET /studio/api/data-objects/{id}
    */
   static async getDataObject(id: number): Promise<PimcoreDataObject> {
     try {
-      const response = await apiClient.get(`/objects/${id}`);
+      const response = await apiClient.get(`/data-objects/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching data object:', error);
@@ -76,13 +84,14 @@ export class PimcoreService {
 
   /**
    * Update a data object
+   * Endpoint: PATCH /studio/api/data-objects/{id}
    */
   static async updateDataObject(
     id: number,
     data: Partial<PimcoreDataObject>
   ): Promise<PimcoreDataObject> {
     try {
-      const response = await apiClient.put(`/objects/${id}`, data);
+      const response = await apiClient.patch(`/data-objects/${id}`, data);
       return response.data;
     } catch (error) {
       console.error('Error updating data object:', error);
@@ -92,12 +101,13 @@ export class PimcoreService {
 
   /**
    * Create a new data object
+   * Endpoint: POST /studio/api/data-objects
    */
   static async createDataObject(
     data: Partial<PimcoreDataObject>
   ): Promise<PimcoreDataObject> {
     try {
-      const response = await apiClient.post('/objects', data);
+      const response = await apiClient.post('/data-objects', data);
       return response.data;
     } catch (error) {
       console.error('Error creating data object:', error);
@@ -107,10 +117,11 @@ export class PimcoreService {
 
   /**
    * Delete a data object
+   * Endpoint: DELETE /studio/api/data-objects/{id}
    */
   static async deleteDataObject(id: number): Promise<void> {
     try {
-      await apiClient.delete(`/objects/${id}`);
+      await apiClient.delete(`/data-objects/${id}`);
     } catch (error) {
       console.error('Error deleting data object:', error);
       throw error;

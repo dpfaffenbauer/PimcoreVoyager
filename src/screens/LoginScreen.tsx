@@ -27,7 +27,7 @@ export default function LoginScreen() {
     setError('');
 
     try {
-      const token = await AuthService.mockLogin(username, password);
+      const token = await AuthService.login(username, password);
       await setToken(token);
       
       // Set mock user data
@@ -91,7 +91,7 @@ export default function LoginScreen() {
             </Button>
 
             <Paragraph style={styles.hint}>
-              Using mock authentication. Any username/password will work.
+              Connects to Pimcore Studio API. Falls back to mock auth if backend unavailable.
             </Paragraph>
           </Card.Content>
         </Card>

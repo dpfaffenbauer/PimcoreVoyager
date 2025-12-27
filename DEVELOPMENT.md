@@ -9,6 +9,7 @@
 - Expo CLI
 - (Optional) iOS Simulator or Android Emulator
 - (Optional) Expo Go app on your mobile device
+- **Pimcore instance with Studio API enabled**
 
 ### Installation
 
@@ -26,8 +27,10 @@ npm install
 3. Configure environment variables:
 ```bash
 cp .env.example .env
-# Edit .env with your Pimcore API configuration
+# Edit .env with your Pimcore Studio API URL
 ```
+
+**Important**: Set `PIMCORE_STUDIO_API_URL` to your Pimcore instance Studio API endpoint (e.g., `https://your-instance.com/studio/api`)
 
 ### Running the App
 
@@ -57,9 +60,9 @@ npm run web      # Run in web browser
 PimcoreVoyager/
 ├── src/
 │   ├── apis/              # API services for Pimcore communication
-│   │   ├── apiClient.ts   # Axios instance with interceptors
-│   │   ├── authService.ts # Authentication service
-│   │   └── pimcoreService.ts # Pimcore API service
+│   │   ├── apiClient.ts   # Axios instance configured for Studio API
+│   │   ├── authService.ts # Pimcore Studio API authentication
+│   │   └── pimcoreService.ts # Pimcore Studio API data services
 │   ├── components/        # Reusable UI components
 │   ├── config/            # Configuration files
 │   │   └── env.ts         # Environment configuration
@@ -88,29 +91,38 @@ PimcoreVoyager/
 
 ## Key Features
 
-### 1. Authentication
-- Mock authentication for development (any username/password works)
-- OAuth2 ready (placeholder for production implementation)
-- Secure token storage using Expo SecureStore
-- Automatic token expiration handling
+### 1. Pimcore Studio API Integration
+- **Native Integration**: Uses Pimcore's built-in Studio API
+- **Standard Endpoints**: 
+  - `/studio/api/login` - Authentication
+  - `/studio/api/data-objects/classes` - Class definitions
+  - `/studio/api/data-objects` - Data objects CRUD
+- **Bearer Token Auth**: Automatic token injection in requests
+- **Mock Fallback**: Falls back to mock data if Studio API unavailable
 
-### 2. State Management
+### 2. Authentication
+- **Pimcore Studio Authentication**: Uses native Pimcore auth system
+- **Secure Storage**: Tokens stored in encrypted storage (Expo SecureStore)
+- **Auto Logout**: Automatic logout on 401 errors
+- **Development Mode**: Falls back to mock auth when backend unavailable
+
+### 3. State Management
 - **Zustand** for lightweight, performant state management
 - **authStore**: Manages authentication state
 - **appStore**: Manages app-wide state (class definitions, etc.)
 
-### 3. API Integration
+### 4. API Integration
 - Axios-based HTTP client with interceptors
 - Automatic token injection for authenticated requests
 - Error handling and token refresh logic
 - Mock data support for offline development
 
-### 4. Navigation
+### 5. Navigation
 - Bottom Tab Navigation for main sections
 - Stack Navigation for hierarchical screens
 - Authentication flow (Login → Main App)
 
-### 5. UI Components
+### 6. UI Components
 - **React Native Paper** for Material Design components
 - Consistent theming and styling
 - Responsive layouts
@@ -122,14 +134,14 @@ PimcoreVoyager/
 Create a `.env` file in the root directory:
 
 ```env
-PIMCORE_API_URL=https://your-pimcore-instance.com/api
-PIMCORE_CLIENT_ID=your-client-id
-PIMCORE_CLIENT_SECRET=your-client-secret
-OAUTH_REDIRECT_URI=pimcorevoyager://oauth/callback
-OAUTH_AUTHORIZATION_ENDPOINT=/oauth/authorize
-OAUTH_TOKEN_ENDPOINT=/oauth/token
+# Pimcore Studio API URL (required)
+PIMCORE_STUDIO_API_URL=https://your-pimcore-instance.com/studio/api
+
+# App Configuration
 APP_ENV=development
 ```
+
+**Note**: The Studio API is typically available at `https://your-pimcore-domain.com/studio/api`
 
 ### Expo Configuration (app.json)
 
@@ -189,25 +201,30 @@ Add these secrets to your GitHub repository:
 
 ## Connecting to Pimcore
 
-### API Endpoints
+### Pimcore Studio API Endpoints
 
-The app expects the following Pimcore REST API endpoints:
+The app uses the following Pimcore Studio API endpoints:
 
-- `GET /classes` - List all class definitions
-- `GET /classes/:id` - Get specific class definition
-- `GET /objects?className=:name` - List objects by class
-- `GET /objects/:id` - Get specific object
-- `PUT /objects/:id` - Update object
-- `POST /objects` - Create object
-- `DELETE /objects/:id` - Delete object
+**Authentication:**
+- `POST /studio/api/login` - User login
+- `POST /studio/api/logout` - User logout
+
+**Data Objects:**
+- `GET /studio/api/data-objects/classes` - List all class definitions
+- `GET /studio/api/data-objects/classes/{id}` - Get specific class definition
+- `GET /studio/api/data-objects` - List objects (with filters)
+- `GET /studio/api/data-objects/{id}` - Get specific object
+- `PATCH /studio/api/data-objects/{id}` - Update object
+- `POST /studio/api/data-objects` - Create object
+- `DELETE /studio/api/data-objects/{id}` - Delete object
 
 ### Authentication Flow
 
-1. User enters credentials
-2. App requests OAuth2 token from Pimcore
+1. User enters Pimcore credentials
+2. App requests token from Studio API `/login` endpoint
 3. Token stored securely in device
-4. Token included in all API requests
-5. Automatic token refresh when expired
+4. Token included in all API requests as Bearer token
+5. Automatic logout on 401 errors
 
 ## Development Tips
 
@@ -232,7 +249,7 @@ npx tsc --noEmit
 
 ### Immediate TODOs
 
-1. Implement actual OAuth2 flow using `expo-auth-session`
+1. Test with real Pimcore Studio API instance
 2. Add GraphQL support for more efficient data fetching
 3. Implement offline data synchronization
 4. Add object editing forms with validation
@@ -262,8 +279,15 @@ npx tsc --noEmit
 - Clear Expo cache: `expo start -c`
 
 **Authentication not working:**
-- Verify `.env` file exists and has correct values
+- Verify `.env` file exists and has correct Studio API URL
 - Check network connectivity to Pimcore instance
+- Verify Pimcore Studio API is enabled and accessible
+- Check Pimcore user credentials are correct
+
+**Studio API not found:**
+- Ensure Pimcore Studio bundle is installed and enabled
+- Verify the API URL format: `https://domain.com/studio/api`
+- Check Pimcore logs for API errors
 
 ## Contributing
 

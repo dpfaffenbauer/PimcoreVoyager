@@ -23,20 +23,22 @@ src/
 ```
 
 ### ✅ Authentication System
-- Mock authentication for development
-- OAuth2-ready structure
+- Pimcore Studio API authentication
+- Native Pimcore auth integration
 - Secure token storage with Expo SecureStore
 - Automatic token expiration handling
 - Login/Logout flow
+- Mock fallback for development
 
 ### ✅ Pimcore API Integration
+- Pimcore Studio API integration
 - Axios-based HTTP client with interceptors
 - Automatic authentication token injection
-- Mock data support for offline development
-- Services for:
-  - Class definitions
-  - Data objects (CRUD operations)
-  - GraphQL-ready structure
+- Studio API endpoints:
+  - `/studio/api/login` - Authentication
+  - `/studio/api/data-objects/classes` - Class definitions
+  - `/studio/api/data-objects` - Data objects (CRUD)
+- Mock data fallback for offline development
 
 ### ✅ Screens Implemented
 1. **Login Screen**: Authentication with mock credentials
@@ -87,14 +89,15 @@ npm run web      # Web browser
 
 ## Next Steps for Production
 
-1. **Implement Real OAuth2**
-   - Replace mock authentication with actual OAuth2 flow
-   - Use expo-auth-session for the implementation
+1. **Test with Real Pimcore Instance**
+   - Configure `.env` with actual Pimcore Studio API URL
+   - Test authentication with real Pimcore credentials
+   - Verify class definitions and data objects loading
 
-2. **Connect to Real Pimcore API**
-   - Update .env with actual Pimcore instance URL
+2. **Connect to Pimcore Studio API**
+   - Update `.env` with your Pimcore instance URL
    - Test with real Pimcore backend
-   - Implement proper error handling
+   - Verify API endpoints work correctly
 
 3. **Add Object Detail Screen**
    - Display full object data
@@ -147,7 +150,8 @@ npm run web      # Web browser
 ## Mock Data
 
 For development without a Pimcore backend:
-- Mock authentication accepts any username/password
+- Mock authentication accepts any username/password (fallback)
+- Studio API is tried first, falls back to mock on error
 - Mock class definitions provided (Product, Category)
 - All API endpoints have fallback mock data
 

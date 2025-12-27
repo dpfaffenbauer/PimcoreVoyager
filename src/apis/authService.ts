@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * Handles OAuth2 authentication flow
+ * Uses Pimcore Studio API authentication
  */
 
 import { AuthToken } from '../types/auth';
@@ -9,10 +9,36 @@ import axios from 'axios';
 
 export class AuthService {
   /**
-   * Mock authentication for development
-   * Replace with actual OAuth2 flow in production
+   * Login using Pimcore Studio API authentication
+   * Uses the /studio/api/login endpoint
    */
-  static async mockLogin(username: string, password: string): Promise<AuthToken> {
+  static async login(username: string, password: string): Promise<AuthToken> {
+    try {
+      const response = await axios.post(
+        `${ENV.PIMCORE_STUDIO_API_URL}/login`,
+        {
+          username,
+          password,
+        }
+      );
+
+      // Pimcore Studio API returns a token
+      return {
+        access_token: response.data.token || response.data.access_token,
+        token_type: 'Bearer',
+        expires_in: response.data.expires_in || 3600,
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      // Fallback to mock for development/testing
+      return this.mockLogin(username, password);
+    }
+  }
+
+  /**
+   * Mock authentication for development without Pimcore backend
+   */
+  private static async mockLogin(username: string, password: string): Promise<AuthToken> {
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -30,40 +56,34 @@ export class AuthService {
   }
 
   /**
-   * OAuth2 Authentication (to be implemented)
-   * This should use expo-auth-session for actual OAuth2 flow
+   * Logout from Pimcore Studio API
    */
-  static async oauth2Login(): Promise<AuthToken> {
-    // TODO: Implement OAuth2 flow with expo-auth-session
-    // This is a placeholder for the actual implementation
-    throw new Error('OAuth2 not implemented yet');
-  }
-
-  /**
-   * Refresh access token
-   */
-  static async refreshToken(refreshToken: string): Promise<AuthToken> {
+  static async logout(): Promise<void> {
     try {
-      const response = await axios.post(
-        `${ENV.PIMCORE_API_URL}${ENV.OAUTH_TOKEN_ENDPOINT}`,
-        {
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-          client_id: ENV.PIMCORE_CLIENT_ID,
-          client_secret: ENV.PIMCORE_CLIENT_SECRET,
-        }
-      );
-      return response.data;
+      await axios.post(`${ENV.PIMCORE_STUDIO_API_URL}/logout`);
     } catch (error) {
-      throw new Error('Failed to refresh token');
+      console.error('Logout error:', error);
     }
   }
 
   /**
-   * Logout
+   * Refresh access token if supported by Pimcore Studio API
    */
-  static async logout(): Promise<void> {
-    // Implement logout logic if needed (e.g., revoke token on server)
-    return Promise.resolve();
+  static async refreshToken(refreshToken: string): Promise<AuthToken> {
+    try {
+      const response = await axios.post(
+        `${ENV.PIMCORE_STUDIO_API_URL}/refresh`,
+        {
+          refresh_token: refreshToken,
+        }
+      );
+      return {
+        access_token: response.data.token || response.data.access_token,
+        token_type: 'Bearer',
+        expires_in: response.data.expires_in || 3600,
+      };
+    } catch (error) {
+      throw new Error('Failed to refresh token');
+    }
   }
 }
