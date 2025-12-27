@@ -23,4 +23,12 @@ export const THEME = {
   // Background colors
   BACKGROUND_WHITE: '#fff',
   BACKGROUND_LIGHT_GRAY: '#f5f5f5',
+  
+  // Text colors
+  TEXT_PRIMARY: '#333',
+  TEXT_SECONDARY: '#666',
+  TEXT_DISABLED: '#999',
+  
+  // Icon colors
+  ICON_DISABLED: '#ccc',
 };

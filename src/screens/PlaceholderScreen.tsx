@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
+import { THEME } from '../config/constants';
 
 interface PlaceholderScreenProps {
   route?: {
@@ -32,7 +33,7 @@ export default function PlaceholderScreen({
   return (
     <View style={styles.container}>
       <View style={styles.placeholderContainer}>
-        <IconButton icon={icon} size={64} iconColor="#ccc" />
+        <IconButton icon={icon} size={64} iconColor={THEME.ICON_DISABLED} />
         <Text style={styles.placeholderTitle}>{screenName}</Text>
         <Text style={styles.placeholderText}>
           {description}
@@ -45,7 +46,7 @@ export default function PlaceholderScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: THEME.BACKGROUND_WHITE,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -58,11 +59,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 16,
     marginBottom: 8,
-    color: '#333',
+    color: THEME.TEXT_PRIMARY,
   },
   placeholderText: {
     fontSize: 16,
-    color: '#666',
+    color: THEME.TEXT_SECONDARY,
     textAlign: 'center',
     marginTop: 8,
   },
