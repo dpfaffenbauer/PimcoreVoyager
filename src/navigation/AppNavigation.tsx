@@ -95,7 +95,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof MaterialCommunityIcons.glyphMap;
+          let iconName: keyof typeof MaterialCommunityIcons.glyphMap = 'help-circle-outline';
 
           switch (route.name) {
             case 'DataObjects':
@@ -107,8 +107,6 @@ function MainTabs() {
             case 'Documents':
               iconName = 'file-document-multiple';
               break;
-            default:
-              iconName = 'help-circle-outline';
           }
 
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
