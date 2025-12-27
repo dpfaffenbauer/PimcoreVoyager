@@ -22,12 +22,22 @@ Dieser Roadmap beschreibt die geplante Entwicklung von Pimcore Voyager - einer g
 - [x] DATA_TYPE_IMPLEMENTATION.md
 - [x] PROJECT_STRUCTURE.md
 
-### 1.3 Core Architecture (In Progress)
-- [ ] Type Registry Setup
-- [ ] Base Components (Button, Card, Input, etc.)
+### 1.3 Core Architecture ✅
+- [x] Type Registry Setup
+- [x] Base Components Structure
+- [x] Data Type Base Types & Interfaces
 - [ ] Navigation Setup
 - [ ] State Management Setup (Zustand/Redux)
 - [ ] API Client Skeleton
+
+### 1.4 First Data Type Implementation ✅
+- [x] Newsletter Active (Boolean Switch)
+  - [x] Display Component
+  - [x] Edit Component
+  - [x] Validator
+  - [x] Transformer
+  - [x] Unit Tests
+  - [x] Documentation
 
 ## Phase 2: Authentication & API Integration (Sprint 3-4)
 
@@ -70,6 +80,7 @@ Implementierung der grundlegenden Text- und Eingabe-Typen:
 - [ ] #44 Input Quantity Value
 
 ### 3.3 Boolean/Simple Selection (Priority: High)
+- [x] Newsletter Active (implemented)
 - [ ] #23 Checkbox
 - [ ] #13 Boolean Select
 - [ ] #24 Consent

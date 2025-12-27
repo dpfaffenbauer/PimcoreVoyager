@@ -79,14 +79,17 @@ Siehe [ROADMAP.md](docs/ROADMAP.md) für detaillierte Phasenplanung.
 - ✅ Projekt Setup & Konfiguration
 - ✅ Basis-Dokumentation
 - ✅ Projektstruktur
+- ✅ Core Architecture (Type Registry, Base Components)
+- ✅ Data Object Types:
+  - ✅ Newsletter Active (Boolean/Switch)
 
 ### In Entwicklung
-- 🔄 Core Architecture (Type Registry, Base Components)
-- ⏳ Authentication System
-- ⏳ Pimcore API Integration
+- 🔄 Authentication System
+- 🔄 Pimcore API Integration
+- 🔄 Additional Data Object Types
 
 ### Geplant
-- Data Object Types (70+ Typen)
+- Data Object Types (69+ weitere Typen)
 - List & Detail Views
 - Edit Functionality
 - Offline Support
