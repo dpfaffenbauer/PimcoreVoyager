@@ -1,24 +1,30 @@
 /**
  * Authentication Service
  * Uses Pimcore Studio API session-based authentication
+ * Supports multi-tenant with configurable instance URLs
  */
 
-import { ENV } from '../config/env';
 import axios from 'axios';
-
-// Create a separate axios instance for auth endpoints
-// This needs to handle cookies for session management
-const authAxios = axios.create({
-  baseURL: ENV.PIMCORE_STUDIO_API_URL,
-  withCredentials: true, // Enable sending/receiving cookies
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-});
+import { useInstanceStore } from '../store/instanceStore';
 
 export class AuthService {
+  /**
+   * Get axios instance for auth with current active instance URL
+   */
+  private static getAuthAxios() {
+    const instanceUrl = useInstanceStore.getState().getActiveInstanceUrl();
+    
+    return axios.create({
+      baseURL: instanceUrl || 'https://demo.pimcore.com/studio/api',
+      withCredentials: true, // Enable sending/receiving cookies
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+  }
+
   /**
    * Login using Pimcore Studio API session-based authentication
    * Uses the /studio/api/login endpoint
@@ -26,6 +32,7 @@ export class AuthService {
    */
   static async login(username: string, password: string): Promise<boolean> {
     try {
+      const authAxios = this.getAuthAxios();
       const response = await authAxios.post('/login', {
         username,
         password,
@@ -61,6 +68,7 @@ export class AuthService {
    */
   static async logout(): Promise<void> {
     try {
+      const authAxios = this.getAuthAxios();
       await authAxios.post('/logout');
     } catch (error) {
       console.error('Logout error:', error);
@@ -73,6 +81,7 @@ export class AuthService {
    */
   static async checkSession(): Promise<boolean> {
     try {
+      const authAxios = this.getAuthAxios();
       const response = await authAxios.get('/session');
       return response.status === 200;
     } catch (error) {

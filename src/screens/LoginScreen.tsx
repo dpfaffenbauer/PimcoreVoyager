@@ -5,17 +5,23 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Title, Paragraph, Card } from 'react-native-paper';
+import { TextInput, Button, Title, Paragraph, Card, IconButton, Chip } from 'react-native-paper';
 import { useAuthStore } from '../store/authStore';
+import { useInstanceStore } from '../store/instanceStore';
 import { AuthService } from '../apis/authService';
 
-export default function LoginScreen() {
+interface LoginScreenProps {
+  navigation: any;
+}
+
+export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const { setAuthenticated, setUser } = useAuthStore();
+  const { activeInstance } = useInstanceStore();
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -51,6 +57,10 @@ export default function LoginScreen() {
     }
   };
 
+  const handleChangeInstance = () => {
+    navigation.navigate('InstanceSelection');
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -63,6 +73,22 @@ export default function LoginScreen() {
             <Paragraph style={styles.subtitle}>
               Sign in to access your Pimcore data
             </Paragraph>
+
+            {activeInstance && (
+              <View style={styles.instanceInfo}>
+                <View style={styles.instanceHeader}>
+                  <Chip icon="server" mode="outlined" compact>
+                    {activeInstance.name}
+                  </Chip>
+                  <IconButton
+                    icon="swap-horizontal"
+                    size={20}
+                    onPress={handleChangeInstance}
+                  />
+                </View>
+                <Paragraph style={styles.instanceUrl}>{activeInstance.url}</Paragraph>
+              </View>
+            )}
 
             <TextInput
               label="Username"
@@ -127,8 +153,25 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     color: '#666',
+  },
+  instanceInfo: {
+    marginBottom: 24,
+    padding: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  instanceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  instanceUrl: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
   },
   input: {
     marginBottom: 16,

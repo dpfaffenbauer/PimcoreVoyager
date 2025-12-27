@@ -2,9 +2,10 @@
  * Pimcore API Service
  * Handles communication with Pimcore Studio API
  * API Documentation: Pimcore Studio API endpoints
+ * Supports multi-tenant with dynamic instance URLs
  */
 
-import apiClient from './apiClient';
+import { getApiClient } from './apiClient';
 import {
   PimcoreClassDefinition,
   PimcoreDataObject,
@@ -18,6 +19,7 @@ export class PimcoreService {
    */
   static async getClassDefinitions(): Promise<PimcoreClassDefinition[]> {
     try {
+      const apiClient = getApiClient();
       const response = await apiClient.get('/data-objects/classes');
       return response.data.items || response.data;
     } catch (error) {
@@ -33,6 +35,7 @@ export class PimcoreService {
    */
   static async getClassDefinition(classId: string): Promise<PimcoreClassDefinition> {
     try {
+      const apiClient = getApiClient();
       const response = await apiClient.get(`/data-objects/classes/${classId}`);
       return response.data;
     } catch (error) {
@@ -51,6 +54,7 @@ export class PimcoreService {
     limit: number = 20
   ): Promise<PimcoreListResponse<PimcoreDataObject>> {
     try {
+      const apiClient = getApiClient();
       const response = await apiClient.get('/data-objects', {
         params: {
           classId,
@@ -74,6 +78,7 @@ export class PimcoreService {
    */
   static async getDataObject(id: number): Promise<PimcoreDataObject> {
     try {
+      const apiClient = getApiClient();
       const response = await apiClient.get(`/data-objects/${id}`);
       return response.data;
     } catch (error) {
@@ -91,6 +96,7 @@ export class PimcoreService {
     data: Partial<PimcoreDataObject>
   ): Promise<PimcoreDataObject> {
     try {
+      const apiClient = getApiClient();
       const response = await apiClient.patch(`/data-objects/${id}`, data);
       return response.data;
     } catch (error) {
@@ -107,6 +113,7 @@ export class PimcoreService {
     data: Partial<PimcoreDataObject>
   ): Promise<PimcoreDataObject> {
     try {
+      const apiClient = getApiClient();
       const response = await apiClient.post('/data-objects', data);
       return response.data;
     } catch (error) {
@@ -121,6 +128,7 @@ export class PimcoreService {
    */
   static async deleteDataObject(id: number): Promise<void> {
     try {
+      const apiClient = getApiClient();
       await apiClient.delete(`/data-objects/${id}`);
     } catch (error) {
       console.error('Error deleting data object:', error);

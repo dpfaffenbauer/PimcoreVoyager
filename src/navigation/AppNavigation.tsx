@@ -1,6 +1,6 @@
 /**
  * Navigation Container
- * Main navigation setup with authentication flow
+ * Main navigation setup with authentication flow and multi-tenant support
  */
 
 import React, { useEffect, useState } from 'react';
@@ -10,11 +10,14 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
+import { useInstanceStore } from '../store/instanceStore';
 
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ObjectListScreen from '../screens/ObjectListScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import InstanceSelectionScreen from '../screens/InstanceSelectionScreen';
+import AddEditInstanceScreen from '../screens/AddEditInstanceScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -73,15 +76,16 @@ function MainTabs() {
 
 export default function AppNavigation() {
   const { isAuthenticated, loadAuthData } = useAuthStore();
+  const { instances, activeInstance, loadInstances } = useInstanceStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load authentication data on app start
-    const initAuth = async () => {
-      await loadAuthData();
+    // Load authentication and instance data on app start
+    const initApp = async () => {
+      await Promise.all([loadAuthData(), loadInstances()]);
       setIsLoading(false);
     };
-    initAuth();
+    initApp();
   }, []);
 
   if (isLoading) {
@@ -92,13 +96,63 @@ export default function AppNavigation() {
     );
   }
 
+  // If no instances configured, show instance selection first
+  const hasInstances = instances.length > 0;
+  const showInstanceSelection = !hasInstances && !isAuthenticated;
+
   return (
     <NavigationContainer>
       {isAuthenticated ? (
         <MainTabs />
       ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Navigator>
+          {showInstanceSelection ? (
+            <>
+              <Stack.Screen
+                name="InstanceSelection"
+                component={InstanceSelectionScreen}
+                options={{ title: 'Select Pimcore Instance' }}
+              />
+              <Stack.Screen
+                name="AddInstance"
+                component={AddEditInstanceScreen}
+                options={{ title: 'Add Instance' }}
+              />
+              <Stack.Screen
+                name="EditInstance"
+                component={AddEditInstanceScreen}
+                options={{ title: 'Edit Instance' }}
+              />
+              <Stack.Screen
+                name="Login"
+                component={LoginScreen}
+                options={{ headerShown: false }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack.Screen
+                name="Login"
+                component={LoginScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="InstanceSelection"
+                component={InstanceSelectionScreen}
+                options={{ title: 'Select Pimcore Instance' }}
+              />
+              <Stack.Screen
+                name="AddInstance"
+                component={AddEditInstanceScreen}
+                options={{ title: 'Add Instance' }}
+              />
+              <Stack.Screen
+                name="EditInstance"
+                component={AddEditInstanceScreen}
+                options={{ title: 'Edit Instance' }}
+              />
+            </>
+          )}
         </Stack.Navigator>
       )}
     </NavigationContainer>

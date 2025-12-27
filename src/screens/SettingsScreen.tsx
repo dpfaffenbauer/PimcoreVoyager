@@ -1,19 +1,28 @@
 /**
  * Settings Screen
- * App settings and user profile
+ * App settings, user profile, and instance management
  */
 
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { List, Card, Title, Paragraph, Button, Divider } from 'react-native-paper';
+import { List, Card, Title, Paragraph, Button, Divider, Chip } from 'react-native-paper';
 import { useAuthStore } from '../store/authStore';
-import { ENV } from '../config/env';
+import { useInstanceStore } from '../store/instanceStore';
 
-export default function SettingsScreen() {
+interface SettingsScreenProps {
+  navigation: any;
+}
+
+export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { user, logout } = useAuthStore();
+  const { activeInstance, instances } = useInstanceStore();
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleManageInstances = () => {
+    navigation.navigate('InstanceSelection');
   };
 
   return (
@@ -33,13 +42,27 @@ export default function SettingsScreen() {
 
       <Card style={styles.card}>
         <Card.Content>
-          <Title>API Configuration</Title>
-          <Paragraph style={styles.configItem}>
-            Studio API: {ENV.PIMCORE_STUDIO_API_URL}
+          <Title>Pimcore Instances</Title>
+          {activeInstance && (
+            <View style={styles.activeInstance}>
+              <Paragraph style={styles.label}>Active Instance:</Paragraph>
+              <Chip icon="server" mode="flat" style={styles.chip}>
+                {activeInstance.name}
+              </Chip>
+              <Paragraph style={styles.instanceUrl}>{activeInstance.url}</Paragraph>
+            </View>
+          )}
+          <Paragraph style={styles.instanceCount}>
+            {instances.length} instance(s) configured
           </Paragraph>
-          <Paragraph style={styles.configItem}>
-            Environment: {ENV.APP_ENV}
-          </Paragraph>
+          <Button
+            mode="outlined"
+            onPress={handleManageInstances}
+            style={styles.manageButton}
+            icon="cog"
+          >
+            Manage Instances
+          </Button>
         </Card.Content>
       </Card>
 
@@ -76,9 +99,31 @@ const styles = StyleSheet.create({
     margin: 16,
     elevation: 2,
   },
-  configItem: {
-    marginTop: 8,
+  activeInstance: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  label: {
+    fontSize: 12,
     color: '#666',
+    marginBottom: 8,
+  },
+  chip: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  instanceUrl: {
+    fontSize: 12,
+    color: '#666',
+  },
+  instanceCount: {
+    marginTop: 16,
+    color: '#666',
+  },
+  manageButton: {
+    marginTop: 12,
   },
   version: {
     marginTop: 16,
