@@ -50,7 +50,7 @@ export const TextareaEdit: React.FC<TextareaEditProps> = ({
         }
         value={value || ''}
         onChangeText={onChange}
-        placeholder={config.placeholder || 'Text eingeben...'}
+        placeholder={config.placeholder || 'Enter text...'}
         mode="outlined"
         multiline
         numberOfLines={config.rows || 4}

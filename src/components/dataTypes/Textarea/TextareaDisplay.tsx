@@ -28,10 +28,12 @@ export const TextareaDisplay: React.FC<TextareaDisplayProps> = ({
       {config.label && (
         <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>
           {config.label}
-          {config.required && <Text style={styles.required}> *</Text>}
+          {config.required && (
+            <Text style={[styles.required, { color: theme.colors.error }]}> *</Text>
+          )}
         </Text>
       )}
-      <Card style={styles.valueCard}>
+      <Card style={[styles.valueCard, { backgroundColor: theme.colors.surfaceVariant }]}>
         <Card.Content>
           <Text style={[styles.value, { color: theme.colors.onSurface }]}>
             {value || '-'}
@@ -54,10 +56,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   required: {
-    color: '#e53e3e',
+    color: '#e53e3e', // Using explicit error color for required indicator
   },
   valueCard: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8f9fa', // Light background for read-only display
     elevation: 0,
   },
   value: {

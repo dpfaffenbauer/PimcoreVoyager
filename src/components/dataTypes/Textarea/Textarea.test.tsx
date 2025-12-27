@@ -120,7 +120,7 @@ describe('Textarea DataType', () => {
     it('should validate required field', () => {
       const result = validateTextarea('', { label: 'Test', required: true });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Dieses Feld ist erforderlich');
+      expect(result.errors).toContain('This field is required');
     });
 
     it('should pass validation for valid input', () => {
@@ -135,7 +135,7 @@ describe('Textarea DataType', () => {
     it('should validate min length', () => {
       const result = validateTextarea('ab', { label: 'Test', minLength: 5 });
       expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain('Mindestens 5 Zeichen erforderlich');
+      expect(result.errors[0]).toContain('At least 5 characters required');
     });
 
     it('should validate max length', () => {
@@ -144,7 +144,7 @@ describe('Textarea DataType', () => {
         maxLength: 10,
       });
       expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain('Maximal 10 Zeichen erlaubt');
+      expect(result.errors[0]).toContain('Maximum 10 characters allowed');
     });
 
     it('should allow empty value when not required', () => {

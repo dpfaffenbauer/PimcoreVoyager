@@ -24,19 +24,19 @@ export function validateTextarea(
 
   // Required validation
   if (config.required && (!value || value.trim() === '')) {
-    errors.push('Dieses Feld ist erforderlich');
+    errors.push('This field is required');
   }
 
   // Skip length validation if value is empty and not required
   if (value && value.trim() !== '') {
     // Min length validation
     if (config.minLength && value.length < config.minLength) {
-      errors.push(`Mindestens ${config.minLength} Zeichen erforderlich`);
+      errors.push(`At least ${config.minLength} characters required`);
     }
 
     // Max length validation
     if (config.maxLength && value.length > config.maxLength) {
-      errors.push(`Maximal ${config.maxLength} Zeichen erlaubt`);
+      errors.push(`Maximum ${config.maxLength} characters allowed`);
     }
   }
 
