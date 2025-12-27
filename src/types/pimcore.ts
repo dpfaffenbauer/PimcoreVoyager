@@ -22,6 +22,7 @@ export interface PimcoreDataObject {
   id: number;
   key: string;
   path: string;
+  fullPath?: string;
   type: string;
   className?: string;
   published?: boolean;
