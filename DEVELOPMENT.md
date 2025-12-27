@@ -24,13 +24,13 @@ cd PimcoreVoyager
 npm install
 ```
 
-3. Configure environment variables:
+3. Configure environment (optional):
 ```bash
 cp .env.example .env
-# Edit .env with your Pimcore Studio API URL
+# Edit .env if you want to customize APP_ENV
 ```
 
-**Important**: Set `PIMCORE_STUDIO_API_URL` to your Pimcore instance Studio API endpoint (e.g., `https://your-instance.com/studio/api`)
+**Note**: Pimcore instance URLs are now configured in-app through the multi-tenant feature. No environment variables needed for API configuration.
 
 ### Running the App
 
@@ -131,17 +131,27 @@ PimcoreVoyager/
 
 ### Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory (optional):
 
 ```env
-# Pimcore Studio API URL (required)
-PIMCORE_STUDIO_API_URL=https://your-pimcore-instance.com/studio/api
-
 # App Configuration
 APP_ENV=development
 ```
 
-**Note**: The Studio API is typically available at `https://your-pimcore-domain.com/studio/api`
+**Note**: Pimcore instance URLs are configured in-app via the multi-tenant feature. Simply add your Pimcore instances through the app settings.
+
+### Multi-Tenant Configuration
+
+The app supports managing multiple Pimcore instances:
+
+1. **Launch the app** - On first launch, you'll be prompted to add a Pimcore instance
+2. **Add Instance**: 
+   - Enter a name (e.g., "Production", "Staging")
+   - Enter the Studio API URL: `https://your-pimcore.com/pimcore-studio/api`
+3. **Switch Instances**: Use the instance selection screen to switch between configured servers
+4. **Manage Instances**: Edit or delete instances from the Settings screen
+
+All instances are stored securely on the device.
 
 ### Expo Configuration (app.json)
 

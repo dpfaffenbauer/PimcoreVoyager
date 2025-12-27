@@ -59,8 +59,8 @@ If Pimcore releases a **platform-agnostic SDK** or **API client**, we can integr
 import { PimcoreClient } from '@pimcore/api-client';
 
 const client = new PimcoreClient({
-  baseURL: ENV.PIMCORE_STUDIO_API_URL,
-  token: authToken,
+  baseURL: instanceStore.getActiveInstanceUrl(),
+  // Session-based auth handles credentials automatically
 });
 
 const classes = await client.dataObjects.getClasses();

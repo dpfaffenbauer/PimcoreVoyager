@@ -1,12 +1,12 @@
 /**
  * Environment configuration
  * Update .env.example with your actual values
+ * 
+ * Note: Pimcore instance URLs are now configured in-app via multi-tenant support
+ * No environment variable needed for API URLs anymore
  */
 
 export const ENV = {
-  // Pimcore Studio API URL (typically: https://your-instance.com/studio/api)
-  PIMCORE_STUDIO_API_URL: process.env.PIMCORE_STUDIO_API_URL || 'https://demo.pimcore.com/studio/api',
-  
   // Application environment
   APP_ENV: process.env.APP_ENV || 'development',
 };
