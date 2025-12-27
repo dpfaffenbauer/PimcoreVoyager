@@ -26,6 +26,9 @@ const BASE_URL = `${PIMCORE_STUDIO_CONFIG.baseUrl}/blob/${PIMCORE_STUDIO_CONFIG.
  * Generate issue title for a data type
  */
 function generateIssueTitle(dataType) {
+  if (!dataType.name) {
+    throw new Error('Data type must have a name property');
+  }
   return `Implement Anzeige und Bearbeitung für Pimcore Data Object Typ: ${dataType.name}`;
 }
 
@@ -33,6 +36,10 @@ function generateIssueTitle(dataType) {
  * Generate issue body for a data type
  */
 function generateIssueBody(dataType) {
+  if (!dataType.filename) {
+    throw new Error(`Data type ${dataType.name} must have a filename property`);
+  }
+  
   const referenceUrl = `${BASE_URL}/${dataType.filename}`;
   
   let body = `Implementiere die Anzeige und Bearbeitung des Pimcore Data Object Typs "${dataType.name}" in unserer React Native App.\n\n`;
@@ -198,9 +205,22 @@ function exportAsMarkdown(missingIssues) {
 async function main() {
   console.log('Reading data types from:', DATA_TYPES_FILE);
   
-  // Read data types
-  const dataTypesJson = fs.readFileSync(DATA_TYPES_FILE, 'utf-8');
-  const { dataTypes } = JSON.parse(dataTypesJson);
+  // Read and parse data types with error handling
+  let dataTypes;
+  try {
+    const dataTypesJson = fs.readFileSync(DATA_TYPES_FILE, 'utf-8');
+    const parsed = JSON.parse(dataTypesJson);
+    dataTypes = parsed.dataTypes;
+    
+    if (!Array.isArray(dataTypes)) {
+      throw new Error('Data types must be an array');
+    }
+  } catch (error) {
+    console.error('Error reading or parsing data types file:');
+    console.error(`  File: ${DATA_TYPES_FILE}`);
+    console.error(`  Error: ${error.message}`);
+    process.exit(1);
+  }
   
   // Filter out data types that already have issues
   const missingIssues = dataTypes.filter(dt => !dt.hasIssue);
