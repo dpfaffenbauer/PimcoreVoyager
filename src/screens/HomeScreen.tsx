@@ -4,9 +4,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
-import { Text, Paragraph, ActivityIndicator, Chip, Divider } from 'react-native-paper';
+import { View, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Animated } from 'react-native';
+import { Text, Paragraph, ActivityIndicator, Chip, Divider, Surface, Badge } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '../store/appStore';
 import { PimcoreService } from '../apis/pimcoreService';
 
@@ -72,71 +73,85 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     const depth = (item.fullPath?.split('/').filter((p: string) => p).length || 1) - 1;
 
     return (
-      <TouchableOpacity
-        style={[styles.item, { paddingLeft: 16 + depth * 16 }]}
-        onPress={() => handleItemPress(item)}
-      >
-        <View style={styles.itemContent}>
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: isFolder ? '#ff9800' : '#2196f3' },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={isFolder ? 'folder' : 'file-document'}
-              size={24}
-              color="#fff"
-            />
-          </View>
-
-          <View style={styles.itemInfo}>
-            <Text style={styles.itemTitle}>{item.key}</Text>
-            <Text style={styles.itemSubtitle}>
-              {item.fullPath || item.path}
-            </Text>
-            <View style={styles.metaRow}>
-              {item.className && (
-                <Chip
-                  icon="label"
-                  style={styles.metaChip}
-                  textStyle={styles.metaChipText}
-                  compact
-                >
-                  {item.className}
-                </Chip>
-              )}
-              {item.published !== undefined && (
-                <Chip
-                  icon={item.published ? 'check-circle' : 'circle-outline'}
-                  style={[
-                    styles.metaChip,
-                    item.published ? styles.publishedChip : styles.draftChip,
-                  ]}
-                  textStyle={[styles.metaChipText, { color: '#fff' }]}
-                  compact
-                >
-                  {item.published ? 'Published' : 'Draft'}
-                </Chip>
-              )}
-              {item.id && (
-                <Chip
-                  icon="identifier"
-                  style={styles.metaChip}
-                  textStyle={styles.metaChipText}
-                  compact
-                >
-                  ID: {item.id}
-                </Chip>
+      <Surface style={[styles.itemSurface, { marginLeft: depth * 16 }]} elevation={1}>
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => handleItemPress(item)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.itemContent}>
+            <View style={styles.iconWrapper}>
+              <LinearGradient
+                colors={isFolder ? ['#FFB300', '#FF6F00'] : ['#2196F3', '#1565C0']}
+                style={styles.iconGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <MaterialCommunityIcons
+                  name={isFolder ? 'folder' : 'file-document-outline'}
+                  size={28}
+                  color="#fff"
+                />
+              </LinearGradient>
+              {isFolder && item.hasChildren && (
+                <Badge style={styles.childBadge} size={18}>
+                  {item.childCount || '•'}
+                </Badge>
               )}
             </View>
-          </View>
 
-          {isFolder && (
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
-          )}
-        </View>
-      </TouchableOpacity>
+            <View style={styles.itemInfo}>
+              <View style={styles.titleRow}>
+                <Text style={styles.itemTitle} numberOfLines={1}>
+                  {item.key}
+                </Text>
+                {item.published !== undefined && (
+                  <View
+                    style={[
+                      styles.statusIndicator,
+                      item.published ? styles.publishedIndicator : styles.draftIndicator,
+                    ]}
+                  />
+                )}
+              </View>
+              
+              <Text style={styles.itemSubtitle} numberOfLines={1}>
+                <MaterialCommunityIcons name="folder-outline" size={12} color="#999" />
+                {' '}{item.fullPath || item.path}
+              </Text>
+              
+              <View style={styles.metaRow}>
+                {item.className && (
+                  <View style={styles.infoChip}>
+                    <MaterialCommunityIcons name="label-outline" size={12} color="#6200ee" />
+                    <Text style={styles.infoChipText}>{item.className}</Text>
+                  </View>
+                )}
+                {item.id && (
+                  <View style={styles.infoChip}>
+                    <MaterialCommunityIcons name="pound" size={12} color="#666" />
+                    <Text style={styles.infoChipText}>{item.id}</Text>
+                  </View>
+                )}
+                {item.modificationDate && (
+                  <View style={styles.infoChip}>
+                    <MaterialCommunityIcons name="clock-outline" size={12} color="#666" />
+                    <Text style={styles.infoChipText}>
+                      {new Date(item.modificationDate * 1000).toLocaleDateString()}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {isFolder && (
+              <View style={styles.chevronContainer}>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#6200ee" />
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Surface>
     );
   };
 
@@ -152,21 +167,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   return (
     <View style={styles.container}>
       {parentId && (
-        <View style={styles.breadcrumbBar}>
+        <Surface style={styles.breadcrumbBar} elevation={2}>
           <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color="#6200ee" />
+            <View style={styles.backButtonInner}>
+              <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
+            </View>
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
-          <Text style={styles.breadcrumbText} numberOfLines={1}>
-            {breadcrumb}
-          </Text>
-        </View>
+          <View style={styles.breadcrumbContent}>
+            <MaterialCommunityIcons name="folder-open-outline" size={16} color="#666" />
+            <Text style={styles.breadcrumbText} numberOfLines={1}>
+              {breadcrumb}
+            </Text>
+          </View>
+        </Surface>
       )}
 
       {error ? (
-        <View style={styles.errorContainer}>
+        <Surface style={styles.errorContainer} elevation={1}>
+          <MaterialCommunityIcons name="alert-circle" size={24} color="#d32f2f" />
           <Paragraph style={styles.errorText}>{error}</Paragraph>
-        </View>
+        </Surface>
       ) : null}
 
       <FlatList
@@ -174,15 +195,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.id || index}`}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={loadObjects} />
+          <RefreshControl 
+            refreshing={loading} 
+            onRefresh={loadObjects}
+            colors={['#6200ee']}
+            tintColor="#6200ee"
+          />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons name="folder-open" size={64} color="#ccc" />
-            <Paragraph style={styles.emptyText}>No data objects found</Paragraph>
+            <View style={styles.emptyIconContainer}>
+              <MaterialCommunityIcons name="folder-open-outline" size={80} color="#e0e0e0" />
+            </View>
+            <Text style={styles.emptyTitle}>No Data Objects</Text>
+            <Paragraph style={styles.emptyText}>
+              Pull down to refresh or check your connection
+            </Paragraph>
           </View>
         }
-        ItemSeparatorComponent={() => <Divider />}
+        contentContainerStyle={objects.length === 0 ? styles.emptyList : styles.listContent}
       />
     </View>
   );
@@ -191,101 +222,201 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f8f9fa',
   },
   loadingText: {
     marginTop: 16,
+    color: '#6200ee',
+    fontSize: 16,
   },
   breadcrumbBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#f5f5f5',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    padding: 16,
+    backgroundColor: '#fff',
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
+  },
+  backButtonInner: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#6200ee',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
   backButtonText: {
-    marginLeft: 4,
     color: '#6200ee',
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  breadcrumbContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   breadcrumbText: {
     flex: 1,
     fontSize: 14,
-    color: '#666',
+    color: '#333',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  listContent: {
+    padding: 12,
+  },
+  emptyList: {
+    flexGrow: 1,
+  },
+  itemSurface: {
+    marginBottom: 12,
+    marginHorizontal: 4,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
   },
   item: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 16,
   },
   itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  iconWrapper: {
+    position: 'relative',
+    marginRight: 16,
+  },
+  iconGradient: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  childBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF6F00',
   },
   itemInfo: {
     flex: 1,
+    marginRight: 8,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
   },
   itemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    flex: 1,
+    marginRight: 8,
+  },
+  statusIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  publishedIndicator: {
+    backgroundColor: '#4caf50',
+  },
+  draftIndicator: {
+    backgroundColor: '#ff9800',
   },
   itemSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 6,
+    fontSize: 13,
+    color: '#757575',
+    marginBottom: 8,
+    lineHeight: 18,
   },
   metaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
+    marginTop: 4,
   },
-  metaChip: {
-    height: 24,
-    backgroundColor: '#e0e0e0',
+  infoChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 4,
   },
-  metaChipText: {
-    fontSize: 10,
-    marginVertical: 0,
+  infoChipText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
   },
-  publishedChip: {
-    backgroundColor: '#4caf50',
-  },
-  draftChip: {
-    backgroundColor: '#ff9800',
+  chevronContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f0e7ff',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorContainer: {
+    flexDirection: 'row',
+    margin: 16,
     padding: 16,
     backgroundColor: '#ffebee',
+    borderRadius: 12,
+    alignItems: 'center',
+    gap: 12,
   },
   errorText: {
     color: '#d32f2f',
-    textAlign: 'center',
+    flex: 1,
+    fontWeight: '500',
   },
   emptyContainer: {
-    padding: 48,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 48,
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 8,
   },
   emptyText: {
-    marginTop: 16,
+    fontSize: 15,
     color: '#999',
+    textAlign: 'center',
   },
 });
