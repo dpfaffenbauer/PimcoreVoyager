@@ -79,16 +79,18 @@ Siehe [ROADMAP.md](docs/ROADMAP.md) für detaillierte Phasenplanung.
 - ✅ Projekt Setup & Konfiguration
 - ✅ Basis-Dokumentation
 - ✅ Projektstruktur
+- ✅ Authentication System
+- ✅ Pimcore API Integration
+- ✅ Data Types Architecture (Type Registry, Base Components)
+- ✅ Many-to-Many Object Relation (Anzeige & Bearbeitung)
 
 ### In Entwicklung
-- 🔄 Core Architecture (Type Registry, Base Components)
-- ⏳ Authentication System
-- ⏳ Pimcore API Integration
+- 🔄 Weitere Data Object Types (70+ Typen)
+- 🔄 Enhanced Object Detail Views
+- 🔄 Advanced Search & Filter
 
 ### Geplant
-- Data Object Types (70+ Typen)
-- List & Detail Views
-- Edit Functionality
+- List & Detail Views Improvements
 - Offline Support
 - CI/CD Pipeline
 

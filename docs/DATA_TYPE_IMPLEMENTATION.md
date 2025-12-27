@@ -284,6 +284,10 @@ export const dataTypeRegistry = {
 - **Display**: Liste verknüpfter Objekte
 - **Edit**: Searchable Picker mit Autocomplete
 - **Performance**: Lazy Loading, Pagination
+- **Implementiert**: ✅ Many-to-Many Object Relation
+  - Siehe [MANY_TO_MANY_RELATION_USAGE.md](MANY_TO_MANY_RELATION_USAGE.md) für Details
+  - Komponenten: Display, Edit, Validator, Transformer
+  - Features: Search, Filter, Class Validation
 
 ### Structured Types
 - Table, Fieldcollections, Block
