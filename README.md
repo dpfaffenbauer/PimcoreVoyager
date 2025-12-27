@@ -32,8 +32,40 @@ Die App kommuniziert mit der **Pimcore Studio API** und generiert Interfaces dyn
 
 ## Build & Release
 
-Builds werden automatisiert per CI/CD-Workflows erstellt (Android/iOS/Expo). Releases erfolgen als OTA-Updates, via TestFlight oder direkte APK bereitstellung.
+Builds werden automatisiert per CI/CD-Workflows erstellt (Android/iOS/Expo). Releases erfolgen als OTA-Updates, via TestFlight oder direkte APK-Bereitstellung.
 
----
+### 🚀 CI/CD Pipeline
 
-> Für Details zu Installation und Entwicklung siehe [CONTRIBUTING.md](CONTRIBUTING.md) und die jeweiligen [User Stories](https://github.com/dpfaffenbauer/PimcoreVoyager/issues).
+Die App nutzt **GitHub Actions** und **Expo Application Services (EAS)** für automatisierte Builds:
+
+- ✅ **Automatische Builds** bei Push/Merge auf `main`/`develop`
+- ✅ **Android APK** und **iOS IPA** Builds
+- ✅ **Artifact-Upload** zu GitHub Actions
+- ✅ **TestFlight Deployment** (optional)
+- ✅ **GitHub Release Integration**
+
+**Schnellstart:** [docs/SECRETS-SETUP.md](docs/SECRETS-SETUP.md)
+
+**Vollständige Dokumentation:** [docs/CI-CD-SETUP.md](docs/CI-CD-SETUP.md)
+
+### Manuelle Builds
+
+```bash
+# Lokale Entwicklung
+npm start
+
+# EAS Build erstellen
+eas build --platform android --profile preview
+eas build --platform ios --profile preview
+```
+
+## Dokumentation
+
+- 📖 **[CI/CD Setup](docs/CI-CD-SETUP.md)** - Vollständige Pipeline-Dokumentation
+- 🔐 **[Signierung](docs/SIGNING.md)** - Android/iOS Zertifikate & Keys
+- 🔧 **[Build-Prozess](docs/BUILD-PROCESS.md)** - Technische Build-Details
+- 🚀 **[Secrets Setup](docs/SECRETS-SETUP.md)** - GitHub Secrets Quickstart
+
+## Entwicklung
+
+Für Details zu Installation und Entwicklung siehe [CONTRIBUTING.md](CONTRIBUTING.md) und die jeweiligen [User Stories](https://github.com/dpfaffenbauer/PimcoreVoyager/issues).

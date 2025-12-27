@@ -138,6 +138,6 @@ We welcome feature requests! Please:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under a proprietary License.
 
 Thank you for contributing to Pimcore Voyager! 🚀
