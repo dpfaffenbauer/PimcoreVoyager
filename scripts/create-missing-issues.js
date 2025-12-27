@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 
 const DATA_TYPES_FILE = path.join(__dirname, 'pimcore-data-types.json');
 const REPO = 'dpfaffenbauer/PimcoreVoyager';
@@ -100,7 +100,8 @@ function delay(seconds) {
 async function createIssue(dataType) {
   const title = generateIssueTitle(dataType);
   const body = generateIssueBody(dataType);
-  const tempFile = path.join(__dirname, '.issue-body.tmp');
+  // Use unique filename to avoid conflicts in concurrent executions
+  const tempFile = path.join(__dirname, `.issue-body-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.tmp`);
   
   try {
     console.log(`Creating issue for: ${dataType.name}`);
@@ -109,7 +110,6 @@ async function createIssue(dataType) {
     fs.writeFileSync(tempFile, body, 'utf-8');
     
     // Use spawn with array of arguments to avoid shell escaping issues
-    const { spawnSync } = require('child_process');
     const result = spawnSync('gh', [
       'issue',
       'create',
