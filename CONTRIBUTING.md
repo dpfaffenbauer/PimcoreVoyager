@@ -1,331 +1,143 @@
 # Contributing to Pimcore Voyager
 
-Willkommen! Wir freuen uns über Beiträge zu Pimcore Voyager.
+Thank you for your interest in contributing to Pimcore Voyager! This document provides guidelines and instructions for contributing.
 
-## Entwicklungsumgebung einrichten
+## Getting Started
 
-### Voraussetzungen
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/your-username/PimcoreVoyager.git`
+3. Create a feature branch: `git checkout -b feature/your-feature-name`
+4. Follow the setup instructions in [DEVELOPMENT.md](DEVELOPMENT.md)
 
-- Node.js 18+ ([nodejs.org](https://nodejs.org))
-- npm oder yarn
-- Expo CLI (`npm install -g expo-cli`)
-- EAS CLI (`npm install -g eas-cli`)
-- Git
+## Development Workflow
 
-### Optional für native Entwicklung
+### 1. Make Your Changes
 
-- **Android:** Android Studio + Android SDK
-- **iOS:** macOS mit Xcode (nur auf Mac)
+- Write clean, maintainable code
+- Follow the existing code style and structure
+- Add comments for complex logic
+- Update documentation if needed
 
-### Repository klonen
+### 2. Test Your Changes
 
-```bash
-git clone https://github.com/dpfaffenbauer/PimcoreVoyager.git
-cd PimcoreVoyager
-```
+- Test on both iOS and Android if possible
+- Verify that existing functionality still works
+- Test edge cases and error scenarios
 
-### Dependencies installieren
+### 3. Commit Your Changes
 
-```bash
-npm install
-```
-
-### App starten
+Use clear, descriptive commit messages:
 
 ```bash
-# Development Server starten
-npm start
-
-# Oder direkt auf Plattform
-npm run android  # Android Emulator/Gerät
-npm run ios      # iOS Simulator (nur macOS)
-npm run web      # Web Browser
+git commit -m "Add feature: description of what you added"
+git commit -m "Fix: description of what you fixed"
+git commit -m "Docs: description of documentation changes"
 ```
 
-## Entwicklungs-Workflow
-
-### 1. Branch erstellen
+### 4. Push and Create a Pull Request
 
 ```bash
-git checkout -b feature/meine-neue-funktion
+git push origin feature/your-feature-name
 ```
 
-### Branch-Naming-Konventionen
+Then create a Pull Request on GitHub with:
+- Clear description of changes
+- Screenshots if UI changes
+- Reference to related issues
 
-- `feature/` - Neue Features
-- `bugfix/` - Bugfixes
-- `docs/` - Dokumentations-Änderungen
-- `refactor/` - Code-Refactoring
-- `test/` - Test-Änderungen
+## Code Style
 
-### 2. Änderungen entwickeln
+### TypeScript
 
-```bash
-# Live-Reload nutzen
-npm start
+- Use TypeScript for all new code
+- Define proper types and interfaces
+- Avoid `any` type when possible
+- Use meaningful variable and function names
 
-# Expo Go App auf Smartphone installieren
-# QR-Code scannen für Live-Testing
-```
+### React/React Native
 
-### 3. Code-Qualität prüfen
+- Use functional components with hooks
+- Keep components small and focused
+- Extract reusable logic into custom hooks
+- Follow React best practices
 
-```bash
-# Linting (falls konfiguriert)
-npm run lint
+### File Organization
 
-# Tests ausführen (falls vorhanden)
-npm test
-```
+- Place components in `src/components/`
+- Place screens in `src/screens/`
+- Place API services in `src/apis/`
+- Keep related files together
 
-### 4. Commits erstellen
+## Pull Request Guidelines
 
-Verwende aussagekräftige Commit-Messages:
+### Before Submitting
 
-```bash
-git add .
-git commit -m "feat: Add data object list view"
-git commit -m "fix: Resolve authentication timeout issue"
-git commit -m "docs: Update build documentation"
-```
+- [ ] Code follows the project's style
+- [ ] TypeScript checks pass (`npx tsc --noEmit`)
+- [ ] App runs without errors on iOS/Android
+- [ ] No console warnings in development
+- [ ] Documentation updated if needed
 
-**Commit-Message-Format:**
+### PR Description Template
 
-```
-<type>: <subject>
+```markdown
+## Description
+Brief description of the changes
 
-<body> (optional)
-
-<footer> (optional)
-```
-
-**Types:**
-- `feat`: Neues Feature
-- `fix`: Bugfix
-- `docs`: Dokumentation
-- `style`: Code-Formatierung
-- `refactor`: Code-Refactoring
-- `test`: Tests hinzufügen/ändern
-- `chore`: Build/Tool-Konfiguration
-
-### 5. Pull Request erstellen
-
-```bash
-git push origin feature/meine-neue-funktion
-```
-
-Erstelle PR auf GitHub mit:
-- Klarer Beschreibung der Änderungen
-- Screenshots (bei UI-Änderungen)
-- Testing-Hinweise
-- Referenz zu Issues (z.B. "Closes #123")
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
 
 ## Testing
+How to test the changes
 
-### Auf echten Geräten testen
+## Screenshots (if applicable)
+Add screenshots for UI changes
 
-**Android:**
-```bash
-# Development Build erstellen
-eas build --platform android --profile development
-
-# Installieren und testen
+## Related Issues
+Closes #issue_number
 ```
 
-**iOS:**
-```bash
-# Development Build erstellen (benötigt registriertes Gerät)
-eas build --platform android --profile development
+## Reporting Bugs
 
-# Via TestFlight oder direkt installieren
-```
+Use GitHub Issues to report bugs. Include:
 
-### Testing-Richtlinien
+1. **Description**: Clear description of the bug
+2. **Steps to Reproduce**: Detailed steps to reproduce
+3. **Expected Behavior**: What should happen
+4. **Actual Behavior**: What actually happens
+5. **Environment**: 
+   - OS (iOS/Android version)
+   - Device/Simulator
+   - App version
+   - React Native version
 
-- ✅ Teste auf Android und iOS
-- ✅ Teste verschiedene Bildschirmgrößen
-- ✅ Teste Offline-Funktionalität
-- ✅ Teste mit echten Pimcore-Daten
-- ✅ Teste Edge-Cases
+## Feature Requests
 
-## Code-Style
+We welcome feature requests! Please:
 
-### JavaScript/React Native
+1. Check if the feature is already requested
+2. Clearly describe the feature and use case
+3. Explain why it would be valuable
+4. Provide examples if possible
 
-- ESLint-Konfiguration befolgen
-- Funktionale Komponenten mit Hooks bevorzugen
-- PropTypes oder TypeScript für Type-Checking
-- Aussagekräftige Variablen- und Funktionsnamen
+## Questions?
 
-### Beispiel
-
-```javascript
-// Gut
-const fetchDataObjects = async (classId) => {
-  try {
-    const response = await api.getObjects(classId);
-    return response.data;
-  } catch (error) {
-    console.error('Failed to fetch objects:', error);
-    throw error;
-  }
-};
-
-// Vermeiden
-const fd = async (c) => {
-  const r = await api.getObjects(c);
-  return r.data;
-};
-```
-
-## Dokumentation
-
-### Code-Kommentare
-
-```javascript
-/**
- * Synchronisiert lokale Datenobjekte mit Pimcore Backend
- * 
- * @param {Array} objects - Array von zu synchronisierenden Objekten
- * @param {Object} options - Sync-Optionen
- * @param {boolean} options.forceUpdate - Erzwingt Update aller Objekte
- * @returns {Promise<Object>} Sync-Ergebnis mit Statistiken
- */
-const syncObjects = async (objects, options = {}) => {
-  // Implementation...
-};
-```
-
-### README/Docs aktualisieren
-
-Bei Features, die Dokumentation benötigen:
-- Update README.md
-- Ergänze docs/ falls nötig
-- Füge Beispiele hinzu
-
-## CI/CD und Builds
-
-### Lokale Builds testen
-
-```bash
-# Preview Build (empfohlen für Testing)
-eas build --platform android --profile preview
-
-# Production Build
-eas build --platform android --profile production
-```
-
-### CI/CD Workflows
-
-Pull Requests triggern automatisch:
-- Build-Checks (via GitHub Actions)
-- EAS Build-Submission
-
-Stelle sicher, dass:
-- ✅ CI-Workflows erfolgreich durchlaufen
-- ✅ Keine Build-Fehler auftreten
-- ✅ App nach Build funktioniert
-
-## Release-Prozess
-
-### Version erhöhen
-
-1. Update `package.json`:
-```json
-{
-  "version": "1.1.0"
-}
-```
-
-2. Update `app.json`:
-```json
-{
-  "expo": {
-    "version": "1.1.0",
-    "ios": {
-      "buildNumber": "1.1.0"
-    },
-    "android": {
-      "versionCode": 2
-    }
-  }
-}
-```
-
-**Version-Schema:** `MAJOR.MINOR.PATCH`
-- **MAJOR:** Breaking Changes
-- **MINOR:** Neue Features (backwards compatible)
-- **PATCH:** Bugfixes
-
-**Android versionCode:**
-- Muss bei jedem Release erhöht werden
-- Integer-Wert
-- Beispiel: 1, 2, 3, 4...
-
-### Release erstellen
-
-```bash
-# Tag erstellen
-git tag v1.1.0
-git push origin v1.1.0
-
-# GitHub Release erstellen
-# Löst automatisch build-artifacts.yml Workflow aus
-```
-
-## Pimcore-Integration
-
-### API-Kommunikation
-
-Die App kommuniziert mit Pimcore über:
-- REST API (Datenabruf)
-- GraphQL API (komplexe Queries)
-
-### Testing mit Pimcore Backend
-
-Setup eines Test-Pimcore-Backends:
-
-```bash
-# Pimcore-Testinstanz aufsetzen
-# API-Credentials konfigurieren
-# .env.local erstellen:
-PIMCORE_API_URL=https://your-pimcore-instance.com/api
-PIMCORE_API_KEY=your-api-key
-```
-
-## Hilfe und Support
-
-### Fragen?
-
-- GitHub Discussions: Allgemeine Fragen
-- GitHub Issues: Bugs und Feature-Requests
-- Expo Forums: Expo-spezifische Fragen
-
-### Probleme mit Setup?
-
-1. Prüfe [docs/CI-CD-SETUP.md](docs/CI-CD-SETUP.md)
-2. Schaue in bestehende Issues
-3. Erstelle neues Issue mit Details:
-   - Umgebung (OS, Node-Version, etc.)
-   - Fehlermeldung
-   - Schritte zur Reproduktion
+- Open an issue with the "question" label
+- Check existing documentation first
+- Be respectful and patient
 
 ## Code of Conduct
 
-Wir folgen dem [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/).
+- Be respectful and inclusive
+- Welcome newcomers
+- Focus on constructive feedback
+- Assume good intentions
 
-**Zusammenfassung:**
-- Respektvoll und konstruktiv kommunizieren
-- Unterschiedliche Perspektiven akzeptieren
-- Fokus auf das Projekt
-- Keine Belästigung oder Diskriminierung
+## License
 
-## Lizenz
+By contributing, you agree that your contributions will be licensed under a proprietary License.
 
-Durch Beiträge stimmst du zu, dass deine Änderungen unter der MIT-Lizenz lizenziert werden.
-
-## Danke!
-
-Danke für deine Beiträge zu Pimcore Voyager! 🚀
-
-Jeder Beitrag, ob groß oder klein, hilft das Projekt zu verbessern.
+Thank you for contributing to Pimcore Voyager! 🚀
