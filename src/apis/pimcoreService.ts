@@ -226,7 +226,7 @@ export class PimcoreService {
 
   /**
    * Get grid data for a specific class
-   * Endpoint: GET /pimcore-studio/api/data-objects/grid/{classId}
+   * Endpoint: POST /pimcore-studio/api/data-objects/grid/{classId}
    * @param folderId - Folder ID (used as filter parameter)
    * @param classId - Class ID
    * @param page - Page number (default: 1)
@@ -241,14 +241,13 @@ export class PimcoreService {
     try {
       const apiClient = getApiClient();
       console.log(`Fetching grid data for class ${classId} in folder ${folderId}`);
-      const response = await apiClient.get(
+      // POST request as per Pimcore Studio API spec
+      const response = await apiClient.post(
         `/data-objects/grid/${classId}`,
         {
-          params: {
-            page,
-            pageSize: limit,
-            parentId: folderId,
-          },
+          folderId: folderId,
+          page: page,
+          pageSize: limit,
         }
       );
       console.log('Grid response:', response.data);
