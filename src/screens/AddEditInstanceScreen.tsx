@@ -127,7 +127,7 @@ export default function AddEditInstanceScreen({ route, navigation }: AddEditInst
               }}
               style={styles.input}
               mode="outlined"
-              placeholder="https://your-pimcore.com/studio/api"
+              placeholder="https://your-pimcore.com/pimcore-studio/api"
               autoCapitalize="none"
               keyboardType="url"
               error={!!errors.url}
@@ -136,7 +136,7 @@ export default function AddEditInstanceScreen({ route, navigation }: AddEditInst
               <HelperText type="error">{errors.url}</HelperText>
             ) : (
               <HelperText type="info">
-                Enter the complete URL to your Pimcore Studio API
+                Enter the complete URL including /pimcore-studio/api path
               </HelperText>
             )}
 

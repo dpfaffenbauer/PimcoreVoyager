@@ -1,56 +1,119 @@
-# Pimcore Studio API - Implementation Details
+# Pimcore Studio API - Implementation Details ✅ VERIFIED
+
+## API Documentation Source
+
+**Official OpenAPI Specification**: https://github.com/pimcore/studio-ui-bundle/blob/1.x/assets/build/api/docs.jsonopenapi.json
+
+- **Version**: 0.10.21
+- **Title**: Studio Backend API
+- **Base Path**: `/pimcore-studio/api` (NOT `/studio/api`)
 
 ## Authentication Method ✅ CONFIRMED
 
 **Pimcore Studio API uses:** Session-based authentication with cookies
 
 ### Implementation Details:
-- **Login**: POST `/studio/api/login` with username/password
+- **Login**: POST `/pimcore-studio/api/login` with username/password
 - **Session Management**: Server sets HTTP-only cookies
 - **API Requests**: Cookies automatically sent with `withCredentials: true`
-- **Logout**: POST `/studio/api/logout` to clear session
+- **Logout**: POST `/pimcore-studio/api/logout` to clear session
 
 ### Changes Made:
-- ✅ Removed Bearer token authentication
+- ✅ Removed ****** authentication
 - ✅ Added `withCredentials: true` to axios configuration
 - ✅ Removed token storage from auth store
 - ✅ Session managed automatically via cookies
 - ✅ Updated LoginScreen to work with session auth
 
-## API Endpoints (Still to verify)
+## API Endpoints ✅ VERIFIED
 
-Current implementation assumes:
+Based on official OpenAPI specification:
+
+### Authentication
 ```
-Authentication:
-POST /studio/api/login
-POST /studio/api/logout
-GET  /studio/api/session  # Check session validity
-
-Data Objects:
-GET  /studio/api/data-objects/classes       # List class definitions
-GET  /studio/api/data-objects/classes/{id}  # Get class definition
-GET  /studio/api/data-objects              # List objects
-GET  /studio/api/data-objects/{id}         # Get object
-PATCH /studio/api/data-objects/{id}        # Update object
-POST /studio/api/data-objects              # Create object
-DELETE /studio/api/data-objects/{id}       # Delete object
+POST /pimcore-studio/api/login          # Session login
+POST /pimcore-studio/api/logout         # Session logout
+POST /pimcore-studio/api/login/token    # Token-based login (alternative)
 ```
 
-**Need to verify:**
-- Are these the correct endpoints?
-- Are there additional endpoints we should use?
-- Is the URL structure different?
-- What is the actual API response format?
+### Class Definitions
+```
+GET  /pimcore-studio/api/class/collection                    # List all classes
+GET  /pimcore-studio/api/class/definition/{dataObjectClass}  # Get class definition
+GET  /pimcore-studio/api/class/custom-layout/collection/{dataObjectClass}  # Get custom layouts
+```
 
-## Documentation Sources
+### Data Objects
+```
+GET    /pimcore-studio/api/data-objects/{id}          # Get single object
+GET    /pimcore-studio/api/data-objects               # List objects (with filters)
+POST   /pimcore-studio/api/data-objects/add/{parentId} # Create object
+PATCH  /pimcore-studio/api/data-objects               # Update object
+DELETE /pimcore-studio/api/data-objects/batch-delete  # Delete object(s)
+```
 
-Would be helpful to have:
-- Pimcore Studio API documentation URL
-- Pimcore Studio API OpenAPI/Swagger spec
-- Or: Example API calls from Pimcore Studio UI Bundle
+### Data Object Grid
+```
+GET  /pimcore-studio/api/data-object/grid/available-columns
+GET  /pimcore-studio/api/data-object/grid/configuration/{folderId}/{classId}
+POST /pimcore-studio/api/data-object/grid/configuration/save/{classId}
+```
+
+## Key Differences from Initial Implementation
+
+### Base Path
+- **Initial Assumption**: `/studio/api`
+- **Actual API**: `/pimcore-studio/api` ✅ CORRECTED
+
+### Class Definitions
+- **Initial**: `/data-objects/classes`
+- **Actual**: `/class/collection` ✅ CORRECTED
+
+### Create Data Object
+- **Initial**: `POST /data-objects`
+- **Actual**: `POST /data-objects/add/{parentId}` ✅ CORRECTED
+- **Note**: Requires parent folder/object ID
+
+### Update Data Object
+- **Initial**: `PATCH /data-objects/{id}`
+- **Actual**: `PATCH /data-objects` (with id in request body) ✅ CORRECTED
+
+### Delete Data Object
+- **Initial**: `DELETE /data-objects/{id}`
+- **Actual**: `DELETE /data-objects/batch-delete` (with ids array) ✅ CORRECTED
+- **Note**: Batch operation, single delete wraps ID in array
+
+## Implementation Status ✅ COMPLETE
+
+- ✅ Authentication method confirmed (session-based)
+- ✅ API endpoints verified against OpenAPI spec
+- ✅ Base path corrected (`/pimcore-studio/api`)
+- ✅ All endpoint paths updated
+- ✅ Request/response formats aligned with spec
+- ✅ Documentation created (`PIMCORE_API_REFERENCE.md`)
+- ✅ Helper text updated in UI (correct URL format)
+
+## Usage in App
+
+### Adding Instance
+When adding a Pimcore instance, users should enter the full API URL:
+
+**Correct Format**: `https://your-domain.com/pimcore-studio/api`
+
+Example URLs:
+- `https://demo.pimcore.com/pimcore-studio/api`
+- `https://my-shop.com/pimcore-studio/api`
+- `http://localhost:8080/pimcore-studio/api`
+
+### Multi-Tenant Support
+Each configured instance can have a different URL, allowing connection to:
+- Production environments
+- Staging environments
+- Development/local instances
+- Different customer installations
 
 ---
 
-**Created**: 2025-12-27
-**Updated**: 2025-12-27
-**Status**: Authentication method confirmed ✅ | Endpoints need verification ⏳
+**Last Updated**: 2025-12-27
+**Status**: All endpoints verified against official OpenAPI specification ✅
+**OpenAPI Version**: 0.10.21

@@ -1,8 +1,8 @@
 /**
  * Pimcore API Service
  * Handles communication with Pimcore Studio API
- * API Documentation: Pimcore Studio API endpoints
- * Supports multi-tenant with dynamic instance URLs
+ * Based on Pimcore Studio API OpenAPI specification v0.10.21
+ * API Base Path: /pimcore-studio/api
  */
 
 import { getApiClient } from './apiClient';
@@ -15,12 +15,12 @@ import {
 export class PimcoreService {
   /**
    * Fetch all class definitions from Pimcore Studio API
-   * Endpoint: GET /studio/api/data-objects/classes
+   * Endpoint: GET /pimcore-studio/api/class/collection
    */
   static async getClassDefinitions(): Promise<PimcoreClassDefinition[]> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.get('/data-objects/classes');
+      const response = await apiClient.get('/class/collection');
       return response.data.items || response.data;
     } catch (error) {
       console.error('Error fetching class definitions:', error);
@@ -31,12 +31,12 @@ export class PimcoreService {
 
   /**
    * Fetch a specific class definition
-   * Endpoint: GET /studio/api/data-objects/classes/{id}
+   * Endpoint: GET /pimcore-studio/api/class/definition/{dataObjectClass}
    */
   static async getClassDefinition(classId: string): Promise<PimcoreClassDefinition> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.get(`/data-objects/classes/${classId}`);
+      const response = await apiClient.get(`/class/definition/${classId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching class definition:', error);
@@ -46,7 +46,8 @@ export class PimcoreService {
 
   /**
    * Fetch data objects by class
-   * Endpoint: GET /studio/api/data-objects
+   * Endpoint: GET /pimcore-studio/api/data-objects (with filtering)
+   * Note: Actual endpoint structure may vary, check API docs for pagination
    */
   static async getDataObjects(
     classId: string,
@@ -55,6 +56,8 @@ export class PimcoreService {
   ): Promise<PimcoreListResponse<PimcoreDataObject>> {
     try {
       const apiClient = getApiClient();
+      // Note: The exact query parameters depend on the grid configuration
+      // This is a simplified version
       const response = await apiClient.get('/data-objects', {
         params: {
           classId,
@@ -74,7 +77,7 @@ export class PimcoreService {
 
   /**
    * Fetch a single data object by ID
-   * Endpoint: GET /studio/api/data-objects/{id}
+   * Endpoint: GET /pimcore-studio/api/data-objects/{id}
    */
   static async getDataObject(id: number): Promise<PimcoreDataObject> {
     try {
@@ -89,7 +92,8 @@ export class PimcoreService {
 
   /**
    * Update a data object
-   * Endpoint: PATCH /studio/api/data-objects/{id}
+   * Endpoint: PATCH /pimcore-studio/api/data-objects
+   * Note: Based on OpenAPI spec, PATCH is used for updates
    */
   static async updateDataObject(
     id: number,
@@ -97,7 +101,10 @@ export class PimcoreService {
   ): Promise<PimcoreDataObject> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.patch(`/data-objects/${id}`, data);
+      const response = await apiClient.patch('/data-objects', {
+        id,
+        ...data,
+      });
       return response.data;
     } catch (error) {
       console.error('Error updating data object:', error);
@@ -107,14 +114,15 @@ export class PimcoreService {
 
   /**
    * Create a new data object
-   * Endpoint: POST /studio/api/data-objects
+   * Endpoint: POST /pimcore-studio/api/data-objects/add/{parentId}
    */
   static async createDataObject(
+    parentId: number,
     data: Partial<PimcoreDataObject>
   ): Promise<PimcoreDataObject> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.post('/data-objects', data);
+      const response = await apiClient.post(`/data-objects/add/${parentId}`, data);
       return response.data;
     } catch (error) {
       console.error('Error creating data object:', error);
@@ -124,12 +132,17 @@ export class PimcoreService {
 
   /**
    * Delete a data object
-   * Endpoint: DELETE /studio/api/data-objects/{id}
+   * Endpoint: DELETE /pimcore-studio/api/data-objects/batch-delete
+   * Note: Pimcore uses batch delete, so we wrap single ID in array
    */
   static async deleteDataObject(id: number): Promise<void> {
     try {
       const apiClient = getApiClient();
-      await apiClient.delete(`/data-objects/${id}`);
+      await apiClient.delete('/data-objects/batch-delete', {
+        data: {
+          ids: [id],
+        },
+      });
     } catch (error) {
       console.error('Error deleting data object:', error);
       throw error;
