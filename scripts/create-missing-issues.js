@@ -113,10 +113,8 @@ function delay(seconds) {
 async function createIssue(dataType) {
   const title = generateIssueTitle(dataType);
   const body = generateIssueBody(dataType);
-  // Use cryptographically secure random filename to avoid conflicts in concurrent executions
-  const timestamp = Date.now();
-  const randomSuffix = crypto.randomBytes(6).toString('hex');
-  const tempFile = path.join(__dirname, `.issue-body-${timestamp}-${randomSuffix}.tmp`);
+  // Use UUID for guaranteed unique temp file (prevents all possible collisions)
+  const tempFile = path.join(__dirname, `.issue-body-${crypto.randomUUID()}.tmp`);
   
   try {
     console.log(`Creating issue for: ${dataType.name}`);
