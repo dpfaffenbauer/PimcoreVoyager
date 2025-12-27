@@ -23,7 +23,8 @@ export default function PlaceholderScreen({
   description = 'This feature will be available in a future version.'
 }: PlaceholderScreenProps) {
   // Extract screen name from route if not provided explicitly
-  const screenName = title || (route?.name?.replace('Placeholder', '')) || 'Feature';
+  // Only replace 'Placeholder' at the beginning of the route name
+  const screenName = title || (route?.name?.replace(/^Placeholder/, '')) || 'Feature';
   
   return (
     <View style={styles.container}>

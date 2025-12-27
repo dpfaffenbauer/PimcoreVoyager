@@ -170,24 +170,38 @@ function DrawerNavigator() {
       {/* Placeholder menu items */}
       <Drawer.Screen
         name="PlaceholderSearch"
-        component={PlaceholderScreen}
         options={{
           title: 'Search',
           drawerIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="magnify" size={size} color={color} />
           ),
         }}
-      />
+      >
+        {() => (
+          <PlaceholderScreen
+            title="Search"
+            icon="magnify"
+            description="Search functionality will be available in a future version."
+          />
+        )}
+      </Drawer.Screen>
       <Drawer.Screen
         name="PlaceholderNotifications"
-        component={PlaceholderScreen}
         options={{
           title: 'Notifications',
           drawerIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="bell" size={size} color={color} />
           ),
         }}
-      />
+      >
+        {() => (
+          <PlaceholderScreen
+            title="Notifications"
+            icon="bell"
+            description="Notifications functionality will be available in a future version."
+          />
+        )}
+      </Drawer.Screen>
     </Drawer.Navigator>
   );
 }
