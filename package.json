@@ -1,0 +1,40 @@
+{
+  "name": "pimcore-voyager",
+  "version": "1.0.0",
+  "description": "Pimcore Voyager - Mobile Companion App für Pimcore",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios",
+    "build:all": "eas build --platform all",
+    "submit:android": "eas submit --platform android",
+    "submit:ios": "eas submit --platform ios",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "expo": "~50.0.0",
+    "expo-status-bar": "~1.11.1",
+    "react": "18.2.0",
+    "react-native": "0.73.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  },
+  "private": true,
+  "keywords": [
+    "pimcore",
+    "react-native",
+    "expo",
+    "mobile",
+    "data-management"
+  ],
+  "author": "Pimcore Voyager Team",
+  "license": "MIT"
+}

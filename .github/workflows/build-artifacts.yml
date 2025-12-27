@@ -1,0 +1,154 @@
+name: Build with Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+      profile:
+        description: 'Build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+  release:
+    types: [created]
+
+jobs:
+  build-and-upload:
+    name: Build and Upload Artifacts
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: ${{ github.event_name == 'workflow_dispatch' && fromJSON(github.event.inputs.platform == 'all' && '["android", "ios"]' || format('["{0}"]', github.event.inputs.platform)) || fromJSON('["android", "ios"]') }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build with EAS
+        id: build
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+          PLATFORM="${{ matrix.platform }}"
+          
+          echo "Building $PLATFORM with profile $PROFILE..."
+          
+          # Submit build and capture build ID
+          BUILD_OUTPUT=$(eas build --platform $PLATFORM --profile $PROFILE --non-interactive --json 2>&1)
+          
+          # Extract build ID from output
+          BUILD_ID=$(echo "$BUILD_OUTPUT" | jq -r '.[0].id // empty')
+          
+          if [ -z "$BUILD_ID" ]; then
+            echo "Failed to get build ID. Output:"
+            echo "$BUILD_OUTPUT"
+            exit 1
+          fi
+          
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "Build ID: $BUILD_ID"
+          
+          # Wait for build to complete (with timeout)
+          TIMEOUT=3600  # 60 minutes
+          ELAPSED=0
+          INTERVAL=60   # Check every 60 seconds
+          
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            STATUS=$(eas build:view $BUILD_ID --json | jq -r '.status')
+            
+            echo "Build status: $STATUS (elapsed: ${ELAPSED}s)"
+            
+            if [ "$STATUS" = "FINISHED" ]; then
+              echo "Build completed successfully!"
+              ARTIFACT_URL=$(eas build:view $BUILD_ID --json | jq -r '.artifacts.buildUrl')
+              echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+              break
+            elif [ "$STATUS" = "ERRORED" ] || [ "$STATUS" = "CANCELED" ]; then
+              echo "Build failed with status: $STATUS"
+              exit 1
+            fi
+            
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+          
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "Build timed out after ${TIMEOUT}s"
+            exit 1
+          fi
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Download artifact
+        if: steps.build.outputs.artifact_url != ''
+        run: |
+          ARTIFACT_URL="${{ steps.build.outputs.artifact_url }}"
+          PLATFORM="${{ matrix.platform }}"
+          
+          if [ "$PLATFORM" = "android" ]; then
+            EXTENSION="apk"
+          else
+            EXTENSION="ipa"
+          fi
+          
+          FILENAME="pimcore-voyager-${PLATFORM}-${{ github.event.inputs.profile || 'production' }}.${EXTENSION}"
+          
+          echo "Downloading artifact from: $ARTIFACT_URL"
+          curl -L -o "$FILENAME" "$ARTIFACT_URL"
+          
+          echo "filename=$FILENAME" >> $GITHUB_ENV
+
+      - name: Upload artifact to GitHub
+        if: env.filename != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: pimcore-voyager-${{ matrix.platform }}-${{ github.event.inputs.profile || 'production' }}
+          path: ${{ env.filename }}
+          retention-days: 30
+
+      - name: Upload to Release
+        if: github.event_name == 'release' && env.filename != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ env.filename }}
+          asset_name: ${{ env.filename }}
+          asset_content_type: application/octet-stream
+
+      - name: Build summary
+        run: |
+          echo "## Build Summary 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform:** ${{ matrix.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Profile:** ${{ github.event.inputs.profile || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build ID:** ${{ steps.build.outputs.build_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Artifact uploaded to GitHub Actions artifacts." >> $GITHUB_STEP_SUMMARY
