@@ -41,13 +41,21 @@ export default function FolderDetailScreen() {
     try {
       setLoading(true);
       
+      console.log('Loading folder data for folder:', folder);
+      
       // Get classes in this folder
       const folderClasses = await PimcoreService.getFolderClasses(folder.id);
+      console.log('Folder classes:', folderClasses);
       setClasses(folderClasses);
 
       // If only one class, automatically load its data
       if (folderClasses.length === 1) {
-        loadGridData(folderClasses[0]);
+        console.log('Auto-loading grid for single class:', folderClasses[0]);
+        await loadGridData(folderClasses[0]);
+      } else if (folderClasses.length === 0) {
+        console.log('No classes found, showing empty state');
+      } else {
+        console.log('Multiple classes found, showing selection');
       }
     } catch (error) {
       console.error('Error loading folder data:', error);
@@ -58,11 +66,15 @@ export default function FolderDetailScreen() {
 
   const loadGridData = async (classId: string) => {
     try {
+      console.log('Loading grid data for class:', classId, 'in folder:', folder.id);
       setSelectedClass(classId);
       const data = await PimcoreService.getGridConfiguration(folder.id, classId, 1, 10);
+      console.log('Grid data received:', data);
       setGridData(data);
     } catch (error) {
       console.error('Error loading grid data:', error);
+      // Set empty grid data to show error state
+      setGridData({ items: [], data: [] });
     }
   };
 

@@ -272,6 +272,8 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 48,
     alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 100,
   },
   emptyText: {
     marginTop: 16,
@@ -279,7 +281,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   treeContainer: {
-    paddingVertical: 8,
+    paddingTop: 0,
+    paddingBottom: 16,
   },
   treeItem: {
     paddingVertical: 8,

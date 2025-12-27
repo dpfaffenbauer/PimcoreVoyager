@@ -229,6 +229,7 @@ export class PimcoreService {
   ): Promise<any> {
     try {
       const apiClient = getApiClient();
+      console.log(`Fetching grid configuration for folder ${folderId}, class ${classId}`);
       const response = await apiClient.get(
         `/data-object/grid/configuration/${folderId}/${classId}`,
         {
@@ -238,10 +239,12 @@ export class PimcoreService {
           },
         }
       );
+      console.log('Grid configuration response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching grid configuration:', error);
-      throw error;
+      // Return empty result instead of throwing
+      return { items: [], data: [], total: 0 };
     }
   }
 
