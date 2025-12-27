@@ -13,7 +13,8 @@ const { execSync } = require('child_process');
 
 const DATA_TYPES_FILE = path.join(__dirname, 'pimcore-data-types.json');
 const REPO = 'dpfaffenbauer/PimcoreVoyager';
-const BASE_URL = 'https://github.com/pimcore/studio-ui-bundle/blob/fa3c98a6f8fab12956374a2290a2c6c679a76cbe/assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types';
+// Using main branch instead of specific commit SHA for better maintainability
+const BASE_URL = 'https://github.com/pimcore/studio-ui-bundle/blob/1.x/assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types';
 
 /**
  * Generate issue title for a data type
@@ -87,17 +88,31 @@ function generateIssueBody(dataType) {
 }
 
 /**
+ * Cross-platform delay function
+ */
+function delay(seconds) {
+  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
+
+/**
  * Create a GitHub issue using gh CLI
  */
-function createIssue(dataType) {
+async function createIssue(dataType) {
   const title = generateIssueTitle(dataType);
   const body = generateIssueBody(dataType);
   
   try {
     console.log(`Creating issue for: ${dataType.name}`);
     
-    const command = `gh issue create --repo ${REPO} --title "${title}" --body "${body}" --label "documentation"`;
+    // Use stdin to avoid command injection - pass body through stdin
+    const tempFile = path.join(__dirname, '.issue-body.tmp');
+    fs.writeFileSync(tempFile, body, 'utf-8');
+    
+    const command = `gh issue create --repo ${REPO} --title ${JSON.stringify(title)} --body-file ${JSON.stringify(tempFile)} --label "documentation"`;
     const result = execSync(command, { encoding: 'utf-8' });
+    
+    // Clean up temp file
+    fs.unlinkSync(tempFile);
     
     console.log(`✓ Created issue: ${result.trim()}`);
     return result.trim();
@@ -146,7 +161,7 @@ function exportAsMarkdown(missingIssues) {
 /**
  * Main function
  */
-function main() {
+async function main() {
   console.log('Reading data types from:', DATA_TYPES_FILE);
   
   // Read data types
@@ -175,13 +190,13 @@ function main() {
   
   const createdIssues = [];
   for (const dataType of missingIssues) {
-    const issueUrl = createIssue(dataType);
+    const issueUrl = await createIssue(dataType);
     if (issueUrl) {
       createdIssues.push({ dataType: dataType.name, url: issueUrl });
     }
     
-    // Add a small delay to avoid rate limiting
-    execSync('sleep 1');
+    // Cross-platform delay to avoid rate limiting
+    await delay(1);
   }
   
   console.log('\n--- Summary ---');

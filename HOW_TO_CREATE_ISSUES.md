@@ -52,7 +52,7 @@ Beschreibung:
 Implementiere die Anzeige und Bearbeitung des Pimcore Data Object Typs "[NAME]" in unserer React Native App.
 
 Referenz zur Komponente:
-https://github.com/pimcore/studio-ui-bundle/blob/fa3c98a6f8fab12956374a2290a2c6c679a76cbe/assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types/[FILENAME]
+https://github.com/pimcore/studio-ui-bundle/blob/1.x/assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types/[FILENAME]
 
 [Implementierungshinweise basierend auf Kategorie]
 

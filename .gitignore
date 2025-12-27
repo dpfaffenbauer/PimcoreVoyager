@@ -28,3 +28,4 @@ temp/
 # Output files from scripts
 scripts/issues-export.md
 scripts/issues-output.txt
+scripts/.issue-body.tmp
