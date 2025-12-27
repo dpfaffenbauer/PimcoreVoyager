@@ -3,7 +3,8 @@
  * Validation logic for Newsletter Active field
  */
 
-import type { NewsletterActiveConfig, ValidationResult } from './NewsletterActive.types';
+import type { ValidationResult } from '../types';
+import type { NewsletterActiveConfig } from './NewsletterActive.types';
 
 /**
  * Validates Newsletter Active field value

@@ -3,6 +3,8 @@
  * Type definitions for Newsletter Active field
  */
 
+import type { ValidationResult } from '../types';
+
 export interface NewsletterActiveValue {
   value: boolean;
 }
@@ -15,7 +17,5 @@ export interface NewsletterActiveConfig {
   defaultValue?: boolean;
 }
 
-export interface ValidationResult {
-  valid: boolean;
-  errors: string[];
-}
+// Re-export for internal use
+export type { ValidationResult };

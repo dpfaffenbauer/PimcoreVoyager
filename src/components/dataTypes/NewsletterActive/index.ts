@@ -15,5 +15,4 @@ export { NewsletterActiveTransformer } from './NewsletterActive.transformer';
 export type {
   NewsletterActiveValue,
   NewsletterActiveConfig,
-  ValidationResult,
 } from './NewsletterActive.types';
