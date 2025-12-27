@@ -1,0 +1,296 @@
+{
+  "dataTypes": [
+    {
+      "name": "Checkbox",
+      "category": "simple",
+      "filename": "dynamic-type-object-data-checkbox.tsx"
+    },
+    {
+      "name": "Consent",
+      "category": "simple",
+      "filename": "dynamic-type-object-data-consent.tsx"
+    },
+    {
+      "name": "Country",
+      "category": "select",
+      "filename": "dynamic-type-object-data-country.tsx",
+      "hasIssue": true,
+      "issueNumber": 8
+    },
+    {
+      "name": "Country Multiselect",
+      "category": "select",
+      "filename": "dynamic-type-object-data-country-multiselect.tsx"
+    },
+    {
+      "name": "Date",
+      "category": "date",
+      "filename": "dynamic-type-object-data-date.tsx"
+    },
+    {
+      "name": "DateTime",
+      "category": "date",
+      "filename": "dynamic-type-object-data-date-time.tsx"
+    },
+    {
+      "name": "Email",
+      "category": "text",
+      "filename": "dynamic-type-object-data-email.tsx"
+    },
+    {
+      "name": "Encrypted",
+      "category": "text",
+      "filename": "dynamic-type-object-data-encrypted.tsx"
+    },
+    {
+      "name": "External Image",
+      "category": "media",
+      "filename": "dynamic-type-object-data-external-image.tsx"
+    },
+    {
+      "name": "Fieldcollections",
+      "category": "structured",
+      "filename": "dynamic-type-object-data-fieldcollections.tsx"
+    },
+    {
+      "name": "Firstname",
+      "category": "text",
+      "filename": "dynamic-type-object-data-firstname.tsx"
+    },
+    {
+      "name": "Gender",
+      "category": "select",
+      "filename": "dynamic-type-object-data-gender.tsx"
+    },
+    {
+      "name": "Geobounds",
+      "category": "geo",
+      "filename": "dynamic-type-object-data-geobounds.tsx"
+    },
+    {
+      "name": "Geopoint",
+      "category": "geo",
+      "filename": "dynamic-type-object-data-geopoint.tsx"
+    },
+    {
+      "name": "Geopolygon",
+      "category": "geo",
+      "filename": "dynamic-type-object-data-geopolygon.tsx"
+    },
+    {
+      "name": "Geopolyline",
+      "category": "geo",
+      "filename": "dynamic-type-object-data-geopolyline.tsx"
+    },
+    {
+      "name": "Hot Spot Image",
+      "category": "media",
+      "filename": "dynamic-type-object-data-hot-spot-image.tsx"
+    },
+    {
+      "name": "Image",
+      "category": "media",
+      "filename": "dynamic-type-object-data-image.tsx"
+    },
+    {
+      "name": "Image Advanced",
+      "category": "media",
+      "filename": "dynamic-type-object-data-image-advanced.tsx"
+    },
+    {
+      "name": "Image Advanced with Hotspots",
+      "category": "media",
+      "filename": "dynamic-type-object-data-image-advanced-with-hotspots.tsx"
+    },
+    {
+      "name": "Image Gallery",
+      "category": "media",
+      "filename": "dynamic-type-object-data-image-gallery.tsx"
+    },
+    {
+      "name": "Input",
+      "category": "text",
+      "filename": "dynamic-type-object-data-input.tsx"
+    },
+    {
+      "name": "Input Quantity Value",
+      "category": "text",
+      "filename": "dynamic-type-object-data-input-quantity-value.tsx"
+    },
+    {
+      "name": "Language",
+      "category": "select",
+      "filename": "dynamic-type-object-data-language.tsx"
+    },
+    {
+      "name": "Language Multiselect",
+      "category": "select",
+      "filename": "dynamic-type-object-data-language-multiselect.tsx"
+    },
+    {
+      "name": "Lastname",
+      "category": "text",
+      "filename": "dynamic-type-object-data-lastname.tsx"
+    },
+    {
+      "name": "Link",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-link.tsx"
+    },
+    {
+      "name": "Localizedfields",
+      "category": "structured",
+      "filename": "dynamic-type-object-data-localizedfields.tsx"
+    },
+    {
+      "name": "Many-to-Many Relation",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-many-to-many-relation.tsx"
+    },
+    {
+      "name": "Many-to-One Relation",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-many-to-one-relation.tsx"
+    },
+    {
+      "name": "Many-to-Many Object Relation",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-many-to-many-object-relation.tsx"
+    },
+    {
+      "name": "Multiselect",
+      "category": "select",
+      "filename": "dynamic-type-object-data-multiselect.tsx"
+    },
+    {
+      "name": "Newsletter Active",
+      "category": "simple",
+      "filename": "dynamic-type-object-data-newsletter-active.tsx"
+    },
+    {
+      "name": "Newsletter Confirmed",
+      "category": "simple",
+      "filename": "dynamic-type-object-data-newsletter-confirmed.tsx"
+    },
+    {
+      "name": "Numeric",
+      "category": "numeric",
+      "filename": "dynamic-type-object-data-numeric.tsx"
+    },
+    {
+      "name": "Objects",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-objects.tsx"
+    },
+    {
+      "name": "Objects Metadata",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-objects-metadata.tsx"
+    },
+    {
+      "name": "Password",
+      "category": "text",
+      "filename": "dynamic-type-object-data-password.tsx"
+    },
+    {
+      "name": "Quantity Value",
+      "category": "numeric",
+      "filename": "dynamic-type-object-data-quantity-value.tsx"
+    },
+    {
+      "name": "Reverse Many-to-Many Object Relation",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-reverse-many-to-many-object-relation.tsx"
+    },
+    {
+      "name": "RGBAColor",
+      "category": "simple",
+      "filename": "dynamic-type-object-data-rgba-color.tsx"
+    },
+    {
+      "name": "Select",
+      "category": "select",
+      "filename": "dynamic-type-object-data-select.tsx"
+    },
+    {
+      "name": "Slider",
+      "category": "numeric",
+      "filename": "dynamic-type-object-data-slider.tsx"
+    },
+    {
+      "name": "Structured Table",
+      "category": "structured",
+      "filename": "dynamic-type-object-data-structured-table.tsx"
+    },
+    {
+      "name": "Table",
+      "category": "structured",
+      "filename": "dynamic-type-object-data-table.tsx"
+    },
+    {
+      "name": "Textarea",
+      "category": "text",
+      "filename": "dynamic-type-object-data-textarea.tsx"
+    },
+    {
+      "name": "Time",
+      "category": "date",
+      "filename": "dynamic-type-object-data-time.tsx"
+    },
+    {
+      "name": "URL Slug",
+      "category": "text",
+      "filename": "dynamic-type-object-data-url-slug.tsx"
+    },
+    {
+      "name": "User",
+      "category": "select",
+      "filename": "dynamic-type-object-data-user.tsx"
+    },
+    {
+      "name": "Video",
+      "category": "media",
+      "filename": "dynamic-type-object-data-video.tsx"
+    },
+    {
+      "name": "WYSIWYG",
+      "category": "text",
+      "filename": "dynamic-type-object-data-wysiwyg.tsx"
+    },
+    {
+      "name": "Advanced Many-to-Many Object Relation",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-advanced-many-to-many-object-relation.tsx",
+      "hasIssue": true,
+      "issueNumber": 10
+    },
+    {
+      "name": "Advanced Many-to-Many Relation",
+      "category": "relation",
+      "filename": "dynamic-type-object-data-advanced-many-to-many-relation.tsx",
+      "hasIssue": true,
+      "issueNumber": 11
+    },
+    {
+      "name": "Block",
+      "category": "structured",
+      "filename": "dynamic-type-object-data-block.tsx",
+      "hasIssue": true,
+      "issueNumber": 12
+    },
+    {
+      "name": "Boolean Select",
+      "category": "simple",
+      "filename": "dynamic-type-object-data-boolean-select.tsx",
+      "hasIssue": true,
+      "issueNumber": 13
+    },
+    {
+      "name": "Calculated Value",
+      "category": "special",
+      "filename": "dynamic-type-object-data-calculated-value.tsx",
+      "hasIssue": true,
+      "issueNumber": 14
+    }
+  ]
+}
