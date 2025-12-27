@@ -12,6 +12,7 @@ import { ActivityIndicator, View, StyleSheet, TouchableOpacity } from 'react-nat
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { useInstanceStore } from '../store/instanceStore';
+import { THEME } from '../config/constants';
 
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -94,20 +95,26 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof MaterialCommunityIcons.glyphMap = 'cube';
+          let iconName: keyof typeof MaterialCommunityIcons.glyphMap;
 
-          if (route.name === 'DataObjects') {
-            iconName = 'database';
-          } else if (route.name === 'Assets') {
-            iconName = 'image-multiple';
-          } else if (route.name === 'Documents') {
-            iconName = 'file-document-multiple';
+          switch (route.name) {
+            case 'DataObjects':
+              iconName = 'database';
+              break;
+            case 'Assets':
+              iconName = 'image-multiple';
+              break;
+            case 'Documents':
+              iconName = 'file-document-multiple';
+              break;
+            default:
+              iconName = 'help-circle-outline';
           }
 
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#6200ee',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: THEME.ACTIVE_TINT_COLOR,
+        tabBarInactiveTintColor: THEME.INACTIVE_TINT_COLOR,
         headerShown: false,
       })}
     >
@@ -140,11 +147,11 @@ function DrawerNavigator() {
             onPress={() => navigation.navigate('Settings')}
             style={styles.userButton}
           >
-            <MaterialCommunityIcons name="account-circle" size={32} color="#6200ee" />
+            <MaterialCommunityIcons name="account-circle" size={32} color={THEME.PRIMARY_COLOR} />
           </TouchableOpacity>
         ),
-        drawerActiveTintColor: '#6200ee',
-        drawerInactiveTintColor: 'gray',
+        drawerActiveTintColor: THEME.ACTIVE_TINT_COLOR,
+        drawerInactiveTintColor: THEME.INACTIVE_TINT_COLOR,
       })}
     >
       <Drawer.Screen

@@ -11,3 +11,16 @@ export const CONSTANTS = {
   // App version
   APP_VERSION: '1.0.0',
 };
+
+export const THEME = {
+  // Primary brand color
+  PRIMARY_COLOR: '#6200ee',
+  
+  // Navigation colors
+  ACTIVE_TINT_COLOR: '#6200ee',
+  INACTIVE_TINT_COLOR: 'gray',
+  
+  // Background colors
+  BACKGROUND_WHITE: '#fff',
+  BACKGROUND_LIGHT_GRAY: '#f5f5f5',
+};
