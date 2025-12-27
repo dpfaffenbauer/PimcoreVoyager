@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface } from 'react-native-paper';
+import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface, Menu, Button } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PimcoreService } from '../apis/pimcoreService';
@@ -29,9 +29,11 @@ export default function FolderDetailScreen() {
   const { folder } = route.params;
 
   const [loading, setLoading] = useState(true);
+  const [loadingGrid, setLoadingGrid] = useState(false);
   const [classes, setClasses] = useState<Array<{id: string, name: string}>>([]);
   const [gridData, setGridData] = useState<any>(null);
   const [selectedClass, setSelectedClass] = useState<{id: string, name: string} | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
     loadFolderData();
@@ -67,14 +69,31 @@ export default function FolderDetailScreen() {
   const loadGridData = async (classObj: {id: string, name: string}) => {
     try {
       console.log('Loading grid data for class:', classObj, 'in folder:', folder.id);
+      setLoadingGrid(true);
       setSelectedClass(classObj);
+      setMenuVisible(false);
+      
       const data = await PimcoreService.getGridConfiguration(folder.id, classObj.id, 1, 10);
       console.log('Grid data received:', data);
-      setGridData(data);
+      
+      // Handle different response structures
+      let items = [];
+      if (data.items && Array.isArray(data.items)) {
+        items = data.items;
+      } else if (data.data && Array.isArray(data.data)) {
+        items = data.data;
+      } else if (Array.isArray(data)) {
+        items = data;
+      }
+      
+      console.log('Extracted items:', items);
+      setGridData({ items, total: items.length });
     } catch (error) {
       console.error('Error loading grid data:', error);
       // Set empty grid data to show error state
-      setGridData({ items: [], data: [] });
+      setGridData({ items: [], total: 0 });
+    } finally {
+      setLoadingGrid(false);
     }
   };
 
@@ -89,30 +108,50 @@ export default function FolderDetailScreen() {
       );
     }
 
-    if (classes.length > 1 && !selectedClass) {
+    // Show dropdown menu for class selection
+    if (classes.length > 1) {
       return (
-        <View style={styles.classSelectionContainer}>
-          <Text style={styles.sectionTitle}>Klasse auswählen:</Text>
-          {classes.map((classObj) => (
-            <TouchableOpacity
-              key={classObj.id}
-              onPress={() => loadGridData(classObj)}
-              style={styles.classOption}
-            >
-              <Surface style={styles.classCard} elevation={2}>
-                <LinearGradient
-                  colors={['#6200ee', '#9d4edd']}
-                  style={styles.classIconGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <IconButton icon="cube-outline" iconColor="#fff" size={32} />
-                </LinearGradient>
-                <Text style={styles.className}>{classObj.name}</Text>
-                <IconButton icon="chevron-right" size={24} />
-              </Surface>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.classDropdownContainer}>
+          <Text style={styles.dropdownLabel}>Klasse auswählen:</Text>
+          <Menu
+            visible={menuVisible}
+            onDismiss={() => setMenuVisible(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setMenuVisible(true)}
+                style={styles.dropdownButton}
+              >
+                <Surface style={styles.dropdownSurface} elevation={2}>
+                  <View style={styles.dropdownContent}>
+                    <LinearGradient
+                      colors={['#6200ee', '#9d4edd']}
+                      style={styles.dropdownIcon}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <IconButton icon="cube-outline" iconColor="#fff" size={20} />
+                    </LinearGradient>
+                    <Text style={styles.dropdownText}>
+                      {selectedClass ? selectedClass.name : 'Wählen Sie eine Klasse aus'}
+                    </Text>
+                    <IconButton 
+                      icon={menuVisible ? "chevron-up" : "chevron-down"} 
+                      size={24} 
+                    />
+                  </View>
+                </Surface>
+              </TouchableOpacity>
+            }
+          >
+            {classes.map((classObj) => (
+              <Menu.Item
+                key={classObj.id}
+                onPress={() => loadGridData(classObj)}
+                title={classObj.name}
+                leadingIcon="cube-outline"
+              />
+            ))}
+          </Menu>
         </View>
       );
     }
@@ -121,9 +160,20 @@ export default function FolderDetailScreen() {
   };
 
   const renderGridData = () => {
+    if (!selectedClass) return null;
+
+    if (loadingGrid) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.loadingText}>Lade Objekte...</Text>
+        </View>
+      );
+    }
+
     if (!gridData) return null;
 
-    const items = gridData.items || gridData.data || [];
+    const items = gridData.items || [];
 
     if (items.length === 0) {
       return (
@@ -139,18 +189,8 @@ export default function FolderDetailScreen() {
       <View style={styles.gridContainer}>
         <View style={styles.gridHeader}>
           <Text style={styles.sectionTitle}>
-            {selectedClass?.name || selectedClass?.id} ({items.length} Objekte)
+            {selectedClass.name} ({items.length} Objekte)
           </Text>
-          {classes.length > 1 && (
-            <IconButton
-              icon="arrow-left"
-              size={20}
-              onPress={() => {
-                setSelectedClass(null);
-                setGridData(null);
-              }}
-            />
-          )}
         </View>
 
         {items.map((item: any, index: number) => (
@@ -269,37 +309,45 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 16,
   },
-  classSelectionContainer: {
+  classDropdownContainer: {
     padding: 16,
+  },
+  dropdownLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333',
+  },
+  dropdownButton: {
+    marginBottom: 16,
+  },
+  dropdownSurface: {
+    borderRadius: 16,
+    backgroundColor: '#fff',
+  },
+  dropdownContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  dropdownIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 12,
+    color: '#333',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#333',
-  },
-  classOption: {
-    marginBottom: 12,
-  },
-  classCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-  },
-  classIconGradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  className: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 16,
     color: '#333',
   },
   gridContainer: {
