@@ -6,9 +6,9 @@ Dieses Repository enthält Tools und Dokumentation zur Verwaltung von GitHub Iss
 
 ## Aktueller Status
 
-- **Gesamt Datentypen:** 59
+- **Gesamt Datentypen:** 56
 - **Mit Issues:** 6 (Issues #8, #10-#14)
-- **Fehlende Issues:** 53
+- **Fehlende Issues:** 50
 
 ## Dateien
 

@@ -4,9 +4,9 @@ Dieses Dokument listet alle Pimcore Data Object Typen auf, für die noch Issues 
 
 ## Status: Übersicht
 
-**Gesamt:** 59 Datentypen  
+**Gesamt:** 56 Datentypen  
 **Mit Issues:** 6 Typen (Issues #8, #10, #11, #12, #13, #14)  
-**Ohne Issues:** 53 Typen
+**Ohne Issues:** 50 Typen
 
 ## Existierende Issues
 
@@ -19,7 +19,7 @@ Dieses Dokument listet alle Pimcore Data Object Typen auf, für die noch Issues 
 | 13 | Boolean Select | simple | ✓ Existiert |
 | 14 | Calculated Value | special | ✓ Existiert |
 
-## Fehlende Issues (53 Typen)
+## Fehlende Issues (50 Typen)
 
 ### Text-basierte Typen (10)
 1. **Input** - Grundlegendes Texteingabefeld
@@ -62,7 +62,7 @@ Dieses Dokument listet alle Pimcore Data Object Typen auf, für die noch Issues 
 6. **External Image** - Externes Bild (URL)
 7. **Video** - Videofeld
 
-### Beziehungs-Typen (6)
+### Beziehungs-Typen (7)
 1. **Link** - Link/Verknüpfung
 2. **Many-to-Many Relation** - n:m-Beziehung
 3. **Many-to-One Relation** - n:1-Beziehung
@@ -83,7 +83,7 @@ Dieses Dokument listet alle Pimcore Data Object Typen auf, für die noch Issues 
 3. **Geopolygon** - Geografisches Polygon
 4. **Geopolyline** - Geografische Polylinie
 
-### Einfache Typen (3)
+### Einfache Typen (4)
 1. **Consent** - Zustimmungsfeld
 2. **Newsletter Active** - Newsletter-Aktivstatus
 3. **Newsletter Confirmed** - Newsletter-Bestätigungsstatus

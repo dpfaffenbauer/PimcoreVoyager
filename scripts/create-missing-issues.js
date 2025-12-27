@@ -100,25 +100,51 @@ function delay(seconds) {
 async function createIssue(dataType) {
   const title = generateIssueTitle(dataType);
   const body = generateIssueBody(dataType);
+  const tempFile = path.join(__dirname, '.issue-body.tmp');
   
   try {
     console.log(`Creating issue for: ${dataType.name}`);
     
-    // Use stdin to avoid command injection - pass body through stdin
-    const tempFile = path.join(__dirname, '.issue-body.tmp');
+    // Write body to temporary file to avoid command injection
     fs.writeFileSync(tempFile, body, 'utf-8');
     
-    const command = `gh issue create --repo ${REPO} --title ${JSON.stringify(title)} --body-file ${JSON.stringify(tempFile)} --label "documentation"`;
-    const result = execSync(command, { encoding: 'utf-8' });
+    // Use spawn with array of arguments to avoid shell escaping issues
+    const { spawnSync } = require('child_process');
+    const result = spawnSync('gh', [
+      'issue',
+      'create',
+      '--repo', REPO,
+      '--title', title,
+      '--body-file', tempFile,
+      '--label', 'documentation'
+    ], {
+      encoding: 'utf-8',
+      shell: false
+    });
     
-    // Clean up temp file
-    fs.unlinkSync(tempFile);
+    if (result.error) {
+      throw result.error;
+    }
     
-    console.log(`✓ Created issue: ${result.trim()}`);
-    return result.trim();
+    if (result.status !== 0) {
+      throw new Error(result.stderr || 'Command failed');
+    }
+    
+    const issueUrl = result.stdout.trim();
+    console.log(`✓ Created issue: ${issueUrl}`);
+    return issueUrl;
   } catch (error) {
     console.error(`✗ Failed to create issue for ${dataType.name}:`, error.message);
     return null;
+  } finally {
+    // Clean up temp file
+    try {
+      if (fs.existsSync(tempFile)) {
+        fs.unlinkSync(tempFile);
+      }
+    } catch (cleanupError) {
+      console.warn(`Warning: Could not clean up temp file: ${cleanupError.message}`);
+    }
   }
 }
 
