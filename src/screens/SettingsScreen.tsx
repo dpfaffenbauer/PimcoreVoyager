@@ -76,6 +76,25 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         </Card.Content>
       </Card>
 
+      <Card style={styles.card}>
+        <Card.Content>
+          <Title>Developer Tools</Title>
+          <Paragraph style={styles.devDescription}>
+            Demo screens for testing and showcasing data type implementations
+          </Paragraph>
+          <Button
+            mode="outlined"
+            onPress={() => navigation.navigate('HomeTab', { 
+              screen: 'ManyToOneRelationDemo' 
+            })}
+            style={styles.demoButton}
+            icon="code-tags"
+          >
+            Many-to-One Relation Demo
+          </Button>
+        </Card.Content>
+      </Card>
+
       <View style={styles.actions}>
         <Button
           mode="contained"
@@ -129,6 +148,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
     color: '#999',
     fontSize: 12,
+  },
+  devDescription: {
+    marginTop: 8,
+    marginBottom: 12,
+    color: '#666',
+    fontSize: 13,
+  },
+  demoButton: {
+    marginTop: 4,
   },
   actions: {
     padding: 16,

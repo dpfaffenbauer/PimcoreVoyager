@@ -20,6 +20,7 @@ import FolderDetailScreen from '../screens/FolderDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InstanceSelectionScreen from '../screens/InstanceSelectionScreen';
 import AddEditInstanceScreen from '../screens/AddEditInstanceScreen';
+import ManyToOneRelationDemoScreen from '../screens/ManyToOneRelationDemoScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,6 +51,11 @@ function HomeStack() {
         options={({ route }: any) => ({
           title: route.params?.object?.key || 'Object Detail',
         })}
+      />
+      <Stack.Screen
+        name="ManyToOneRelationDemo"
+        component={ManyToOneRelationDemoScreen}
+        options={{ title: 'Many-to-One Relation Demo' }}
       />
     </Stack.Navigator>
   );
