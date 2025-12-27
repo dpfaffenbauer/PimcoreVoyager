@@ -115,6 +115,8 @@ export class PimcoreService {
   /**
    * Create a new data object
    * Endpoint: POST /pimcore-studio/api/data-objects/add/{parentId}
+   * @param parentId - Parent folder/object ID (required by Pimcore Studio API)
+   * @param data - Object data with class-specific fields
    */
   static async createDataObject(
     parentId: number,
@@ -145,6 +147,27 @@ export class PimcoreService {
       });
     } catch (error) {
       console.error('Error deleting data object:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Batch delete multiple data objects
+   * Endpoint: DELETE /pimcore-studio/api/data-objects/batch-delete
+   * @param ids - Array of data object IDs to delete
+   * @returns Promise with jobRun ID (async operation)
+   */
+  static async batchDeleteDataObjects(ids: number[]): Promise<{ jobRunId?: string }> {
+    try {
+      const apiClient = getApiClient();
+      const response = await apiClient.delete('/data-objects/batch-delete', {
+        data: {
+          ids,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error batch deleting data objects:', error);
       throw error;
     }
   }
