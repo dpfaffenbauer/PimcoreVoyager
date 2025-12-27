@@ -16,6 +16,13 @@ export interface PimcoreField {
   mandatory?: boolean;
   noteditable?: boolean;
   invisible?: boolean;
+  // Relation-specific fields
+  classes?: string[];
+  displayFields?: string[];
+  allowCreate?: boolean;
+  maxItems?: number;
+  // Additional config that can vary by field type
+  config?: Record<string, any>;
 }
 
 export interface PimcoreDataObject {
