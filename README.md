@@ -12,7 +12,7 @@ Die App ermöglicht den schnellen und einfachen Zugriff auf beliebige Pimcore Da
 - **Suche & Filter:** Übergreifende Objektsuche und Filteroptionen nach Objektklassen und Feldern.
 - **Bearbeitung & Validierung:** Bearbeiten von Datenobjekten, Validierung nach den Vorgaben der Pimcore Class Definitions.
 - **Offline-Unterstützung:** Daten können mobil bearbeitet und werden bei erneuter Verbindung synchronisiert.
-- **Sichere Authentifizierung:** Integration moderner Authentifizierungsmethoden (OAuth2, JWT).
+- **Sichere Authentifizierung:** Integration der Pimcore Studio API Authentifizierung.
 - **Plattformübergreifend:** Entwicklung mit React Native, basiert auf Expo.
 
 ## Für wen?
@@ -21,7 +21,14 @@ Die App ermöglicht den schnellen und einfachen Zugriff auf beliebige Pimcore Da
 
 ## Wie funktioniert es?
 
-Die App kommuniziert mit den Pimcore REST / GraphQL APIs und generiert Interfaces dynamisch anhand der im Backend gepflegten Datenklassen. Struktur, Felder und Validierungen werden somit automatisch übernommen, bei Änderungen im Backend sind keine App-Updates nötig.
+Die App kommuniziert mit der **Pimcore Studio API** und generiert Interfaces dynamisch anhand der im Backend gepflegten Datenklassen. Struktur, Felder und Validierungen werden somit automatisch übernommen, bei Änderungen im Backend sind keine App-Updates nötig.
+
+### Technische Details
+
+- **API-Integration**: Nutzt die native Pimcore Studio API (`/studio/api`)
+- **Authentifizierung**: Verwendet die eingebaute Pimcore-Authentifizierung
+- **Datenmodell**: Kompatibel mit Pimcore Studio API Datenstrukturen
+- **SDK-Kompatibilität**: Implementierung folgt denselben Patterns wie `@pimcore/studio-ui-bundle` (für React Native adaptiert)
 
 ## Build & Release
 
