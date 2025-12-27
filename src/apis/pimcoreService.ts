@@ -241,13 +241,32 @@ export class PimcoreService {
     try {
       const apiClient = getApiClient();
       console.log(`Fetching grid data for class ${classId} in folder ${folderId}`);
+
+      // Define the columns we want to retrieve (system columns)
+      const columns = [
+        { key: 'id', type: 'system.id', group: ['system'], config: [] },
+        { key: 'key', type: 'system.string', group: ['system'], config: [] },
+        { key: 'fullpath', type: 'system.string', group: ['system'], config: [] },
+        { key: 'published', type: 'system.boolean', group: ['system'], config: [] },
+        { key: 'filename', type: 'system.string', group: ['system'], config: [] },
+        { key: 'classname', type: 'system.string', group: ['system'], config: [] },
+        { key: 'creationDate', type: 'system.datetime', group: ['system'], config: [] },
+        { key: 'modificationDate', type: 'system.datetime', group: ['system'], config: [] },
+        { key: 'type', type: 'system.string', group: ['system'], config: [] },
+      ];
+
       // POST request as per Pimcore Studio API spec
       const response = await apiClient.post(
         `/data-objects/grid/${classId}`,
         {
           folderId: folderId,
-          page: page,
-          pageSize: limit,
+          columns: columns,
+          filters: {
+            includeDescendants: true,
+            page: page,
+            pageSize: limit,
+            columnFilters: [],
+          },
         }
       );
       console.log('Grid response:', response.data);

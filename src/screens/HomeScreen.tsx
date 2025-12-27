@@ -5,11 +5,12 @@
  * Matches Pimcore Studio tree design
  */
 
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
-import { Text, ActivityIndicator, IconButton, Appbar, Surface } from 'react-native-paper';
+import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable } from 'react-native';
+import { Text, ActivityIndicator, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PimcoreService } from '../apis/pimcoreService';
 import { PimcoreDataObject } from '../types/pimcore';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,35 +36,60 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadRootLevel();
-  }, []);
-
-  const loadRootLevel = async () => {
+  const loadRootLevel = useCallback(async () => {
     try {
       setLoading(true);
       // Load first level only (parentId = 1 is typically root)
       const items = await PimcoreService.getTreeLevel(1);
-      const treeNodes: TreeNode[] = items.map(item => ({
+      const childNodes: TreeNode[] = items.map(item => ({
         ...item,
         expanded: false,
         children: [],
         childrenLoaded: false,
-        level: 0,
+        level: 1,
       }));
-      setTreeData(treeNodes);
+
+      // Create Home node with ID 1 as root
+      const homeNode: TreeNode = {
+        id: 1,
+        key: 'Home',
+        type: 'folder',
+        path: '/',
+        parentId: 0,
+        hasChildren: childNodes.length > 0,
+        expanded: true,
+        children: childNodes,
+        childrenLoaded: true,
+        level: 0,
+      };
+
+      setTreeData([homeNode]);
     } catch (error) {
       console.error('Error loading root level:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadRootLevel();
     setRefreshing(false);
-  };
+  }, [loadRootLevel]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable onPress={onRefresh} style={{ marginRight: 16 }}>
+          <MaterialCommunityIcons name="refresh" size={24} color="#666" />
+        </Pressable>
+      ),
+    });
+  }, [navigation, onRefresh]);
+
+  useEffect(() => {
+    loadRootLevel();
+  }, [loadRootLevel]);
 
   const toggleExpand = async (node: TreeNode, path: number[]) => {
     if (!node.hasChildren && node.type !== 'folder') return;
@@ -213,9 +239,6 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <Appbar.Header>
-          <Appbar.Content title="Objekt-Baum" />
-        </Appbar.Header>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
           <Text style={styles.loadingText}>Lade Baum...</Text>
@@ -226,11 +249,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header>
-        <Appbar.Content title="Objekt-Baum" />
-        <Appbar.Action icon="refresh" onPress={onRefresh} />
-      </Appbar.Header>
-
       <ScrollView
         style={styles.scrollView}
         refreshControl={

@@ -66,34 +66,54 @@ export default function FolderDetailScreen() {
     }
   };
 
-  const loadGridData = async (classObj: {id: string, name: string}) => {
+  const loadGridData = async (classObj: {id: string, name: string}, page: number = 1, append: boolean = false) => {
     try {
-      console.log('Loading grid data for class:', classObj, 'in folder:', folder.id);
+      console.log('Loading grid data for class:', classObj, 'in folder:', folder.id, 'page:', page);
       setLoadingGrid(true);
       setSelectedClass(classObj);
       setMenuVisible(false);
-      
-      const data = await PimcoreService.getGridConfiguration(folder.id, classObj.id, 1, 10);
-      console.log('Grid data received:', data);
-      
+
+      const data = await PimcoreService.getGridConfiguration(folder.id, classObj.id, page, 10);
+      console.log('Grid data received:', JSON.stringify(data, null, 2));
+
       // Handle different response structures
       let items = [];
+      let totalCount = 0;
+
       if (data.items && Array.isArray(data.items)) {
         items = data.items;
+        totalCount = data.totalItems || data.total || items.length;
       } else if (data.data && Array.isArray(data.data)) {
         items = data.data;
+        totalCount = data.totalItems || data.total || items.length;
       } else if (Array.isArray(data)) {
         items = data;
+        totalCount = items.length;
       }
-      
-      console.log('Extracted items:', items);
-      setGridData({ items, total: items.length });
+
+      // Log first item structure for debugging
+      if (items.length > 0) {
+        console.log('First item structure:', JSON.stringify(items[0], null, 2));
+      }
+
+      if (append && gridData) {
+        setGridData({ items: [...gridData.items, ...items], total: totalCount, currentPage: page });
+      } else {
+        setGridData({ items, total: totalCount, currentPage: page });
+      }
     } catch (error) {
       console.error('Error loading grid data:', error);
       // Set empty grid data to show error state
-      setGridData({ items: [], total: 0 });
+      setGridData({ items: [], total: 0, currentPage: 1 });
     } finally {
       setLoadingGrid(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (selectedClass && gridData && gridData.items.length < gridData.total) {
+      const nextPage = (gridData.currentPage || 1) + 1;
+      loadGridData(selectedClass, nextPage, true);
     }
   };
 
@@ -159,10 +179,45 @@ export default function FolderDetailScreen() {
     return null;
   };
 
+  // Helper to extract a value from grid item (handles {value: x} structure)
+  const extractValue = (field: any): any => {
+    if (field === null || field === undefined) return undefined;
+    if (typeof field === 'object' && 'value' in field) return field.value;
+    return field;
+  };
+
+  // Helper to extract display name from item
+  const getItemDisplayName = (item: any): string => {
+    // Grid API returns values as {value: x} objects
+    const key = extractValue(item.key);
+    const filename = extractValue(item.filename);
+    const name = extractValue(item.name);
+    const fullpath = extractValue(item.fullpath);
+
+    if (key) return key;
+    if (filename) return filename;
+    if (name) return name;
+    if (fullpath) return fullpath;
+
+    // Fallback
+    const itemId = extractValue(item.id) || 'unknown';
+    return `Objekt ${itemId}`;
+  };
+
+  // Helper to extract ID from item
+  const getItemId = (item: any): number | string => {
+    return extractValue(item.id) || '';
+  };
+
+  // Helper to check if item is published
+  const isPublished = (item: any): boolean => {
+    return extractValue(item.published) === true;
+  };
+
   const renderGridData = () => {
     if (!selectedClass) return null;
 
-    if (loadingGrid) {
+    if (loadingGrid && (!gridData || gridData.items.length === 0)) {
       return (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
@@ -185,53 +240,67 @@ export default function FolderDetailScreen() {
       );
     }
 
+    const hasMore = items.length < gridData.total;
+
     return (
       <View style={styles.gridContainer}>
         <View style={styles.gridHeader}>
           <Text style={styles.sectionTitle}>
-            {selectedClass.name} ({items.length} Objekte)
+            {selectedClass.name} ({items.length} von {gridData.total} Objekten)
           </Text>
         </View>
 
-        {items.map((item: any, index: number) => (
-          <TouchableOpacity
-            key={item.id || index}
-            onPress={() =>
-              navigation.navigate('ObjectDetail', {
-                object: item,
-                classDefinition: selectedClass,
-              })
-            }
-          >
-            <Surface style={styles.gridItem} elevation={1}>
-              <LinearGradient
-                colors={['#0084ff', '#44a3ff']}
-                style={styles.objectIcon}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <IconButton icon="cube" iconColor="#fff" size={20} />
-              </LinearGradient>
+        {items.map((item: any, index: number) => {
+          const itemId = getItemId(item);
+          const displayName = getItemDisplayName(item);
 
-              <View style={styles.objectInfo}>
-                <Text style={styles.objectName}>{item.key || item.filename || `Objekt ${item.id}`}</Text>
-                <View style={styles.objectMeta}>
-                  <Chip icon="identifier" style={styles.metaChip} textStyle={styles.metaChipText}>
-                    ID: {item.id}
-                  </Chip>
-                  {item.published && (
-                    <View style={[styles.statusDot, styles.publishedDot]} />
-                  )}
-                  {!item.published && (
-                    <View style={[styles.statusDot, styles.draftDot]} />
-                  )}
+          return (
+            <TouchableOpacity
+              key={itemId || index}
+              onPress={() =>
+                navigation.navigate('ObjectDetail', {
+                  object: { ...item, id: itemId },
+                  classDefinition: selectedClass,
+                })
+              }
+            >
+              <Surface style={styles.gridItem} elevation={1}>
+                <LinearGradient
+                  colors={['#0084ff', '#44a3ff']}
+                  style={styles.objectIcon}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <IconButton icon="cube" iconColor="#fff" size={20} />
+                </LinearGradient>
+
+                <View style={styles.objectInfo}>
+                  <Text style={styles.objectName}>{displayName}</Text>
+                  <View style={styles.objectMeta}>
+                    <Chip icon="identifier" style={styles.metaChip} textStyle={styles.metaChipText}>
+                      ID: {itemId}
+                    </Chip>
+                    <View style={[styles.statusDot, isPublished(item) ? styles.publishedDot : styles.draftDot]} />
+                  </View>
                 </View>
-              </View>
 
               <IconButton icon="chevron-right" size={20} />
             </Surface>
           </TouchableOpacity>
-        ))}
+          );
+        })}
+
+        {hasMore && (
+          <Button
+            mode="outlined"
+            onPress={loadMore}
+            loading={loadingGrid}
+            disabled={loadingGrid}
+            style={styles.loadMoreButton}
+          >
+            Mehr laden
+          </Button>
+        )}
       </View>
     );
   };
@@ -381,5 +450,9 @@ const styles = StyleSheet.create({
   },
   draftDot: {
     backgroundColor: '#ff9800',
+  },
+  loadMoreButton: {
+    marginTop: 16,
+    marginBottom: 8,
   },
 });

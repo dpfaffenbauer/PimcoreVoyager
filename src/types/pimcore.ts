@@ -23,11 +23,14 @@ export interface PimcoreDataObject {
   key: string;
   path: string;
   type: string;
-  className: string;
-  published: boolean;
-  modificationDate: number;
-  creationDate: number;
+  className?: string;
+  published?: boolean;
+  modificationDate?: number;
+  creationDate?: number;
   elements?: Record<string, any>;
+  parentId?: number;
+  hasChildren?: boolean;
+  filename?: string;
 }
 
 export interface PimcoreListResponse<T> {
