@@ -13,8 +13,13 @@ const { execSync, spawnSync } = require('child_process');
 
 const DATA_TYPES_FILE = path.join(__dirname, 'pimcore-data-types.json');
 const REPO = 'dpfaffenbauer/PimcoreVoyager';
-// Using main branch instead of specific commit SHA for better maintainability
-const BASE_URL = 'https://github.com/pimcore/studio-ui-bundle/blob/1.x/assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types';
+// Configuration for Pimcore Studio UI Bundle reference
+const PIMCORE_STUDIO_CONFIG = {
+  baseUrl: 'https://github.com/pimcore/studio-ui-bundle',
+  branch: '1.x',
+  typesPath: 'assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types'
+};
+const BASE_URL = `${PIMCORE_STUDIO_CONFIG.baseUrl}/blob/${PIMCORE_STUDIO_CONFIG.branch}/${PIMCORE_STUDIO_CONFIG.typesPath}`;
 
 /**
  * Generate issue title for a data type
@@ -101,7 +106,9 @@ async function createIssue(dataType) {
   const title = generateIssueTitle(dataType);
   const body = generateIssueBody(dataType);
   // Use unique filename to avoid conflicts in concurrent executions
-  const tempFile = path.join(__dirname, `.issue-body-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.tmp`);
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).slice(2, 11);
+  const tempFile = path.join(__dirname, `.issue-body-${timestamp}-${randomSuffix}.tmp`);
   
   try {
     console.log(`Creating issue for: ${dataType.name}`);
