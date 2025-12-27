@@ -36,7 +36,7 @@ function DataObjectsStack() {
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerShown: false }}
+        options={{ title: 'Objekt-Baum' }}
       />
       <Stack.Screen
         name="FolderDetail"
@@ -68,7 +68,7 @@ function AssetsStack() {
       <Stack.Screen
         name="AssetsHome"
         component={AssetsScreen}
-        options={{ headerShown: false }}
+        options={{ title: 'Assets' }}
       />
     </Stack.Navigator>
   );
@@ -81,7 +81,7 @@ function DocumentsStack() {
       <Stack.Screen
         name="DocumentsHome"
         component={DocumentsScreen}
-        options={{ headerShown: false }}
+        options={{ title: 'Documents' }}
       />
     </Stack.Navigator>
   );
@@ -107,7 +107,7 @@ function MainTabs() {
         },
         tabBarActiveTintColor: '#6200ee',
         tabBarInactiveTintColor: 'gray',
-        headerShown: true,
+        headerShown: false,
       })}
     >
       <Tab.Screen
