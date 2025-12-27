@@ -225,9 +225,9 @@ export class PimcoreService {
   }
 
   /**
-   * Get grid configuration and data for a specific class in a folder
-   * Endpoint: GET /pimcore-studio/api/data-object/grid/configuration/{id}/{classId}
-   * @param folderId - Folder ID
+   * Get grid data for a specific class
+   * Endpoint: GET /pimcore-studio/api/data-objects/grid/{classId}
+   * @param folderId - Folder ID (used as filter parameter)
    * @param classId - Class ID
    * @param page - Page number (default: 1)
    * @param limit - Items per page (default: 10)
@@ -240,20 +240,21 @@ export class PimcoreService {
   ): Promise<any> {
     try {
       const apiClient = getApiClient();
-      console.log(`Fetching grid configuration for folder ${folderId}, class ${classId}`);
+      console.log(`Fetching grid data for class ${classId} in folder ${folderId}`);
       const response = await apiClient.get(
-        `/data-object/grid/configuration/${folderId}/${classId}`,
+        `/data-objects/grid/${classId}`,
         {
           params: {
             page,
             pageSize: limit,
+            parentId: folderId,
           },
         }
       );
-      console.log('Grid configuration response:', response.data);
+      console.log('Grid response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching grid configuration:', error);
+      console.error('Error fetching grid data:', error);
       // Return empty result instead of throwing
       return { items: [], data: [], total: 0 };
     }

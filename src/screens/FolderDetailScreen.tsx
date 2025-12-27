@@ -241,20 +241,10 @@ export default function FolderDetailScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={folder.key || folder.filename || 'Ordner'} />
+        <Appbar.Action icon="refresh" onPress={loadFolderData} />
       </Appbar.Header>
 
       <ScrollView style={styles.content}>
-        {/* Folder Header */}
-        <LinearGradient
-          colors={['#ff9500', '#ffb84d']}
-          style={styles.headerGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <IconButton icon="folder" iconColor="#fff" size={48} />
-          <Text style={styles.headerTitle}>{folder.key || folder.filename || 'Ordner'}</Text>
-          <Text style={styles.headerSubtitle}>{folder.fullPath}</Text>
-        </LinearGradient>
 
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -279,23 +269,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  headerGradient: {
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginTop: 8,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
-    marginTop: 4,
   },
   loadingContainer: {
     padding: 48,
