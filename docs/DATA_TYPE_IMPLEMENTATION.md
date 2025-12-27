@@ -10,6 +10,18 @@ Pimcore unterstützt über 70 verschiedene Data Object Types. Jeder Type benöti
 3. **Validator** - Validiert Eingaben
 4. **Transformer** - Konvertiert zwischen API und UI Format
 
+## Implementierte Data Types
+
+### Link
+✅ **Vollständig implementiert** - Siehe [LINK_DATA_TYPE.md](LINK_DATA_TYPE.md) für Details
+
+Der Link Data Type unterstützt:
+- Direct URLs (externe Links)
+- Internal Links (Pimcore Objekt-Referenzen)
+- Umfangreiche Link-Metadaten (target, title, anchor, parameters, etc.)
+- Validierung und API-Transformation
+- Demo-Screen verfügbar unter `src/screens/LinkDemoScreen.tsx`
+
 ## Implementierungs-Template
 
 ### 1. Type Definition erstellen
