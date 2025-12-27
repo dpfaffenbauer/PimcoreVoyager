@@ -1,220 +1,251 @@
 /**
- * Home Screen
- * Displays Pimcore data objects tree view
+ * Home Screen - Tree View
+ * Shows hierarchical tree structure with lazy loading
+ * Only loads first level initially, children load on expand
+ * Matches Pimcore Studio tree design
  */
 
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Animated } from 'react-native';
-import { Text, Paragraph, ActivityIndicator, Chip, Divider, Surface, Badge } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAppStore } from '../store/appStore';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
+import { Text, ActivityIndicator, IconButton, Appbar, Surface } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PimcoreService } from '../apis/pimcoreService';
+import { PimcoreDataObject } from '../types/pimcore';
+import { LinearGradient } from 'expo-linear-gradient';
 
-interface HomeScreenProps {
-  navigation: any;
+type RootStackParamList = {
+  Home: undefined;
+  FolderDetail: { folder: any };
+  ObjectDetail: { object: any; classDefinition?: any };
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+interface TreeNode extends PimcoreDataObject {
+  expanded?: boolean;
+  children?: TreeNode[];
+  childrenLoaded?: boolean;
+  level: number;
 }
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const [objects, setObjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [parentId, setParentId] = useState<number | null>(null);
-  const [breadcrumb, setBreadcrumb] = useState<string>('Root');
+export default function HomeScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const [treeData, setTreeData] = useState<TreeNode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadObjects();
-  }, [parentId]);
+    loadRootLevel();
+  }, []);
 
-  const loadObjects = async () => {
-    setLoading(true);
-    setError('');
+  const loadRootLevel = async () => {
     try {
-      // Get all objects from tree endpoint (no class filter at root level)
-      const result = await PimcoreService.getDataObjects(
-        undefined, // No class filter - show everything
-        1,
-        100,
-        parentId || undefined
-      );
-      setObjects(result.data || []);
-    } catch (error: any) {
-      console.error('Error loading objects:', error);
-      setError('Failed to load data objects');
+      setLoading(true);
+      // Load first level only (parentId = 1 is typically root)
+      const items = await PimcoreService.getTreeLevel(1);
+      const treeNodes: TreeNode[] = items.map(item => ({
+        ...item,
+        expanded: false,
+        children: [],
+        childrenLoaded: false,
+        level: 0,
+      }));
+      setTreeData(treeNodes);
+    } catch (error) {
+      console.error('Error loading root level:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleItemPress = (item: any) => {
-    if (item.type === 'folder') {
-      // Navigate into folder
-      setParentId(item.id);
-      setBreadcrumb(item.fullPath || item.key);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadRootLevel();
+    setRefreshing(false);
+  };
+
+  const toggleExpand = async (node: TreeNode, path: number[]) => {
+    if (!node.hasChildren && node.type !== 'folder') return;
+
+    const newTreeData = [...treeData];
+    let current: any = newTreeData;
+    
+    // Navigate to the node
+    for (let i = 0; i < path.length; i++) {
+      if (i === path.length - 1) {
+        const targetNode = current[path[i]];
+        
+        if (!targetNode.expanded) {
+          // Expand: load children if not loaded
+          targetNode.expanded = true;
+          
+          if (!targetNode.childrenLoaded) {
+            try {
+              const children = await PimcoreService.getTreeLevel(targetNode.id);
+              targetNode.children = children.map(child => ({
+                ...child,
+                expanded: false,
+                children: [],
+                childrenLoaded: false,
+                level: targetNode.level + 1,
+              }));
+              targetNode.childrenLoaded = true;
+            } catch (error) {
+              console.error('Error loading children:', error);
+              targetNode.children = [];
+            }
+          }
+        } else {
+          // Collapse
+          targetNode.expanded = false;
+        }
+      } else {
+        current = current[path[i]].children;
+      }
+    }
+    
+    setTreeData(newTreeData);
+  };
+
+  const handleNodeClick = (node: TreeNode) => {
+    if (node.type === 'folder') {
+      // Open folder detail view
+      navigation.navigate('FolderDetail', { folder: node });
     } else {
-      // Navigate to detail view for data objects
-      navigation.navigate('ObjectDetail', { 
-        object: item,
-        classDefinition: { id: item.className, name: item.className }
+      // Open object detail view
+      navigation.navigate('ObjectDetail', {
+        object: node,
+        classDefinition: { id: node.className, name: node.className },
       });
     }
   };
 
-  const handleBackPress = () => {
-    if (parentId) {
-      // Navigate back up
-      setParentId(null);
-      setBreadcrumb('Root');
-    }
+  const getNodeIcon = (node: TreeNode): string => {
+    if (node.type === 'folder') return 'folder';
+    if (node.type === 'asset') return 'image';
+    return 'cube';
   };
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
-    const isFolder = item.type === 'folder';
-    const depth = (item.fullPath?.split('/').filter((p: string) => p).length || 1) - 1;
+  const getNodeGradient = (node: TreeNode): string[] => {
+    if (node.type === 'folder') return ['#ff9500', '#ffb84d'];
+    if (node.type === 'asset') return ['#9c27b0', '#ba68c8'];
+    return ['#0084ff', '#44a3ff'];
+  };
+
+  const renderTreeNode = (node: TreeNode, path: number[]) => {
+    const hasExpandableChildren = node.hasChildren || node.type === 'folder';
+    const gradient = getNodeGradient(node);
+    const icon = getNodeIcon(node);
 
     return (
-      <Surface style={[styles.itemSurface, { marginLeft: depth * 16 }]} elevation={1}>
+      <View key={`${node.id}-${path.join('-')}`}>
         <TouchableOpacity
-          style={styles.item}
-          onPress={() => handleItemPress(item)}
-          activeOpacity={0.7}
+          onPress={() => handleNodeClick(node)}
+          style={[
+            styles.treeItem,
+            { paddingLeft: 16 + node.level * 24 }, // Indentation based on level
+          ]}
         >
-          <View style={styles.itemContent}>
-            <View style={styles.iconWrapper}>
-              <LinearGradient
-                colors={isFolder ? ['#FFB300', '#FF6F00'] : ['#2196F3', '#1565C0']}
-                style={styles.iconGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+          <View style={styles.treeItemContent}>
+            {/* Expand/Collapse Chevron */}
+            {hasExpandableChildren && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  toggleExpand(node, path);
+                }}
+                style={styles.chevronButton}
               >
-                <MaterialCommunityIcons
-                  name={isFolder ? 'folder' : 'file-document-outline'}
-                  size={28}
-                  color="#fff"
+                <IconButton
+                  icon={node.expanded ? 'chevron-down' : 'chevron-right'}
+                  size={20}
+                  iconColor="#666"
+                  style={{ margin: 0 }}
                 />
-              </LinearGradient>
-              {isFolder && item.hasChildren && (
-                <Badge style={styles.childBadge} size={18}>
-                  {item.childCount || '•'}
-                </Badge>
-              )}
-            </View>
+              </TouchableOpacity>
+            )}
+            {!hasExpandableChildren && <View style={styles.chevronSpacer} />}
 
-            <View style={styles.itemInfo}>
-              <View style={styles.titleRow}>
-                <Text style={styles.itemTitle} numberOfLines={1}>
-                  {item.key}
-                </Text>
-                {item.published !== undefined && (
-                  <View
-                    style={[
-                      styles.statusIndicator,
-                      item.published ? styles.publishedIndicator : styles.draftIndicator,
-                    ]}
-                  />
-                )}
-              </View>
-              
-              <Text style={styles.itemSubtitle} numberOfLines={1}>
-                <MaterialCommunityIcons name="folder-outline" size={12} color="#999" />
-                {' '}{item.fullPath || item.path}
-              </Text>
-              
-              <View style={styles.metaRow}>
-                {item.className && (
-                  <View style={styles.infoChip}>
-                    <MaterialCommunityIcons name="label-outline" size={12} color="#6200ee" />
-                    <Text style={styles.infoChipText}>{item.className}</Text>
-                  </View>
-                )}
-                {item.id && (
-                  <View style={styles.infoChip}>
-                    <MaterialCommunityIcons name="pound" size={12} color="#666" />
-                    <Text style={styles.infoChipText}>{item.id}</Text>
-                  </View>
-                )}
-                {item.modificationDate && (
-                  <View style={styles.infoChip}>
-                    <MaterialCommunityIcons name="clock-outline" size={12} color="#666" />
-                    <Text style={styles.infoChipText}>
-                      {new Date(item.modificationDate * 1000).toLocaleDateString()}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
+            {/* Node Icon with Gradient */}
+            <LinearGradient
+              colors={gradient}
+              style={styles.nodeIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <IconButton icon={icon} iconColor="#fff" size={18} style={{ margin: 0 }} />
+            </LinearGradient>
 
-            {isFolder && (
-              <View style={styles.chevronContainer}>
-                <MaterialCommunityIcons name="chevron-right" size={24} color="#6200ee" />
-              </View>
+            {/* Node Label */}
+            <Text style={styles.nodeLabel} numberOfLines={1}>
+              {node.key || node.filename || `Item ${node.id}`}
+            </Text>
+
+            {/* Status Indicator */}
+            {node.type !== 'folder' && (
+              <View
+                style={[
+                  styles.statusDot,
+                  node.published ? styles.publishedDot : styles.draftDot,
+                ]}
+              />
             )}
           </View>
         </TouchableOpacity>
-      </Surface>
+
+        {/* Render Children if Expanded */}
+        {node.expanded && node.children && node.children.length > 0 && (
+          <View>
+            {node.children.map((child, index) =>
+              renderTreeNode(child, [...path, index])
+            )}
+          </View>
+        )}
+      </View>
     );
   };
 
-  if (loading && objects.length === 0) {
+  const renderTree = (nodes: TreeNode[]) => {
+    return nodes.map((node, index) => renderTreeNode(node, [index]));
+  };
+
+  if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" />
-        <Paragraph style={styles.loadingText}>Loading data objects...</Paragraph>
+      <View style={styles.container}>
+        <Appbar.Header>
+          <Appbar.Content title="Objekt-Baum" />
+        </Appbar.Header>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.loadingText}>Lade Baum...</Text>
+        </View>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {parentId && (
-        <Surface style={styles.breadcrumbBar} elevation={2}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <View style={styles.backButtonInner}>
-              <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
-            </View>
-            <Text style={styles.backButtonText}>Back</Text>
-          </TouchableOpacity>
-          <View style={styles.breadcrumbContent}>
-            <MaterialCommunityIcons name="folder-open-outline" size={16} color="#666" />
-            <Text style={styles.breadcrumbText} numberOfLines={1}>
-              {breadcrumb}
-            </Text>
-          </View>
-        </Surface>
-      )}
+      <Appbar.Header>
+        <Appbar.Content title="Objekt-Baum" />
+        <Appbar.Action icon="refresh" onPress={onRefresh} />
+      </Appbar.Header>
 
-      {error ? (
-        <Surface style={styles.errorContainer} elevation={1}>
-          <MaterialCommunityIcons name="alert-circle" size={24} color="#d32f2f" />
-          <Paragraph style={styles.errorText}>{error}</Paragraph>
-        </Surface>
-      ) : null}
-
-      <FlatList
-        data={objects}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => `${item.id || index}`}
+      <ScrollView
+        style={styles.scrollView}
         refreshControl={
-          <RefreshControl 
-            refreshing={loading} 
-            onRefresh={loadObjects}
-            colors={['#6200ee']}
-            tintColor="#6200ee"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        ListEmptyComponent={
+      >
+        {treeData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconContainer}>
-              <MaterialCommunityIcons name="folder-open-outline" size={80} color="#e0e0e0" />
-            </View>
-            <Text style={styles.emptyTitle}>No Data Objects</Text>
-            <Paragraph style={styles.emptyText}>
-              Pull down to refresh or check your connection
-            </Paragraph>
+            <IconButton icon="folder-outline" size={64} iconColor="#ccc" />
+            <Text style={styles.emptyText}>Keine Daten gefunden</Text>
           </View>
-        }
-        contentContainerStyle={objects.length === 0 ? styles.emptyList : styles.listContent}
-      />
+        ) : (
+          <View style={styles.treeContainer}>{renderTree(treeData)}</View>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -222,201 +253,72 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-  },
-  loadingText: {
-    marginTop: 16,
-    color: '#6200ee',
-    fontSize: 16,
-  },
-  breadcrumbBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
     backgroundColor: '#fff',
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  backButtonInner: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#6200ee',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  backButtonText: {
-    color: '#6200ee',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  breadcrumbContent: {
+  scrollView: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
   },
-  breadcrumbText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-  listContent: {
-    padding: 12,
-  },
-  emptyList: {
-    flexGrow: 1,
-  },
-  itemSurface: {
-    marginBottom: 12,
-    marginHorizontal: 4,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-  },
-  item: {
-    padding: 16,
-  },
-  itemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconWrapper: {
-    position: 'relative',
-    marginRight: 16,
-  },
-  iconGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  childBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#FF6F00',
-  },
-  itemInfo: {
-    flex: 1,
-    marginRight: 8,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  itemTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    flex: 1,
-    marginRight: 8,
-  },
-  statusIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  publishedIndicator: {
-    backgroundColor: '#4caf50',
-  },
-  draftIndicator: {
-    backgroundColor: '#ff9800',
-  },
-  itemSubtitle: {
-    fontSize: 13,
-    color: '#757575',
-    marginBottom: 8,
-    lineHeight: 18,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 4,
-  },
-  infoChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    gap: 4,
-  },
-  infoChipText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  chevronContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f0e7ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    margin: 16,
-    padding: 16,
-    backgroundColor: '#ffebee',
-    borderRadius: 12,
-    alignItems: 'center',
-    gap: 12,
-  },
-  errorText: {
-    color: '#d32f2f',
-    flex: 1,
-    fontWeight: '500',
-  },
-  emptyContainer: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 48,
   },
-  emptyIconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
+  loadingText: {
+    marginTop: 16,
+    color: '#666',
+    fontSize: 16,
   },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 8,
+  emptyContainer: {
+    padding: 48,
+    alignItems: 'center',
   },
   emptyText: {
-    fontSize: 15,
+    marginTop: 16,
     color: '#999',
-    textAlign: 'center',
+    fontSize: 16,
+  },
+  treeContainer: {
+    paddingVertical: 8,
+  },
+  treeItem: {
+    paddingVertical: 8,
+    paddingRight: 16,
+  },
+  treeItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chevronButton: {
+    marginRight: 4,
+  },
+  chevronSpacer: {
+    width: 40,
+  },
+  nodeIconGradient: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  nodeLabel: {
+    flex: 1,
+    fontSize: 15,
+    color: '#333',
+    fontWeight: '500',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  publishedDot: {
+    backgroundColor: '#4caf50',
+  },
+  draftDot: {
+    backgroundColor: '#ff9800',
   },
 });

@@ -198,6 +198,79 @@ export class PimcoreService {
   }
 
   /**
+   * Get classes available in a folder
+   * Endpoint: GET /pimcore-studio/api/class/folder/{folderId}
+   * Returns list of class IDs that have objects in this folder
+   */
+  static async getFolderClasses(folderId: number): Promise<string[]> {
+    try {
+      const apiClient = getApiClient();
+      const response = await apiClient.get(`/class/folder/${folderId}`);
+      return response.data.classes || response.data || [];
+    } catch (error) {
+      console.error('Error fetching folder classes:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get grid configuration and data for a specific class in a folder
+   * Endpoint: GET /pimcore-studio/api/data-object/grid/configuration/{id}/{classId}
+   * @param folderId - Folder ID
+   * @param classId - Class ID
+   * @param page - Page number (default: 1)
+   * @param limit - Items per page (default: 10)
+   */
+  static async getGridConfiguration(
+    folderId: number,
+    classId: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<any> {
+    try {
+      const apiClient = getApiClient();
+      const response = await apiClient.get(
+        `/data-object/grid/configuration/${folderId}/${classId}`,
+        {
+          params: {
+            page,
+            pageSize: limit,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching grid configuration:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get tree structure starting from root or specific parent
+   * Only loads one level (lazy loading for deep trees)
+   * Endpoint: GET /pimcore-studio/api/data-objects/tree
+   */
+  static async getTreeLevel(parentId: number = 1): Promise<PimcoreDataObject[]> {
+    try {
+      const apiClient = getApiClient();
+      const params: any = {
+        parentId,
+        pageSize: 1000, // Load many items at this level
+        // No excludeFolders - get everything
+      };
+      
+      const response = await apiClient.get('/data-objects/tree', {
+        params,
+      });
+      
+      return response.data.items || [];
+    } catch (error) {
+      console.error('Error fetching tree level:', error);
+      return [];
+    }
+  }
+
+  /**
    * Mock class definitions for development
    */
   private static getMockClassDefinitions(): PimcoreClassDefinition[] {

@@ -16,6 +16,7 @@ import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ObjectListScreen from '../screens/ObjectListScreen';
 import ObjectDetailScreen from '../screens/ObjectDetailScreen';
+import FolderDetailScreen from '../screens/FolderDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InstanceSelectionScreen from '../screens/InstanceSelectionScreen';
 import AddEditInstanceScreen from '../screens/AddEditInstanceScreen';
@@ -29,7 +30,12 @@ function HomeStack() {
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Data Objects' }}
+        options={{ title: 'Objekt-Baum' }}
+      />
+      <Stack.Screen
+        name="FolderDetail"
+        component={FolderDetailScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ObjectList"
