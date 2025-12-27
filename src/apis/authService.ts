@@ -8,6 +8,20 @@ import { ENV } from '../config/env';
 import axios from 'axios';
 
 export class AuthService {
+  // Constants
+  private static readonly DEFAULT_TOKEN_EXPIRY = 3600; // 1 hour in seconds
+
+  /**
+   * Parse token response from Pimcore Studio API
+   */
+  private static parseTokenResponse(responseData: any): AuthToken {
+    return {
+      access_token: responseData.token || responseData.access_token,
+      token_type: 'Bearer',
+      expires_in: responseData.expires_in || this.DEFAULT_TOKEN_EXPIRY,
+    };
+  }
+
   /**
    * Login using Pimcore Studio API authentication
    * Uses the /studio/api/login endpoint
@@ -22,12 +36,7 @@ export class AuthService {
         }
       );
 
-      // Pimcore Studio API returns a token
-      return {
-        access_token: response.data.token || response.data.access_token,
-        token_type: 'Bearer',
-        expires_in: response.data.expires_in || 3600,
-      };
+      return this.parseTokenResponse(response.data);
     } catch (error) {
       console.error('Login error:', error);
       // Fallback to mock for development/testing
@@ -77,11 +86,7 @@ export class AuthService {
           refresh_token: refreshToken,
         }
       );
-      return {
-        access_token: response.data.token || response.data.access_token,
-        token_type: 'Bearer',
-        expires_in: response.data.expires_in || 3600,
-      };
+      return this.parseTokenResponse(response.data);
     } catch (error) {
       throw new Error('Failed to refresh token');
     }

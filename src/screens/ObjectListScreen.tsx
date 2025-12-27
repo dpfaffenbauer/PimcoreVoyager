@@ -30,7 +30,7 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
   const loadObjects = async () => {
     setLoading(true);
     try {
-      const response = await PimcoreService.getDataObjects(classDefinition.name);
+      const response = await PimcoreService.getDataObjects(classDefinition.id);
       setObjects(response.data);
     } catch (error) {
       console.error('Error loading objects:', error);

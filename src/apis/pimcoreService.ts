@@ -46,14 +46,14 @@ export class PimcoreService {
    * Endpoint: GET /studio/api/data-objects
    */
   static async getDataObjects(
-    className: string,
+    classId: string,
     page: number = 1,
     limit: number = 20
   ): Promise<PimcoreListResponse<PimcoreDataObject>> {
     try {
       const response = await apiClient.get('/data-objects', {
         params: {
-          classId: className,
+          classId,
           page,
           pageSize: limit,
         },
