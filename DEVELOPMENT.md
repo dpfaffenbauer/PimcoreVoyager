@@ -97,12 +97,12 @@ PimcoreVoyager/
   - `/studio/api/login` - Authentication
   - `/studio/api/data-objects/classes` - Class definitions
   - `/studio/api/data-objects` - Data objects CRUD
-- **Bearer Token Auth**: Automatic token injection in requests
+- **Session-Based Auth**: Cookie-based session management with `withCredentials`
 - **Mock Fallback**: Falls back to mock data if Studio API unavailable
 
 ### 2. Authentication
-- **Pimcore Studio Authentication**: Uses native Pimcore auth system
-- **Secure Storage**: Tokens stored in encrypted storage (Expo SecureStore)
+- **Pimcore Studio Authentication**: Session-based authentication with cookies
+- **No Token Storage**: Sessions managed automatically via HTTP cookies
 - **Auto Logout**: Automatic logout on 401 errors
 - **Development Mode**: Falls back to mock auth when backend unavailable
 
@@ -113,8 +113,8 @@ PimcoreVoyager/
 
 ### 4. API Integration
 - Axios-based HTTP client with interceptors
-- Automatic token injection for authenticated requests
-- Error handling and token refresh logic
+- Automatic cookie handling for session management
+- Error handling with 401 session expiration detection
 - Mock data support for offline development
 
 ### 5. Navigation
@@ -221,10 +221,10 @@ The app uses the following Pimcore Studio API endpoints:
 ### Authentication Flow
 
 1. User enters Pimcore credentials
-2. App requests token from Studio API `/login` endpoint
-3. Token stored securely in device
-4. Token included in all API requests as Bearer token
-5. Automatic logout on 401 errors
+2. App sends POST to Studio API `/login` endpoint
+3. Server establishes session and sets HTTP-only cookies
+4. Cookies automatically included in all subsequent API requests
+5. Automatic logout on 401 errors (session expired)
 
 ## Development Tips
 

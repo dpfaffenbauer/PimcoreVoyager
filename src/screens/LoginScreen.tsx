@@ -15,7 +15,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { setToken, setUser } = useAuthStore();
+  const { setAuthenticated, setUser } = useAuthStore();
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -27,16 +27,22 @@ export default function LoginScreen() {
     setError('');
 
     try {
-      const token = await AuthService.login(username, password);
-      await setToken(token);
+      const success = await AuthService.login(username, password);
       
-      // Set mock user data
-      setUser({
-        id: '1',
-        username,
-        email: `${username}@example.com`,
-        name: username,
-      });
+      if (success) {
+        // Session is established via cookies
+        setAuthenticated(true);
+        
+        // Set user data
+        setUser({
+          id: '1',
+          username,
+          email: `${username}@example.com`,
+          name: username,
+        });
+      } else {
+        setError('Login failed. Please check your credentials.');
+      }
     } catch (err) {
       setError('Login failed. Please check your credentials.');
       console.error('Login error:', err);
@@ -91,7 +97,7 @@ export default function LoginScreen() {
             </Button>
 
             <Paragraph style={styles.hint}>
-              Connects to Pimcore Studio API. Falls back to mock auth if backend unavailable.
+              Session-based authentication via Pimcore Studio API. Falls back to mock if backend unavailable.
             </Paragraph>
           </Card.Content>
         </Card>

@@ -25,15 +25,15 @@ src/
 ### ✅ Authentication System
 - Pimcore Studio API authentication
 - Native Pimcore auth integration
-- Secure token storage with Expo SecureStore
-- Automatic token expiration handling
+- Session-based authentication with cookies
+- Automatic session expiration handling
 - Login/Logout flow
 - Mock fallback for development
 
 ### ✅ Pimcore API Integration
 - Pimcore Studio API integration
 - Axios-based HTTP client with interceptors
-- Automatic authentication token injection
+- Automatic cookie handling for session management
 - Studio API endpoints:
   - `/studio/api/login` - Authentication
   - `/studio/api/data-objects/classes` - Class definitions
@@ -41,13 +41,13 @@ src/
 - Mock data fallback for offline development
 
 ### ✅ Screens Implemented
-1. **Login Screen**: Authentication with mock credentials
+1. **Login Screen**: Session-based authentication
 2. **Home Screen**: Lists Pimcore class definitions
 3. **Object List Screen**: Displays data objects for selected class
 4. **Settings Screen**: User profile and app configuration
 
 ### ✅ State Management
-- **authStore**: Authentication state, token management
+- **authStore**: Authentication state management
 - **appStore**: Application state, class definitions
 
 ### ✅ Configuration
@@ -157,9 +157,9 @@ For development without a Pimcore backend:
 
 ## Security Considerations
 
-✅ Tokens stored in secure encrypted storage
+✅ Sessions managed securely via HTTP-only cookies
 ✅ HTTPS enforced for API communication
-✅ Token expiration handling
+✅ Automatic session expiration handling
 ✅ Automatic logout on 401 errors
 ✅ Environment variables for sensitive data
 

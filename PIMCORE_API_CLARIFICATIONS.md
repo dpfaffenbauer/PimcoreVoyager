@@ -1,32 +1,30 @@
-# Pimcore Studio API - Implementation Questions
+# Pimcore Studio API - Implementation Details
 
-## Current Status
+## Authentication Method ✅ CONFIRMED
 
-The implementation currently uses **assumed** Pimcore Studio API endpoints and authentication method based on common REST API patterns.
+**Pimcore Studio API uses:** Session-based authentication with cookies
 
-## Questions for Clarification
+### Implementation Details:
+- **Login**: POST `/studio/api/login` with username/password
+- **Session Management**: Server sets HTTP-only cookies
+- **API Requests**: Cookies automatically sent with `withCredentials: true`
+- **Logout**: POST `/studio/api/logout` to clear session
 
-### 1. Authentication Method
-**Question:** Welche Authentifizierungsmethode verwendet die Pimcore Studio API?
+### Changes Made:
+- ✅ Removed Bearer token authentication
+- ✅ Added `withCredentials: true` to axios configuration
+- ✅ Removed token storage from auth store
+- ✅ Session managed automatically via cookies
+- ✅ Updated LoginScreen to work with session auth
 
-Current implementation uses:
-- Bearer Token authentication
-- Token received from `/studio/api/login`
-- Token sent in `Authorization: Bearer <token>` header
-
-**Possible alternatives:**
-- Session-based authentication with cookies
-- API Keys
-- Basic Authentication
-- Other method?
-
-### 2. API Endpoints
-**Question:** Was sind die tatsächlichen Pimcore Studio API Endpunkte?
+## API Endpoints (Still to verify)
 
 Current implementation assumes:
 ```
 Authentication:
 POST /studio/api/login
+POST /studio/api/logout
+GET  /studio/api/session  # Check session validity
 
 Data Objects:
 GET  /studio/api/data-objects/classes       # List class definitions
@@ -38,22 +36,15 @@ POST /studio/api/data-objects              # Create object
 DELETE /studio/api/data-objects/{id}       # Delete object
 ```
 
-**Need to know:**
+**Need to verify:**
 - Are these the correct endpoints?
 - Are there additional endpoints we should use?
 - Is the URL structure different?
 - What is the actual API response format?
 
-## Next Steps
+## Documentation Sources
 
-Once we have clarity on:
-1. The actual authentication method
-2. The correct API endpoint structure
-
-We can update the implementation to match the real Pimcore Studio API.
-
-## Documentation Sources Needed
-
+Would be helpful to have:
 - Pimcore Studio API documentation URL
 - Pimcore Studio API OpenAPI/Swagger spec
 - Or: Example API calls from Pimcore Studio UI Bundle
@@ -61,4 +52,5 @@ We can update the implementation to match the real Pimcore Studio API.
 ---
 
 **Created**: 2025-12-27
-**Status**: Waiting for clarification from @dpfaffenbauer
+**Updated**: 2025-12-27
+**Status**: Authentication method confirmed ✅ | Endpoints need verification ⏳
