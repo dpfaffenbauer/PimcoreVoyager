@@ -62,7 +62,7 @@ export class PimcoreService {
    * This endpoint provides tree structure with folders and data objects
    */
   static async getDataObjects(
-    classId: string,
+    classId?: string,
     page: number = 1,
     limit: number = 100,
     parentId?: number

@@ -36,7 +36,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         100,
         parentId || undefined
       );
-      setObjects(result.items || []);
+      setObjects(result.data || []);
     } catch (error: any) {
       console.error('Error loading objects:', error);
       setError('Failed to load data objects');
