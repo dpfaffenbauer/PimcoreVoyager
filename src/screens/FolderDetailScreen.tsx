@@ -29,9 +29,9 @@ export default function FolderDetailScreen() {
   const { folder } = route.params;
 
   const [loading, setLoading] = useState(true);
-  const [classes, setClasses] = useState<string[]>([]);
+  const [classes, setClasses] = useState<Array<{id: string, name: string}>>([]);
   const [gridData, setGridData] = useState<any>(null);
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [selectedClass, setSelectedClass] = useState<{id: string, name: string} | null>(null);
 
   useEffect(() => {
     loadFolderData();
@@ -64,11 +64,11 @@ export default function FolderDetailScreen() {
     }
   };
 
-  const loadGridData = async (classId: string) => {
+  const loadGridData = async (classObj: {id: string, name: string}) => {
     try {
-      console.log('Loading grid data for class:', classId, 'in folder:', folder.id);
-      setSelectedClass(classId);
-      const data = await PimcoreService.getGridConfiguration(folder.id, classId, 1, 10);
+      console.log('Loading grid data for class:', classObj, 'in folder:', folder.id);
+      setSelectedClass(classObj);
+      const data = await PimcoreService.getGridConfiguration(folder.id, classObj.id, 1, 10);
       console.log('Grid data received:', data);
       setGridData(data);
     } catch (error) {
@@ -93,10 +93,10 @@ export default function FolderDetailScreen() {
       return (
         <View style={styles.classSelectionContainer}>
           <Text style={styles.sectionTitle}>Klasse auswählen:</Text>
-          {classes.map((classId) => (
+          {classes.map((classObj) => (
             <TouchableOpacity
-              key={classId}
-              onPress={() => loadGridData(classId)}
+              key={classObj.id}
+              onPress={() => loadGridData(classObj)}
               style={styles.classOption}
             >
               <Surface style={styles.classCard} elevation={2}>
@@ -108,7 +108,7 @@ export default function FolderDetailScreen() {
                 >
                   <IconButton icon="cube-outline" iconColor="#fff" size={32} />
                 </LinearGradient>
-                <Text style={styles.className}>{classId}</Text>
+                <Text style={styles.className}>{classObj.name}</Text>
                 <IconButton icon="chevron-right" size={24} />
               </Surface>
             </TouchableOpacity>
@@ -139,7 +139,7 @@ export default function FolderDetailScreen() {
       <View style={styles.gridContainer}>
         <View style={styles.gridHeader}>
           <Text style={styles.sectionTitle}>
-            {selectedClass} ({items.length} Objekte)
+            {selectedClass?.name || selectedClass?.id} ({items.length} Objekte)
           </Text>
           {classes.length > 1 && (
             <IconButton
@@ -159,7 +159,7 @@ export default function FolderDetailScreen() {
             onPress={() =>
               navigation.navigate('ObjectDetail', {
                 object: item,
-                classDefinition: { id: selectedClass, name: selectedClass },
+                classDefinition: selectedClass,
               })
             }
           >

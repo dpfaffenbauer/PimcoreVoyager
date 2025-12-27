@@ -200,13 +200,24 @@ export class PimcoreService {
   /**
    * Get classes available in a folder
    * Endpoint: GET /pimcore-studio/api/class/folder/{folderId}
-   * Returns list of class IDs that have objects in this folder
+   * Returns list of class objects that have objects in this folder
    */
-  static async getFolderClasses(folderId: number): Promise<string[]> {
+  static async getFolderClasses(folderId: number): Promise<Array<{id: string, name: string}>> {
     try {
       const apiClient = getApiClient();
       const response = await apiClient.get(`/class/folder/${folderId}`);
-      return response.data.classes || response.data || [];
+      console.log('getFolderClasses response:', response.data);
+      
+      // Handle different response structures
+      if (response.data.items && Array.isArray(response.data.items)) {
+        return response.data.items;
+      } else if (response.data.classes && Array.isArray(response.data.classes)) {
+        return response.data.classes;
+      } else if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      
+      return [];
     } catch (error) {
       console.error('Error fetching folder classes:', error);
       return [];
