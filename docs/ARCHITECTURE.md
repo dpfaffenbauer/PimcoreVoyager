@@ -1,439 +1,286 @@
-# CI/CD Pipeline Architektur
+# Pimcore Voyager - Architektur
 
 ## Übersicht
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        GitHub Repository                          │
-│                      dpfaffenbauer/PimcoreVoyager                │
-└────────────┬────────────────────────────────────────────────────┘
-             │
-             │ Push/PR/Workflow Dispatch
-             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       GitHub Actions                              │
-│                                                                   │
-│  ┌────────────────────┐         ┌─────────────────────┐        │
-│  │   build.yml        │         │ build-artifacts.yml │        │
-│  │                    │         │                     │        │
-│  │ • Quick builds     │         │ • Full builds       │        │
-│  │ • No waiting       │         │ • Downloads APK/IPA │        │
-│  │ • CI checks        │         │ • Uploads artifacts │        │
-│  └──────────┬─────────┘         └──────────┬──────────┘        │
-└─────────────┼────────────────────────────────┼──────────────────┘
-              │                                │
-              │ eas build                      │ eas build + wait
-              ▼                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Expo Application Services (EAS)                │
-│                                                                   │
-│  ┌──────────────┐                        ┌──────────────┐       │
-│  │   Android    │                        │     iOS      │       │
-│  │   Builder    │                        │   Builder    │       │
-│  │              │                        │              │       │
-│  │ • APK Build  │                        │ • IPA Build  │       │
-│  │ • AAB Build  │                        │ • Simulator  │       │
-│  │ • Signing    │                        │ • Signing    │       │
-│  └──────┬───────┘                        └──────┬───────┘       │
-└─────────┼──────────────────────────────────────┼────────────────┘
-          │                                      │
-          │ Build Output                         │ Build Output
-          ▼                                      ▼
-┌─────────────────────┐               ┌─────────────────────┐
-│  Android APK/AAB    │               │     iOS IPA         │
-│  Ready to Deploy    │               │  Ready to Deploy    │
-└─────────┬───────────┘               └─────────┬───────────┘
-          │                                     │
-          │                                     │
-          ├─────────────┬───────────────────────┼──────────────┐
-          │             │                       │              │
-          ▼             ▼                       ▼              ▼
-  ┌──────────────┐ ┌──────────┐      ┌────────────┐  ┌──────────────┐
-  │   GitHub     │ │  Google  │      │  TestFlight│  │    GitHub    │
-  │  Artifacts   │ │   Play   │      │   (Apple)  │  │   Releases   │
-  │              │ │  Store   │      │            │  │              │
-  └──────────────┘ └──────────┘      └────────────┘  └──────────────┘
-```
+Pimcore Voyager ist eine React Native/Expo Mobile App, die als generische Companion App für Pimcore dient. Die App ermöglicht das Anzeigen und Bearbeiten von Pimcore Data Objects auf mobilen Geräten.
 
-## Workflow-Typen
+## Technologie-Stack
 
-### 1. Standard Build (`build.yml`)
+### Frontend
+- **React Native** - Cross-platform Mobile Framework
+- **Expo** - Build- und Development-Tooling
+- **TypeScript** - Type Safety
+- **React Navigation** - Navigation
+- **React Hook Form** - Formular-Management
+- **React Query** - Server State Management
+- **Zustand/Redux** - Client State Management
 
-**Trigger:**
-- Push auf `main` oder `develop`
-- Pull Request
-- Manueller Dispatch
+### Backend Integration
+- **Pimcore REST API** - Datenabruf und -manipulation
+- **Pimcore GraphQL API** - Flexible Datenabfragen
+- **OAuth2/JWT** - Authentifizierung
 
-**Ablauf:**
-```
-1. Checkout Code
-2. Setup Node.js (mit npm cache)
-3. Install Dependencies (npm ci)
-4. Setup Expo/EAS (expo-github-action)
-5. Start EAS Build (--no-wait)
-6. Return Build ID
-7. Optional: Comment on PR
-```
+## Architektur-Prinzipien
 
-**Dauer:** ~5-10 Minuten (wartet nicht auf Build)
+### 1. Dynamic Type System
 
-**Use Cases:**
-- Schnelle CI-Checks
-- Entwicklungs-Iterationen
-- PR-Validierung
-
-### 2. Artifact Build (`build-artifacts.yml`)
-
-**Trigger:**
-- Manueller Dispatch (mit Platform/Profile Auswahl)
-- GitHub Release erstellt
-
-**Ablauf:**
-```
-1. Checkout Code
-2. Setup Node.js (mit npm cache)
-3. Install Dependencies (npm ci)
-4. Setup Expo/EAS (expo-github-action)
-5. Start EAS Build
-6. Poll Build Status (alle 60s, bis zu 60 Min)
-7. Download APK/IPA von Build URL
-8. Upload als GitHub Artifact (30 Tage)
-9. Optional: Attach zu GitHub Release
-10. Generate Build Summary
-```
-
-**Dauer:** ~20-60 Minuten (wartet auf Build-Completion)
-
-**Use Cases:**
-- Releases
-- Distribution
-- Finale Builds für Store-Upload
-
-### 3. TestFlight Submit (Optional)
-
-**Trigger:**
-- Nach erfolgreichem iOS Build auf `main`
-- Nur wenn `ENABLE_TESTFLIGHT_DEPLOY=true`
-
-**Ablauf:**
-```
-1. Checkout Code
-2. Setup Node.js
-3. Install Dependencies
-4. Setup Expo/EAS
-5. Submit letzten Build zu TestFlight (eas submit)
-```
-
-**Dauer:** ~5-10 Minuten
-
-**Use Cases:**
-- Beta-Testing
-- Interne Distribution
-- Pre-Release Testing
-
-## Secrets & Credentials Flow
+Die App nutzt ein dynamisches Typsystem, das Pimcore Class Definitions zur Laufzeit interpretiert:
 
 ```
-┌──────────────────────┐
-│  GitHub Repository   │
-│     Settings         │
-│                      │
-│  Secrets:            │
-│  • EXPO_TOKEN        │
-│  • EXPO_APPLE_ID     │
-│  • EXPO_APPLE_...    │
-└─────────┬────────────┘
-          │
-          │ Injected as env vars
-          ▼
-┌──────────────────────┐
-│  GitHub Actions      │
-│  Workflow Runtime    │
-└─────────┬────────────┘
-          │
-          │ Passed to EAS CLI
-          ▼
-┌──────────────────────┐
-│  Expo Account        │
-│                      │
-│  Credentials:        │
-│  • Android Keystore  │
-│  • iOS Certificate   │
-│  • iOS Profile       │
-└─────────┬────────────┘
-          │
-          │ Used during build
-          ▼
-┌──────────────────────┐
-│  EAS Build Servers   │
-│                      │
-│  • Sign APK/IPA      │
-│  • Generate Build    │
-└──────────────────────┘
-```
-
-## Build-Profile Matrix
-
-| Profile      | Android      | iOS            | Use Case          | Store Ready |
-|--------------|--------------|----------------|-------------------|-------------|
-| development  | APK (Debug)  | Debug Build    | Development       | ❌           |
-| preview      | APK          | Release (AdHoc)| Internal Testing  | ⚠️           |
-| production   | APK          | Release        | Store Deployment  | ✅           |
-| production-aab| AAB         | Release        | Play Store        | ✅           |
-
-## Platform-spezifische Flows
-
-### Android Build Flow
-
-```
-GitHub Actions
-    ↓
-EAS Build (Ubuntu)
-    ↓
-1. Install Dependencies
-2. Generate Native Project (expo prebuild)
-3. Build with Gradle
-4. Sign APK/AAB with Keystore
-5. Optimize & Align
-    ↓
-Output: APK or AAB
-    ↓
-Destinations:
-- GitHub Artifacts
-- Google Play Console (via eas submit)
-- GitHub Releases
-```
-
-### iOS Build Flow
-
-```
-GitHub Actions
-    ↓
-EAS Build (macOS)
-    ↓
-1. Install Dependencies
-2. Generate Native Project (expo prebuild)
-3. Install CocoaPods
-4. Build with Xcode
-5. Sign IPA with Certificate + Profile
-6. Archive & Export
-    ↓
-Output: IPA
-    ↓
-Destinations:
-- GitHub Artifacts
-- TestFlight (via eas submit)
-- App Store Connect
-- GitHub Releases
-```
-
-## Parallelisierung
-
-### Matrix-Strategie
-
-```yaml
-strategy:
-  matrix:
-    platform: [android, ios]
+Pimcore Class Definition → Type Registry → Component Rendering
 ```
 
 **Vorteile:**
-- ✅ Beide Platforms gleichzeitig
-- ✅ Halbiert Gesamt-Build-Zeit
-- ✅ Unabhängige Jobs
+- Keine Code-Änderungen bei Pimcore-Schema-Updates
+- Automatische UI-Generierung
+- Konsistenz mit Pimcore-Backend
 
-**Build-Zeiten:**
-```
-Sequential: Android (15 min) + iOS (20 min) = 35 min
-Parallel:   max(Android (15 min), iOS (20 min)) = 20 min
-```
-
-## Caching-Strategie
-
-### npm Dependencies
-
-```yaml
-- uses: actions/setup-node@v4
-  with:
-    cache: 'npm'
-```
-
-**Cache-Key:** Hash von `package-lock.json`
-
-**Speed-Up:** 2-3 Minuten pro Build
-
-### EAS Build Cache
-
-EAS cached automatisch:
-- Node modules
-- Gradle dependencies (Android)
-- CocoaPods (iOS)
-- Native build artifacts
-
-## Monitoring & Debugging
-
-### Build-Status überprüfen
-
-**EAS Dashboard:**
-```
-https://expo.dev/accounts/[username]/projects/pimcore-voyager/builds
-```
-
-**GitHub Actions:**
-```
-https://github.com/dpfaffenbauer/PimcoreVoyager/actions
-```
-
-### Log-Quellen
-
-1. **GitHub Actions Logs:**
-   - Workflow-Ausführung
-   - npm install Output
-   - EAS CLI Output
-
-2. **EAS Build Logs:**
-   - Native Build Output
-   - Gradle/Xcode Logs
-   - Signing Details
-
-### Fehlersuche
+### 2. Component-Based Architecture
 
 ```
-Build fehlgeschlagen?
-    ↓
-1. Check GitHub Actions Logs
-    ↓
-2. Finde Build ID in Logs
-    ↓
-3. Check EAS Dashboard mit Build ID
-    ↓
-4. Analyse voller Build Logs
-    ↓
-5. Check Common Issues:
-   - Invalid Credentials
-   - Expired Certificates
-   - Dependency Conflicts
-   - Platform-specific Errors
+Screen
+  ├── DataObjectList
+  │   └── DataObjectCard
+  └── DataObjectDetail
+      └── DynamicForm
+          ├── FieldRenderer
+          │   └── DataTypeComponent (Input, Select, etc.)
+          └── ValidationHandler
 ```
 
-## Sicherheit
-
-### Secrets-Verwaltung
+### 3. Layer Architecture
 
 ```
-GitHub Secrets (encrypted at rest)
-    ↓ HTTPS/TLS
-GitHub Actions Runtime (in-memory)
-    ↓ HTTPS/TLS
-EAS API (authenticated)
-    ↓
-EAS Build Servers (isolated containers)
+┌─────────────────────────────────┐
+│   Presentation Layer            │
+│   (React Native Components)     │
+├─────────────────────────────────┤
+│   Business Logic Layer          │
+│   (Hooks, Services, Utils)      │
+├─────────────────────────────────┤
+│   Data Layer                    │
+│   (API Client, State Mgmt)      │
+├─────────────────────────────────┤
+│   Pimcore Backend               │
+│   (REST/GraphQL API)            │
+└─────────────────────────────────┘
 ```
 
-**Best Practices:**
-- ✅ Niemals Secrets in Logs ausgeben
-- ✅ `--non-interactive` für alle EAS Commands
-- ✅ Secrets regelmäßig rotieren
-- ✅ Minimal erforderliche Berechtigungen
+## Core Komponenten
 
-### Build-Isolation
+### Data Type Registry
 
-Jeder Build läuft in:
-- Frischem Container
-- Isolierter Umgebung
-- Mit temporären Credentials
+Zentrale Registry für alle Pimcore Data Object Types:
 
-Nach Build:
-- Container gelöscht
-- Secrets entfernt
-- Nur Artifacts bleiben
+```typescript
+interface DataTypeDefinition {
+  display: React.ComponentType<DataTypeProps>;
+  edit: React.ComponentType<DataTypeProps>;
+  validator?: (value: any, config: any) => ValidationResult;
+  transformer?: {
+    toAPI: (value: any) => any;
+    fromAPI: (value: any) => any;
+  };
+}
 
-## Performance-Metriken
+const registry: Record<string, DataTypeDefinition> = {
+  'input': { ... },
+  'textarea': { ... },
+  'numeric': { ... },
+  // ... 69+ weitere Typen
+};
+```
 
-### Typische Build-Zeiten
+### Dynamic Form Renderer
 
-**GitHub Actions Setup:**
-- Checkout: 5-10s
-- Node.js Setup: 10-20s
-- npm ci (cached): 30-60s
-- npm ci (uncached): 2-3 min
+Generiert Formulare basierend auf Class Definitions:
 
-**EAS Build:**
-- Android Preview: 10-15 min
-- Android Production: 12-18 min
-- iOS Preview: 15-20 min
-- iOS Production: 18-25 min
+```typescript
+interface ClassDefinition {
+  fields: FieldDefinition[];
+  layout: LayoutDefinition;
+}
 
-**Artifact Download (build-artifacts.yml):**
-- Download: 30-60s
-- Upload: 30-90s
+function DynamicForm({ classDefinition, data, onSubmit }) {
+  // Rendert Formular basierend auf Definition
+  // Nutzt Registry für Type-spezifische Components
+}
+```
 
-**Gesamt:**
-- Standard Build: 5-10 min
-- Artifact Build: 25-65 min
+### API Client
 
-## Skalierung
+Abstrahiert Pimcore API Zugriffe:
 
-### Concurrent Builds
+```typescript
+class PimcoreClient {
+  // Authentication
+  async login(credentials): Promise<AuthToken>
+  async refreshToken(): Promise<AuthToken>
+  
+  // Data Objects
+  async getClassDefinitions(): Promise<ClassDefinition[]>
+  async listObjects(classId, filters): Promise<DataObject[]>
+  async getObject(id): Promise<DataObject>
+  async updateObject(id, data): Promise<DataObject>
+  async createObject(classId, data): Promise<DataObject>
+  
+  // Assets
+  async uploadAsset(file): Promise<Asset>
+  async getAsset(id): Promise<Asset>
+}
+```
 
-**GitHub Actions:**
-- Parallele Jobs pro Workflow: Unbegrenzt (abhängig von Plan)
-- Concurrent Workflows: Abhängig von Plan
+## State Management
 
-**EAS Build:**
-- Free Plan: 30 Builds/Monat
-- Production Plan: Unbegrenzt mit Fair Use
+### Server State (React Query)
+- API-Daten (Data Objects, Class Definitions)
+- Caching und Invalidierung
+- Optimistic Updates
+- Offline Queue
 
-### Optimierungen für Scale
+### Client State (Zustand/Redux)
+- Authentifizierung Status
+- UI State (Navigation, Modal, etc.)
+- Form State (Draft, Unsaved Changes)
+- User Preferences
 
-1. **Matrix-Parallelisierung**
-2. **Dependency Caching**
-3. **Selective Builds** (nur geänderte Platforms)
-4. **Build-Profile Optimierung**
+## Data Flow
 
-## Erweiterungen
+### Anzeigen eines Data Objects
 
-### Mögliche Zusatz-Features
+```
+1. User navigiert zu Object Detail
+2. Screen lädt Class Definition (cached)
+3. Screen lädt Object Daten via API
+4. DynamicForm rendert basierend auf Class Def
+5. Für jedes Feld: Registry lookup → Component render
+```
 
-1. **Automatische Tests:**
-   ```yaml
-   - name: Run Tests
-     run: npm test
-   ```
+### Bearbeiten eines Data Objects
 
-2. **Linting:**
-   ```yaml
-   - name: Lint Code
-     run: npm run lint
-   ```
+```
+1. User öffnet Edit Mode
+2. Form wird mit aktuellen Werten initialisiert
+3. User ändert Felder → Local State Update
+4. Validation läuft bei jedem Change
+5. User speichert → API Call mit transformierten Daten
+6. Success → Cache Invalidierung & Navigation
+7. Error → Error Anzeige & Retry Option
+```
 
-3. **E2E Testing:**
-   - Detox für React Native
-   - Maestro für UI-Tests
+## Offline Support
 
-4. **Notifications:**
-   - Slack-Integration
-   - Email-Benachrichtigungen
-   - Discord Webhooks
+```
+┌──────────────┐
+│  User Action │
+└──────┬───────┘
+       │
+       ├─ Online  → Direct API Call
+       │
+       └─ Offline → Queue in Local Storage
+                      │
+                      └─ Background Sync when online
+```
 
-5. **Advanced Deployments:**
-   - Staged Rollouts
-   - A/B Testing Builds
-   - Multiple Distribution Channels
+**Implementierung:**
+- Local Storage für Änderungs-Queue
+- Background Sync bei Reconnect
+- Conflict Resolution bei Dateninkonsistenz
+- Optimistic UI Updates
 
-## Zusammenfassung
+## Security
 
-Die CI/CD-Pipeline bietet:
+### Authentifizierung
+- OAuth2 / JWT Token-based Auth
+- Secure Token Storage (Keychain/Keystore)
+- Auto Token Refresh
+- Biometric Auth Option
 
-✅ **Automatisierung:** Builds bei jedem Push
-✅ **Flexibilität:** Manuelle und automatische Triggers
-✅ **Sicherheit:** Secrets Management, Build Isolation
-✅ **Transparenz:** Logs, Artifacts, Build History
-✅ **Skalierbarkeit:** Parallele Builds, Caching
-✅ **Distribution:** Multiple Deployment-Kanäle
+### Autorisierung
+- Field-Level Permissions aus Pimcore
+- Read-Only Mode für eingeschränkte User
+- Sensitive Data Handling
 
-**Next Steps:**
-1. Setup GitHub Secrets
-2. Test ersten Build
-3. Configure Signing
-4. Deploy to Stores
+### Data Security
+- HTTPS für alle API Calls
+- No Logging of Sensitive Data
+- Encryption for Local Storage
+
+## Performance Optimierungen
+
+### Rendering
+- React.memo für statische Components
+- Virtualized Lists für lange Listen
+- Lazy Loading für Images
+- Code Splitting für Data Types
+
+### Netzwerk
+- Request Deduplication
+- Aggressive Caching
+- Batch Requests wo möglich
+- Image Optimization/Thumbnails
+
+### Startup
+- Lazy Component Loading
+- Progressive Data Loading
+- Skeleton Screens
+
+## Testing Strategy
+
+### Unit Tests
+- Data Type Components (Display/Edit)
+- Validators
+- Transformers
+- Utils
+
+### Integration Tests
+- Form Rendering
+- API Client
+- State Management
+
+### E2E Tests
+- Login Flow
+- Object List → Detail → Edit → Save
+- Offline → Online Sync
+- Error Handling
+
+## Build & Deployment
+
+### Development
+```bash
+npm start           # Expo Dev Server
+npm run ios         # iOS Simulator
+npm run android     # Android Emulator
+```
+
+### Production Builds
+```bash
+# Android
+eas build --platform android --profile production
+
+# iOS  
+eas build --platform ios --profile production
+```
+
+### Distribution
+- **Android**: APK via GitHub Releases oder Google Play
+- **iOS**: TestFlight oder App Store
+- **OTA Updates**: Expo Updates für schnelle Patches
+
+## Monitoring & Analytics
+
+- Crash Reporting (Sentry)
+- Performance Monitoring
+- User Analytics (opt-in)
+- API Error Tracking
+
+## Zukünftige Erweiterungen
+
+- Push Notifications
+- Asset Preview & Editing
+- Workflow Integration
+- Multi-Language Support
+- Dark Mode
+- Advanced Search/Filtering
+- Batch Operations
+- Export Funktionen
