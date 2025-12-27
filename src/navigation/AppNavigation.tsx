@@ -131,8 +131,6 @@ function MainTabs() {
 
 // Drawer Navigator with burger menu and main tabs
 function DrawerNavigator() {
-  const { user } = useAuthStore();
-
   return (
     <Drawer.Navigator
       screenOptions={({ navigation }) => ({

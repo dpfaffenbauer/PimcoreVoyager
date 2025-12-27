@@ -11,18 +11,27 @@ interface PlaceholderScreenProps {
   route?: {
     name?: string;
   };
+  title?: string;
+  icon?: string;
+  description?: string;
 }
 
-export default function PlaceholderScreen({ route }: PlaceholderScreenProps) {
-  const screenName = route?.name?.replace('Placeholder', '') || 'Feature';
+export default function PlaceholderScreen({ 
+  route, 
+  title, 
+  icon = 'clock-outline',
+  description = 'This feature will be available in a future version.'
+}: PlaceholderScreenProps) {
+  // Extract screen name from route if not provided explicitly
+  const screenName = title || (route?.name?.replace('Placeholder', '')) || 'Feature';
   
   return (
     <View style={styles.container}>
       <View style={styles.placeholderContainer}>
-        <IconButton icon="clock-outline" size={64} iconColor="#ccc" />
+        <IconButton icon={icon} size={64} iconColor="#ccc" />
         <Text style={styles.placeholderTitle}>{screenName}</Text>
         <Text style={styles.placeholderText}>
-          This feature will be available in a future version.
+          {description}
         </Text>
       </View>
     </View>
