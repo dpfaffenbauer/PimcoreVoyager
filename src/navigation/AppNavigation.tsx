@@ -15,6 +15,7 @@ import { useInstanceStore } from '../store/instanceStore';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ObjectListScreen from '../screens/ObjectListScreen';
+import ObjectDetailScreen from '../screens/ObjectDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InstanceSelectionScreen from '../screens/InstanceSelectionScreen';
 import AddEditInstanceScreen from '../screens/AddEditInstanceScreen';
@@ -28,13 +29,20 @@ function HomeStack() {
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Class Definitions' }}
+        options={{ title: 'Data Objects' }}
       />
       <Stack.Screen
         name="ObjectList"
         component={ObjectListScreen as any}
         options={({ route }: any) => ({
           title: route.params?.classDefinition?.name || 'Objects',
+        })}
+      />
+      <Stack.Screen
+        name="ObjectDetail"
+        component={ObjectDetailScreen}
+        options={({ route }: any) => ({
+          title: route.params?.object?.key || 'Object Detail',
         })}
       />
     </Stack.Navigator>

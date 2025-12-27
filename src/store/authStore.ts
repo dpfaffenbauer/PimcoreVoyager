@@ -9,12 +9,22 @@ import * as SecureStore from 'expo-secure-store';
 import { User, AuthState } from '../types/auth';
 
 const USER_KEY = 'auth_user';
+const CREDENTIALS_KEY = 'saved_credentials';
+
+interface SavedCredentials {
+  username: string;
+  password: string;
+  instanceId?: string;
+}
 
 interface AuthStore extends AuthState {
   setAuthenticated: (authenticated: boolean) => void;
   setUser: (user: User) => void;
   logout: () => Promise<void>;
   loadAuthData: () => Promise<void>;
+  saveCredentials: (username: string, password: string, instanceId?: string) => Promise<void>;
+  loadCredentials: (instanceId?: string) => Promise<SavedCredentials | null>;
+  clearCredentials: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -52,6 +62,44 @@ export const useAuthStore = create<AuthStore>((set) => ({
       }
     } catch (error) {
       console.error('Error loading auth data:', error);
+    }
+  },
+
+  saveCredentials: async (username: string, password: string, instanceId?: string) => {
+    try {
+      const credentials: SavedCredentials = {
+        username,
+        password,
+        instanceId,
+      };
+      await SecureStore.setItemAsync(CREDENTIALS_KEY, JSON.stringify(credentials));
+    } catch (error) {
+      console.error('Error saving credentials:', error);
+    }
+  },
+
+  loadCredentials: async (instanceId?: string) => {
+    try {
+      const credentialsStr = await SecureStore.getItemAsync(CREDENTIALS_KEY);
+      if (credentialsStr) {
+        const credentials: SavedCredentials = JSON.parse(credentialsStr);
+        // If instanceId is provided, only return credentials for that instance
+        if (instanceId && credentials.instanceId !== instanceId) {
+          return null;
+        }
+        return credentials;
+      }
+    } catch (error) {
+      console.error('Error loading credentials:', error);
+    }
+    return null;
+  },
+
+  clearCredentials: async () => {
+    try {
+      await SecureStore.deleteItemAsync(CREDENTIALS_KEY);
+    } catch (error) {
+      console.error('Error clearing credentials:', error);
     }
   },
 }));

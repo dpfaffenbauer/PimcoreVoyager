@@ -1,11 +1,11 @@
 /**
  * Login Screen
- * Handles user authentication
+ * Handles user authentication with saved credentials support
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Title, Paragraph, Card, IconButton, Chip } from 'react-native-paper';
+import { TextInput, Button, Title, Paragraph, Card, IconButton, Chip, Checkbox } from 'react-native-paper';
 import { useAuthStore } from '../store/authStore';
 import { useInstanceStore } from '../store/instanceStore';
 import { AuthService } from '../apis/authService';
@@ -19,9 +19,24 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
 
-  const { setAuthenticated, setUser } = useAuthStore();
+  const { setAuthenticated, setUser, saveCredentials, loadCredentials } = useAuthStore();
   const { activeInstance } = useInstanceStore();
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    loadSavedCredentials();
+  }, [activeInstance]);
+
+  const loadSavedCredentials = async () => {
+    const credentials = await loadCredentials(activeInstance?.id);
+    if (credentials) {
+      setUsername(credentials.username);
+      setPassword(credentials.password);
+      setRememberMe(true);
+    }
+  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -36,6 +51,11 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       const success = await AuthService.login(username, password);
       
       if (success) {
+        // Save credentials if remember me is checked
+        if (rememberMe) {
+          await saveCredentials(username, password, activeInstance?.id);
+        }
+
         // Session is established via cookies
         setAuthenticated(true);
         
@@ -108,6 +128,16 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               mode="outlined"
             />
 
+            <View style={styles.checkboxRow}>
+              <Checkbox
+                status={rememberMe ? 'checked' : 'unchecked'}
+                onPress={() => setRememberMe(!rememberMe)}
+              />
+              <Paragraph style={styles.checkboxLabel} onPress={() => setRememberMe(!rememberMe)}>
+                Remember my credentials
+              </Paragraph>
+            </View>
+
             {error ? (
               <Paragraph style={styles.error}>{error}</Paragraph>
             ) : null}
@@ -123,7 +153,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             </Button>
 
             <Paragraph style={styles.hint}>
-              Session-based authentication via Pimcore Studio API. Falls back to mock if backend unavailable.
+              Session-based authentication via Pimcore Studio API. Credentials are stored securely on your device.
             </Paragraph>
           </Card.Content>
         </Card>
@@ -175,6 +205,15 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  checkboxLabel: {
+    flex: 1,
+    marginLeft: 8,
   },
   button: {
     marginTop: 8,
