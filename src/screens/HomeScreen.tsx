@@ -45,9 +45,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       <Card.Content>
         <Title>{item.name}</Title>
         {item.description && <Paragraph>{item.description}</Paragraph>}
-        <Paragraph style={styles.fieldCount}>
-          {item.fields.length} fields
-        </Paragraph>
+        {item.fields && (
+          <Paragraph style={styles.fieldCount}>
+            {item.fields.length} fields
+          </Paragraph>
+        )}
       </Card.Content>
     </Card>
   );

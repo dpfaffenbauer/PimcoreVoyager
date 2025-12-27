@@ -21,7 +21,19 @@ export class PimcoreService {
     try {
       const apiClient = getApiClient();
       const response = await apiClient.get('/class/collection');
-      return response.data.items || response.data;
+      
+      // Handle different response structures
+      let items = response.data.items || response.data || [];
+      
+      // Ensure each item has the expected structure
+      items = items.map((item: any) => ({
+        id: item.id || item.name || '',
+        name: item.name || item.id || '',
+        description: item.description || '',
+        fields: item.fields || [],
+      }));
+      
+      return items;
     } catch (error) {
       console.error('Error fetching class definitions:', error);
       // Return mock data for development

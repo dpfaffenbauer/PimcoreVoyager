@@ -6,7 +6,7 @@ export interface PimcoreClassDefinition {
   id: string;
   name: string;
   description?: string;
-  fields: PimcoreField[];
+  fields?: PimcoreField[];
 }
 
 export interface PimcoreField {
