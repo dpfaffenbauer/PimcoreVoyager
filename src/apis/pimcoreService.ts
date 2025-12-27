@@ -64,7 +64,7 @@ export class PimcoreService {
   static async getDataObjects(
     classId: string,
     page: number = 1,
-    limit: number = 50,
+    limit: number = 100,
     parentId?: number
   ): Promise<PimcoreListResponse<PimcoreDataObject>> {
     try {
@@ -72,17 +72,18 @@ export class PimcoreService {
       const params: any = {
         page,
         pageSize: limit,
-        excludeFolders: false, // Include folders in tree view
+        // Don't set excludeFolders - let API return both folders and objects
       };
       
-      // Add classIds filter if provided
-      if (classId) {
-        params.classIds = JSON.stringify([classId]);
+      // Add parentId filter if provided (required for navigating tree structure)
+      if (parentId !== undefined && parentId !== null) {
+        params.parentId = parentId;
       }
       
-      // Add parentId filter if provided
-      if (parentId !== undefined) {
-        params.parentId = parentId;
+      // Only add classIds filter if classId is provided and not for root level
+      // This allows showing all items in folders
+      if (classId && parentId === undefined) {
+        params.classIds = JSON.stringify([classId]);
       }
       
       const response = await apiClient.get('/data-objects/tree', {
