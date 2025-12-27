@@ -7,7 +7,8 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { ActivityIndicator, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { useInstanceStore } from '../store/instanceStore';
@@ -20,17 +21,22 @@ import FolderDetailScreen from '../screens/FolderDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InstanceSelectionScreen from '../screens/InstanceSelectionScreen';
 import AddEditInstanceScreen from '../screens/AddEditInstanceScreen';
+import AssetsScreen from '../screens/AssetsScreen';
+import DocumentsScreen from '../screens/DocumentsScreen';
+import PlaceholderScreen from '../screens/PlaceholderScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
 
-function HomeStack() {
+// Data Objects Stack Navigator
+function DataObjectsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Objekt-Baum' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="FolderDetail"
@@ -55,36 +61,136 @@ function HomeStack() {
   );
 }
 
+// Assets Stack Navigator (placeholder)
+function AssetsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="AssetsHome"
+        component={AssetsScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Documents Stack Navigator (placeholder)
+function DocumentsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="DocumentsHome"
+        component={DocumentsScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Main Tabs with Data Objects, Assets, and Documents
 function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof MaterialCommunityIcons.glyphMap = 'home';
+          let iconName: keyof typeof MaterialCommunityIcons.glyphMap = 'cube';
 
-          if (route.name === 'HomeTab') {
-            iconName = 'home';
-          } else if (route.name === 'Settings') {
-            iconName = 'cog';
+          if (route.name === 'DataObjects') {
+            iconName = 'database';
+          } else if (route.name === 'Assets') {
+            iconName = 'image-multiple';
+          } else if (route.name === 'Documents') {
+            iconName = 'file-document-multiple';
           }
 
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#6200ee',
         tabBarInactiveTintColor: 'gray',
+        headerShown: true,
       })}
     >
       <Tab.Screen
-        name="HomeTab"
-        component={HomeStack}
-        options={{ headerShown: false, title: 'Home' }}
+        name="DataObjects"
+        component={DataObjectsStack}
+        options={{ title: 'Data-Objects' }}
       />
       <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{ title: 'Settings' }}
+        name="Assets"
+        component={AssetsStack}
+        options={{ title: 'Assets' }}
+      />
+      <Tab.Screen
+        name="Documents"
+        component={DocumentsStack}
+        options={{ title: 'Documents' }}
       />
     </Tab.Navigator>
+  );
+}
+
+// Drawer Navigator with burger menu and main tabs
+function DrawerNavigator() {
+  const { user } = useAuthStore();
+
+  return (
+    <Drawer.Navigator
+      screenOptions={({ navigation }) => ({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Settings')}
+            style={styles.userButton}
+          >
+            <MaterialCommunityIcons name="account-circle" size={32} color="#6200ee" />
+          </TouchableOpacity>
+        ),
+        drawerActiveTintColor: '#6200ee',
+        drawerInactiveTintColor: 'gray',
+      })}
+    >
+      <Drawer.Screen
+        name="MainTabs"
+        component={MainTabs}
+        options={{
+          title: 'Pimcore Voyager',
+          drawerLabel: 'Home',
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: 'Settings',
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cog" size={size} color={color} />
+          ),
+        }}
+      />
+      {/* Placeholder menu items */}
+      <Drawer.Screen
+        name="PlaceholderSearch"
+        component={PlaceholderScreen}
+        options={{
+          title: 'Search',
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="magnify" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="PlaceholderNotifications"
+        component={PlaceholderScreen}
+        options={{
+          title: 'Notifications',
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="bell" size={size} color={color} />
+          ),
+        }}
+      />
+    </Drawer.Navigator>
   );
 }
 
@@ -117,7 +223,7 @@ export default function AppNavigation() {
   return (
     <NavigationContainer>
       {isAuthenticated ? (
-        <MainTabs />
+        <DrawerNavigator />
       ) : (
         <Stack.Navigator>
           {showInstanceSelection ? (
@@ -178,5 +284,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  userButton: {
+    marginRight: 16,
+    padding: 4,
   },
 });
