@@ -30,9 +30,3 @@ Builds werden automatisiert per CI/CD-Workflows erstellt (Android/iOS/Expo). Rel
 ---
 
 > Für Details zu Installation und Entwicklung siehe [CONTRIBUTING.md](CONTRIBUTING.md) und die jeweiligen [User Stories](https://github.com/dpfaffenbauer/PimcoreVoyager/issues).
-
----
-
-## Lizenz
-
-MIT
