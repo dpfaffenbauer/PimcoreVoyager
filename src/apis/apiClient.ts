@@ -7,13 +7,14 @@
 import axios, { AxiosInstance } from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { useInstanceStore } from '../store/instanceStore';
+import { CONSTANTS } from '../config/constants';
 
 // Create a function to get the API client with current instance URL
 export const getApiClient = (): AxiosInstance => {
   const instanceUrl = useInstanceStore.getState().getActiveInstanceUrl();
   
   const client = axios.create({
-    baseURL: instanceUrl || 'https://demo.pimcore.com/studio/api',
+    baseURL: instanceUrl || CONSTANTS.DEFAULT_PIMCORE_API_URL,
     withCredentials: true, // Enable sending/receiving cookies for session management
     timeout: 10000,
     headers: {

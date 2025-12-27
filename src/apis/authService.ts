@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 import { useInstanceStore } from '../store/instanceStore';
+import { CONSTANTS } from '../config/constants';
 
 export class AuthService {
   /**
@@ -15,7 +16,7 @@ export class AuthService {
     const instanceUrl = useInstanceStore.getState().getActiveInstanceUrl();
     
     return axios.create({
-      baseURL: instanceUrl || 'https://demo.pimcore.com/studio/api',
+      baseURL: instanceUrl || CONSTANTS.DEFAULT_PIMCORE_API_URL,
       withCredentials: true, // Enable sending/receiving cookies
       timeout: 10000,
       headers: {

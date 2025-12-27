@@ -10,6 +10,11 @@ import { PimcoreInstance } from '../types/instance';
 const INSTANCES_KEY = 'pimcore_instances';
 const ACTIVE_INSTANCE_KEY = 'active_instance_id';
 
+// Helper to generate unique IDs
+const generateId = (): string => {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
 interface InstanceStore {
   instances: PimcoreInstance[];
   activeInstance: PimcoreInstance | null;
@@ -63,7 +68,7 @@ export const useInstanceStore = create<InstanceStore>((set, get) => ({
     try {
       const newInstance: PimcoreInstance = {
         ...instanceData,
-        id: Date.now().toString(),
+        id: generateId(),
         createdAt: Date.now(),
       };
 
