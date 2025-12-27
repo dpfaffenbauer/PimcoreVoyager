@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execSync, spawnSync } = require('child_process');
 
 const DATA_TYPES_FILE = path.join(__dirname, 'pimcore-data-types.json');
@@ -105,9 +106,9 @@ function delay(seconds) {
 async function createIssue(dataType) {
   const title = generateIssueTitle(dataType);
   const body = generateIssueBody(dataType);
-  // Use unique filename to avoid conflicts in concurrent executions
+  // Use cryptographically secure random filename to avoid conflicts in concurrent executions
   const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).slice(2, 11);
+  const randomSuffix = crypto.randomBytes(6).toString('hex');
   const tempFile = path.join(__dirname, `.issue-body-${timestamp}-${randomSuffix}.tmp`);
   
   try {
