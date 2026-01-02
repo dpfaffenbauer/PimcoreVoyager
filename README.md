@@ -1,178 +1,42 @@
 # Pimcore Voyager
 
-<p align="center">
-  <img src="assets/logo.png" alt="Pimcore Voyager Logo" width="120" height="120">
-</p>
+**Pimcore Voyager** ist eine generische Mobile Companion App (React Native, Expo) für Pimcore – das Enterprise Open Source Daten- und Experience Management System.
 
-<p align="center">
-  <strong>Mobile Companion App für Pimcore</strong><br>
-  Verwalte Datenobjekte, Assets und Dokumente unterwegs
-</p>
+## 🎯 Ziel
 
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#verwendung">Verwendung</a> •
-  <a href="#entwicklung">Entwicklung</a> •
-  <a href="#lizenz">Lizenz</a>
-</p>
+Die App ermöglicht den schnellen und einfachen Zugriff auf beliebige Pimcore Datenobjekte über mobile Endgeräte (iOS/Android). Sie dient als „Außenposten" für das Bearbeiten, Durchsuchen und Verwalten strukturierter Pimcore-Daten, auch offline.
 
----
+## ✨ Hauptfunktionen
 
-## Überblick
+- **Dynamische Datenobjektverwaltung:** Automatisches Auslesen der Pimcore Class Definitions, Listen- und Detail-Ansichten für beliebige Objektklassen.
+- **Suche & Filter:** Übergreifende Objektsuche und Filteroptionen nach Objektklassen und Feldern.
+- **Bearbeitung & Validierung:** Bearbeiten von Datenobjekten, Validierung nach den Vorgaben der Pimcore Class Definitions.
+- **Offline-Unterstützung:** Daten können mobil bearbeitet und werden bei erneuter Verbindung synchronisiert.
+- **Sichere Authentifizierung:** Integration der Pimcore Studio API Authentifizierung.
+- **Plattformübergreifend:** Entwicklung mit React Native, basiert auf Expo.
+- **70+ Data Object Types:** Unterstützung für alle Pimcore Data Object Typen (in Entwicklung).
 
-**Pimcore Voyager** ist eine native Mobile App (React Native/Expo), die sich über die Studio API mit deiner Pimcore-Instanz verbindet. Durchsuche, betrachte und verwalte deine Pimcore-Inhalte direkt von deinem iOS- oder Android-Gerät.
+## 👥 Für wen?
 
-## Features
+- Pimcore-Redakteure, Außendienst, Content Teams & Admins, die unterwegs Datenobjekte pflegen oder abrufen wollen.
 
-### Datenobjekte
-- Baumstruktur der Datenobjekte durchsuchen
-- Objektdetails mit vollständigem Feldrendering
-- Unterstützung aller Pimcore-Feldtypen (Input, Textarea, Select, Relations, etc.)
-- Field Collections und Object Bricks Support
-- Grid-Ansicht für Objekte in Ordnern
+## 🏗️ Wie funktioniert es?
 
-### Assets
-- Asset-Baum und Ordner durchsuchen
-- Asset-Details und Metadaten anzeigen
-- Bildvorschau
-- Dateityp-Icons
+Die App kommuniziert mit der **Pimcore Studio API** und generiert Interfaces dynamisch anhand der im Backend gepflegten Datenklassen. Struktur, Felder und Validierungen werden somit automatisch übernommen, bei Änderungen im Backend sind keine App-Updates nötig.
 
-### Dokumente
-- Dokument-Baum durchsuchen
-- Dokumentdetails anzeigen
-- Page, Snippet und Link Support
+### Technische Details
 
-### Workflows
-- Workflow-Status auf Objekten anzeigen
-- Workflow-Transitionen ausführen
-- Globale Workflow-Aktionen triggern
+- **API-Integration**: Nutzt die native Pimcore Studio API (`/studio/api`)
+- **Authentifizierung**: Verwendet die eingebaute Pimcore-Authentifizierung
+- **Datenmodell**: Kompatibel mit Pimcore Studio API Datenstrukturen
+- **SDK-Kompatibilität**: Implementierung folgt denselben Patterns wie `@pimcore/studio-ui-bundle` (für React Native adaptiert)
 
-### Multi-Instanz Support
-- Verbindung zu mehreren Pimcore-Instanzen
-- Einfaches Wechseln zwischen Instanzen
-- Sichere Speicherung der Zugangsdaten
+## 🚀 Quick Start
 
-### Suche
-- Globale Suche über alle Content-Typen
-- Filter nach Datenobjekten, Assets oder Dokumenten
-
-## Installation
-
-### Aus dem App Store (Kostenlos)
-
-Die offizielle Pimcore Voyager App ist kostenlos verfügbar:
-
-- **iOS**: [App Store](#) *(coming soon)*
-- **Android**: [Google Play](#) *(coming soon)*
-
-### Voraussetzungen
-
-- Pimcore 11.x oder höher
-- Pimcore Studio UI Bundle installiert und aktiviert
-- Gültige Pimcore-Benutzerdaten
-
-## Verwendung
-
-### Erste Schritte
-
-1. **App starten** und auf "Instanz hinzufügen" tippen
-2. **Pimcore-Details eingeben:**
-   - Instanzname (z.B. "Produktion")
-   - API URL: `https://deine-pimcore.com/pimcore-studio/api`
-3. **Anmelden** mit deinen Pimcore-Zugangsdaten
-4. **Durchsuchen** deiner Inhalte!
-
-### Navigation
-
-- **Datenobjekte**: Datenobjekte nach Klasse organisiert durchsuchen
-- **Assets**: Medienbibliothek und Dateien zugreifen
-- **Dokumente**: Pimcore-Dokumente anzeigen
-- **Suche**: Inhalte über alle Typen finden
-- **Einstellungen**: Instanzen und App-Einstellungen verwalten
-
-## Architektur
-
-### Tech Stack
-
-| Technologie | Verwendung |
-|-------------|------------|
-| React Native | Mobile App Framework |
-| Expo | Build & Development Toolchain |
-| TypeScript | Typsicherheit |
-| React Navigation | Navigation |
-| React Native Paper | UI Components (Material Design) |
-| Zustand | State Management |
-| Axios | HTTP Client |
-
-### Projektstruktur
-
-```
-src/
-├── apis/                    # API Services
-│   ├── apiClient.ts         # Axios Client Konfiguration
-│   ├── authService.ts       # Authentifizierung
-│   ├── pimcoreService.ts    # Haupt-Service (Facade)
-│   ├── dataObjectService.ts # Datenobjekt-Operationen
-│   ├── assetService.ts      # Asset-Operationen
-│   ├── documentService.ts   # Dokument-Operationen
-│   ├── classService.ts      # Klassendefinitionen
-│   ├── workflowService.ts   # Workflow-Operationen
-│   └── searchService.ts     # Such-Funktionalität
-├── components/              # Wiederverwendbare UI-Komponenten
-│   ├── FieldRenderer.tsx    # Dynamisches Feldrendering
-│   ├── WorkflowSection.tsx  # Workflow-Status Anzeige
-│   ├── CustomDrawer.tsx     # Navigation Drawer
-│   └── FloatingActionMenu.tsx
-├── screens/                 # Screen-Komponenten
-│   ├── LoginScreen.tsx
-│   ├── InstanceSelectionScreen.tsx
-│   ├── DataObjectsScreen.tsx
-│   ├── ObjectDetailScreen.tsx
-│   ├── ObjectListScreen.tsx
-│   ├── AssetsScreen.tsx
-│   ├── AssetDetailScreen.tsx
-│   ├── DocumentsScreen.tsx
-│   ├── DocumentDetailScreen.tsx
-│   ├── FolderDetailScreen.tsx
-│   └── SearchScreen.tsx
-├── navigation/              # Navigation Konfiguration
-│   └── AppNavigation.tsx
-├── store/                   # State Management
-│   ├── authStore.ts
-│   └── instanceStore.ts
-├── types/                   # TypeScript Definitionen
-│   ├── pimcore.ts
-│   └── auth.ts
-└── config/                  # Konfiguration
-    └── env.ts
-```
-
-### API Services
-
-Die App kommuniziert mit Pimcore über die Studio API. Services sind nach Domäne organisiert:
-
-| Service | Beschreibung |
-|---------|--------------|
-| `DataObjectService` | CRUD-Operationen für Datenobjekte |
-| `AssetService` | Asset-Baum und Datei-Operationen |
-| `DocumentService` | Dokument-Baum und Details |
-| `ClassService` | Klassendefinitionen und Layouts |
-| `WorkflowService` | Workflow-Status und Aktionen |
-| `SearchService` | Globale Such-Funktionalität |
-
-Alle Services werden über `PimcoreService` für Rückwärtskompatibilität re-exportiert.
-
-## Entwicklung
-
-Für detaillierte Entwicklungsanleitungen siehe [DEVELOPMENT.md](DEVELOPMENT.md).
-
-### Quick Start
-
-```bash
+\`\`\`bash
 # Repository klonen
-git clone https://github.com/cors-gmbh/pimcore-voyager.git
-cd pimcore-voyager
+git clone https://github.com/dpfaffenbauer/PimcoreVoyager.git
+cd PimcoreVoyager
 
 # Dependencies installieren
 npm install
@@ -180,73 +44,105 @@ npm install
 # Development Server starten
 npm start
 
-# Auf iOS ausführen
+# Auf iOS starten (benötigt Xcode)
 npm run ios
 
-# Auf Android ausführen
+# Auf Android starten (benötigt Android Studio)
 npm run android
-```
+\`\`\`
 
-### Building
+## 📋 Voraussetzungen
 
-```bash
-# Development Build (mit Dev Client)
-npx expo run:ios --device
+- Node.js (v18 oder höher)
+- npm oder yarn
+- Expo CLI
+- Für iOS: Xcode (nur macOS)
+- Für Android: Android Studio
 
-# Release Build
-npx expo run:ios --device --configuration Release
+## 📚 Dokumentation
 
-# EAS Cloud Build
-eas build --profile production --platform ios
-```
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Entwicklungs-Leitfaden
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architektur-Übersicht
+- [docs/DATA_TYPE_IMPLEMENTATION.md](docs/DATA_TYPE_IMPLEMENTATION.md) - Data Type Implementation Guide
+- [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) - Projektstruktur
+- [docs/ROADMAP.md](docs/ROADMAP.md) - Entwicklungs-Roadmap
 
-### TestFlight / App Store
+## 🎯 Status & Roadmap
 
-```bash
-# Archive erstellen und zu App Store Connect hochladen
-# 1. Xcode öffnen
-open ios/PimcoreVoyager.xcworkspace
+**Current Status**: Phase 1 - Foundation ✅
 
-# 2. In Xcode: Product → Archive → Distribute App
-```
+Das Projekt befindet sich in der initialen Entwicklungsphase. Die Grundstruktur ist aufgesetzt, und die Implementierung der Data Object Types beginnt in Kürze.
 
-## Contributing
+Siehe [ROADMAP.md](docs/ROADMAP.md) für detaillierte Phasenplanung.
 
-Contributions sind willkommen! Bitte lies die Contributing Guidelines bevor du einen Pull Request erstellst.
+### Implementierte Features
+- ✅ Projekt Setup & Konfiguration
+- ✅ Basis-Dokumentation
+- ✅ Projektstruktur
 
-1. Repository forken
-2. Feature Branch erstellen (`git checkout -b feature/amazing-feature`)
-3. Änderungen committen (`git commit -m 'Add amazing feature'`)
-4. Branch pushen (`git push origin feature/amazing-feature`)
-5. Pull Request öffnen
+### In Entwicklung
+- 🔄 Core Architecture (Type Registry, Base Components)
+- ⏳ Authentication System
+- ⏳ Pimcore API Integration
 
-Mit deinem Beitrag stimmst du den Bedingungen unserer Lizenzvereinbarung zu.
+### Geplant
+- Data Object Types (70+ Typen)
+- List & Detail Views
+- Edit Functionality
+- Offline Support
+- CI/CD Pipeline
 
-## Support
+## 🏗️ Build & Release
 
-- **Dokumentation**: [docs.pimcore.com](https://docs.pimcore.com)
-- **Issues**: [GitHub Issues](https://github.com/cors-gmbh/pimcore-voyager/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/cors-gmbh/pimcore-voyager/discussions)
+Builds werden automatisiert per CI/CD-Workflows erstellt (Android/iOS/Expo). Releases erfolgen als OTA-Updates, via TestFlight oder direkte APK-Bereitstellung.
 
-## Lizenz
+\`\`\`bash
+# Production Build für Android
+eas build --platform android --profile production
 
-**Pimcore Voyager License (PVL)**
+# Production Build für iOS
+eas build --platform ios --profile production
+\`\`\`
 
-| Nutzung | Lizenz |
-|---------|--------|
-| Offizielle App aus App Store / Google Play | **Kostenlos** |
-| Geforkte oder angepasste Versionen | **Kostenpflichtig** via [store.pimcore.com](https://store.pimcore.com) |
+## 🤝 Contributing
 
-Siehe [LICENSE.md](LICENSE.md) für vollständige Lizenzbedingungen.
+Beiträge sind willkommen! Siehe [CONTRIBUTING.md](CONTRIBUTING.md) für Details zum Entwicklungsprozess.
 
----
+### Data Type Implementation
 
-<p align="center">
-  <strong>Entwickelt von</strong><br>
-  <a href="https://www.cors.gmbh">CORS GmbH</a><br>
-  Zeileisstraße 6, 4600 Wels, Austria
-</p>
+Das Projekt benötigt Implementierungen für 70+ Pimcore Data Object Typen. Jeder Type benötigt:
+- Display Component (Anzeige)
+- Edit Component (Bearbeitung)
+- Validator (Validierung)
+- Transformer (API ↔ UI Konvertierung)
 
-<p align="center">
-  © 2025 CORS GmbH. Alle Rechte vorbehalten.
-</p>
+Siehe [DATA_TYPE_IMPLEMENTATION.md](docs/DATA_TYPE_IMPLEMENTATION.md) für einen detaillierten Implementierungs-Leitfaden.
+
+## 📦 Technologie-Stack
+
+- **Frontend**: React Native, Expo, TypeScript
+- **Navigation**: React Navigation
+- **State Management**: Zustand/Redux, React Query
+- **API**: Pimcore REST/GraphQL
+- **Authentication**: OAuth2/JWT
+- **Storage**: Expo SecureStore, AsyncStorage
+- **Testing**: Jest, React Native Testing Library
+
+## 📄 Lizenz
+
+GPL-3.0 - Siehe [LICENSE](LICENSE) für Details.
+
+## 🔗 Links
+
+- [Pimcore](https://pimcore.com/)
+- [Pimcore Studio UI Bundle](https://github.com/pimcore/studio-ui-bundle) (Referenz-Implementierung)
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/)
+
+## 📧 Kontakt
+
+Bei Fragen oder Anregungen erstelle bitte ein [Issue](https://github.com/dpfaffenbauer/PimcoreVoyager/issues) oder kontaktiere @dpfaffenbauer.
+
+## Entwicklung
+
+> **Note**: Dies ist ein aktives Entwicklungsprojekt. Die App befindet sich in einem frühen Stadium. Contributions und Feedback sind sehr willkommen!

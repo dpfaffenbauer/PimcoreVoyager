@@ -1,137 +1,209 @@
 # Contributing to Pimcore Voyager
 
-Thank you for your interest in contributing to Pimcore Voyager! This document provides guidelines and instructions for contributing.
+Willkommen bei Pimcore Voyager! Diese Anleitung hilft dir beim Einstieg in die Entwicklung.
 
-## Getting Started
+## Entwicklungsumgebung Setup
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/PimcoreVoyager.git`
-3. Create a feature branch: `git checkout -b feature/your-feature-name`
-4. Follow the setup instructions in [DEVELOPMENT.md](DEVELOPMENT.md)
+### Voraussetzungen
 
-## Development Workflow
+- Node.js (v18 oder höher)
+- npm oder yarn
+- Expo CLI
+- Für iOS: Xcode (nur macOS)
+- Für Android: Android Studio
 
-### 1. Make Your Changes
-
-- Write clean, maintainable code
-- Follow the existing code style and structure
-- Add comments for complex logic
-- Update documentation if needed
-
-### 2. Test Your Changes
-
-- Test on both iOS and Android if possible
-- Verify that existing functionality still works
-- Test edge cases and error scenarios
-
-### 3. Commit Your Changes
-
-Use clear, descriptive commit messages:
+### Installation
 
 ```bash
-git commit -m "Add feature: description of what you added"
-git commit -m "Fix: description of what you fixed"
-git commit -m "Docs: description of documentation changes"
+# Repository klonen
+git clone https://github.com/dpfaffenbauer/PimcoreVoyager.git
+cd PimcoreVoyager
+
+# Dependencies installieren
+npm install
+
+# Expo CLI installieren (falls nicht vorhanden)
+npm install -g expo-cli
+
+# App starten
+npm start
 ```
 
-### 4. Push and Create a Pull Request
+## Projektstruktur
 
-```bash
-git push origin feature/your-feature-name
+```
+PimcoreVoyager/
+├── src/
+│   ├── components/          # React Native Komponenten
+│   │   ├── dataTypes/      # Data Object Type Komponenten
+│   │   ├── forms/          # Formular-Komponenten
+│   │   └── ui/             # UI-Basis-Komponenten
+│   ├── screens/            # App-Screens
+│   ├── services/           # API Services
+│   │   └── pimcore/        # Pimcore API Client
+│   ├── store/              # State Management (Redux/Zustand)
+│   ├── types/              # TypeScript Definitionen
+│   └── utils/              # Hilfsfunktionen
+├── assets/                 # Bilder, Fonts, etc.
+├── docs/                   # Dokumentation
+└── __tests__/              # Tests
 ```
 
-Then create a Pull Request on GitHub with:
-- Clear description of changes
-- Screenshots if UI changes
-- Reference to related issues
+## Data Object Types Implementierung
 
-## Code Style
+Jeder Pimcore Data Object Type benötigt:
+
+### 1. Type Definition
+
+```typescript
+// src/types/dataTypes.ts
+export interface DataTypeProps {
+  value: any;
+  onChange: (value: any) => void;
+  config: DataTypeConfig;
+  readonly?: boolean;
+  error?: string;
+}
+```
+
+### 2. Display Component
+
+```typescript
+// src/components/dataTypes/Input/InputDisplay.tsx
+import React from 'react';
+import { Text, View } from 'react-native';
+
+export const InputDisplay: React.FC<DataTypeProps> = ({ value, config }) => {
+  return (
+    <View>
+      <Text>{config.label}</Text>
+      <Text>{value || '-'}</Text>
+    </View>
+  );
+};
+```
+
+### 3. Edit Component
+
+```typescript
+// src/components/dataTypes/Input/InputEdit.tsx
+import React from 'react';
+import { TextInput, View } from 'react-native';
+
+export const InputEdit: React.FC<DataTypeProps> = ({ 
+  value, 
+  onChange, 
+  config,
+  error 
+}) => {
+  return (
+    <View>
+      <TextInput
+        value={value}
+        onChangeText={onChange}
+        placeholder={config.placeholder}
+      />
+      {error && <Text>{error}</Text>}
+    </View>
+  );
+};
+```
+
+### 4. Registration
+
+```typescript
+// src/components/dataTypes/registry.ts
+import { InputDisplay, InputEdit } from './Input';
+
+export const dataTypeRegistry = {
+  'input': {
+    display: InputDisplay,
+    edit: InputEdit,
+  },
+  // ... weitere Typen
+};
+```
+
+## Coding Standards
 
 ### TypeScript
 
-- Use TypeScript for all new code
-- Define proper types and interfaces
-- Avoid `any` type when possible
-- Use meaningful variable and function names
+- Verwende TypeScript für alle neuen Dateien
+- Definiere explizite Types für Props und State
+- Vermeide `any` wo möglich
 
-### React/React Native
+### React Native Best Practices
 
-- Use functional components with hooks
-- Keep components small and focused
-- Extract reusable logic into custom hooks
-- Follow React best practices
+- Nutze funktionale Komponenten mit Hooks
+- Implementiere React.memo für Performance-kritische Komponenten
+- Verwende StyleSheet.create für Styles
 
-### File Organization
+### Mobile Optimierung
 
-- Place components in `src/components/`
-- Place screens in `src/screens/`
-- Place API services in `src/apis/`
-- Keep related files together
-
-## Pull Request Guidelines
-
-### Before Submitting
-
-- [ ] Code follows the project's style
-- [ ] TypeScript checks pass (`npx tsc --noEmit`)
-- [ ] App runs without errors on iOS/Android
-- [ ] No console warnings in development
-- [ ] Documentation updated if needed
-
-### PR Description Template
-
-```markdown
-## Description
-Brief description of the changes
-
-## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
+- Touch-Targets mindestens 44x44 Pixel
+- Berücksichtige verschiedene Bildschirmgrößen
+- Teste auf iOS und Android
+- Implementiere Loading States
+- Handle Offline-Szenarien
 
 ## Testing
-How to test the changes
 
-## Screenshots (if applicable)
-Add screenshots for UI changes
+```bash
+# Unit Tests
+npm test
 
-## Related Issues
-Closes #issue_number
+# E2E Tests
+npm run test:e2e
+
+# Type Check
+npm run type-check
+
+# Linting
+npm run lint
 ```
 
-## Reporting Bugs
+### Test-Struktur für Data Types
 
-Use GitHub Issues to report bugs. Include:
+```typescript
+// __tests__/dataTypes/Input.test.tsx
+describe('Input Data Type', () => {
+  it('should display value correctly', () => {
+    // Test display component
+  });
 
-1. **Description**: Clear description of the bug
-2. **Steps to Reproduce**: Detailed steps to reproduce
-3. **Expected Behavior**: What should happen
-4. **Actual Behavior**: What actually happens
-5. **Environment**: 
-   - OS (iOS/Android version)
-   - Device/Simulator
-   - App version
-   - React Native version
+  it('should handle edit interactions', () => {
+    // Test edit component
+  });
 
-## Feature Requests
+  it('should validate input', () => {
+    // Test validation logic
+  });
+});
+```
 
-We welcome feature requests! Please:
+## Pull Request Prozess
 
-1. Check if the feature is already requested
-2. Clearly describe the feature and use case
-3. Explain why it would be valuable
-4. Provide examples if possible
+1. Fork das Repository
+2. Erstelle einen Feature Branch (`git checkout -b feature/input-type`)
+3. Committe deine Änderungen (`git commit -am 'Add Input type implementation'`)
+4. Push zum Branch (`git push origin feature/input-type`)
+5. Erstelle einen Pull Request
 
-## Questions?
+### PR Checklist
 
-- Open an issue with the "question" label
-- Check existing documentation first
-- Be respectful and patient
+- [ ] Code folgt den Coding Standards
+- [ ] Tests sind hinzugefügt/aktualisiert
+- [ ] Dokumentation ist aktualisiert
+- [ ] Build läuft ohne Fehler
+- [ ] Mobile UX ist getestet (iOS & Android)
 
-## Code of Conduct
+## Referenzen
 
-- Be respectful and inclusive
-- Welcome newcomers
-- Focus on constructive feedback
-- Assume good intentions
+- [Pimcore Studio UI Bundle](https://github.com/pimcore/studio-ui-bundle) - Referenz-Implementierung
+- [React Native Dokumentation](https://reactnative.dev/)
+- [Expo Dokumentation](https://docs.expo.dev/)
+- [Pimcore API Dokumentation](https://pimcore.com/docs/)
+
+## Fragen?
+
+Bei Fragen erstelle ein Issue oder kontaktiere @dpfaffenbauer.

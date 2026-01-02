@@ -1,18 +1,16 @@
-/**
- * Main App Component
- * Pimcore Voyager - Mobile Companion App for Pimcore
- */
-
 import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { PaperProvider } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
-import { Provider as PaperProvider } from 'react-native-paper';
 import AppNavigation from './src/navigation/AppNavigation';
 
 export default function App() {
   return (
-    <PaperProvider>
-      <AppNavigation />
-      <StatusBar style="auto" />
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider>
+        <StatusBar style="auto" />
+        <AppNavigation />
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }
