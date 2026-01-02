@@ -3,19 +3,20 @@
  * Main navigation setup with authentication flow and multi-tenant support
  */
 
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect, useState, useRef } from 'react';
+import { NavigationContainer, useNavigation, NavigationContainerRef } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import { ActivityIndicator, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { useInstanceStore } from '../store/instanceStore';
 import { THEME } from '../config/constants';
+import { CustomDrawer } from '../components/CustomDrawer';
+import { FloatingActionMenu } from '../components/FloatingActionMenu';
 
 import LoginScreen from '../screens/LoginScreen';
-import HomeScreen from '../screens/HomeScreen';
+import DataObjectsScreen from '../screens/DataObjectsScreen';
 import ObjectListScreen from '../screens/ObjectListScreen';
 import ObjectDetailScreen from '../screens/ObjectDetailScreen';
 import FolderDetailScreen from '../screens/FolderDetailScreen';
@@ -23,13 +24,39 @@ import SettingsScreen from '../screens/SettingsScreen';
 import InstanceSelectionScreen from '../screens/InstanceSelectionScreen';
 import AddEditInstanceScreen from '../screens/AddEditInstanceScreen';
 import AssetsScreen from '../screens/AssetsScreen';
+import AssetDetailScreen from '../screens/AssetDetailScreen';
 import DocumentsScreen from '../screens/DocumentsScreen';
-import SearchPlaceholderScreen from '../screens/SearchPlaceholderScreen';
-import NotificationsPlaceholderScreen from '../screens/NotificationsPlaceholderScreen';
+import DocumentDetailScreen from '../screens/DocumentDetailScreen';
+import SearchScreen from '../screens/SearchScreen';
+import PropertiesScreen from '../screens/PropertiesScreen';
+import NotesScreen from '../screens/NotesScreen';
+import DependenciesScreen from '../screens/DependenciesScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
+
+// Drawer state context
+const DrawerContext = React.createContext<{
+  isOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+}>({
+  isOpen: false,
+  openDrawer: () => {},
+  closeDrawer: () => {},
+});
+
+export const useDrawer = () => React.useContext(DrawerContext);
+
+// Burger menu button component
+function BurgerMenuButton() {
+  const { openDrawer } = useDrawer();
+  return (
+    <TouchableOpacity onPress={openDrawer} style={styles.burgerButton}>
+      <MaterialCommunityIcons name="menu" size={26} color="#333" />
+    </TouchableOpacity>
+  );
+}
 
 // Data Objects Stack Navigator
 function DataObjectsStack() {
@@ -37,8 +64,11 @@ function DataObjectsStack() {
     <Stack.Navigator>
       <Stack.Screen
         name="Home"
-        component={HomeScreen}
-        options={{ title: 'Objekt-Baum' }}
+        component={DataObjectsScreen}
+        options={{
+          title: 'Datenobjekte',
+          headerLeft: () => <BurgerMenuButton />,
+        }}
       />
       <Stack.Screen
         name="FolderDetail"
@@ -59,35 +89,101 @@ function DataObjectsStack() {
           title: route.params?.object?.key || 'Object Detail',
         })}
       />
+      <Stack.Screen
+        name="Properties"
+        component={PropertiesScreen}
+        options={{ title: 'Properties' }}
+      />
+      <Stack.Screen
+        name="Notes"
+        component={NotesScreen}
+        options={{ title: 'Notes' }}
+      />
+      <Stack.Screen
+        name="Dependencies"
+        component={DependenciesScreen}
+        options={{ title: 'Dependencies' }}
+      />
     </Stack.Navigator>
   );
 }
 
-// Assets Stack Navigator (placeholder)
+// Assets Stack Navigator
 function AssetsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="AssetsHome"
         component={AssetsScreen}
-        options={{ title: 'Assets' }}
+        options={{
+          title: 'Assets',
+          headerLeft: () => <BurgerMenuButton />,
+        }}
+      />
+      <Stack.Screen
+        name="AssetDetail"
+        component={AssetDetailScreen}
+        options={({ route }: any) => ({
+          title: route.params?.asset?.filename || 'Asset',
+        })}
+      />
+      <Stack.Screen
+        name="Properties"
+        component={PropertiesScreen}
+        options={{ title: 'Properties' }}
+      />
+      <Stack.Screen
+        name="Notes"
+        component={NotesScreen}
+        options={{ title: 'Notes' }}
+      />
+      <Stack.Screen
+        name="Dependencies"
+        component={DependenciesScreen}
+        options={{ title: 'Dependencies' }}
       />
     </Stack.Navigator>
   );
 }
 
-// Documents Stack Navigator (placeholder)
+// Documents Stack Navigator
 function DocumentsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="DocumentsHome"
         component={DocumentsScreen}
-        options={{ title: 'Documents' }}
+        options={{
+          title: 'Documents',
+          headerLeft: () => <BurgerMenuButton />,
+        }}
+      />
+      <Stack.Screen
+        name="DocumentDetail"
+        component={DocumentDetailScreen}
+        options={({ route }: any) => ({
+          title: route.params?.document?.key || 'Dokument',
+        })}
+      />
+      <Stack.Screen
+        name="Properties"
+        component={PropertiesScreen}
+        options={{ title: 'Properties' }}
+      />
+      <Stack.Screen
+        name="Notes"
+        component={NotesScreen}
+        options={{ title: 'Notes' }}
+      />
+      <Stack.Screen
+        name="Dependencies"
+        component={DependenciesScreen}
+        options={{ title: 'Dependencies' }}
       />
     </Stack.Navigator>
   );
 }
+
 
 // Main Tabs with Data Objects, Assets, and Documents
 function MainTabs() {
@@ -119,7 +215,7 @@ function MainTabs() {
       <Tab.Screen
         name="DataObjects"
         component={DataObjectsStack}
-        options={{ title: 'Data-Objects' }}
+        options={{ title: 'Objekte' }}
       />
       <Tab.Screen
         name="Assets"
@@ -129,78 +225,189 @@ function MainTabs() {
       <Tab.Screen
         name="Documents"
         component={DocumentsStack}
-        options={{ title: 'Documents' }}
+        options={{ title: 'Dokumente' }}
       />
     </Tab.Navigator>
   );
 }
 
-// Drawer Navigator with burger menu and main tabs
-function DrawerNavigator() {
+// Settings Stack Navigator (accessible via FAB)
+function SettingsStack() {
   return (
-    <Drawer.Navigator
-      screenOptions={({ navigation }) => ({
-        headerRight: () => (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Settings')}
-            style={styles.userButton}
-          >
-            <MaterialCommunityIcons name="account-circle" size={32} color={THEME.PRIMARY_COLOR} />
-          </TouchableOpacity>
-        ),
-        drawerActiveTintColor: THEME.ACTIVE_TINT_COLOR,
-        drawerInactiveTintColor: THEME.INACTIVE_TINT_COLOR,
-      })}
-    >
-      <Drawer.Screen
-        name="MainTabs"
-        component={MainTabs}
-        options={{
-          title: 'Pimcore Voyager',
-          drawerLabel: 'Home',
-          drawerIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="Settings"
+    <Stack.Navigator>
+      <Stack.Screen
+        name="SettingsHome"
         component={SettingsScreen}
+        options={{ title: 'Einstellungen' }}
+      />
+      <Stack.Screen
+        name="InstanceSelection"
+        component={InstanceSelectionScreen}
+        options={{ title: 'Instanzen verwalten' }}
+      />
+      <Stack.Screen
+        name="AddInstance"
+        component={AddEditInstanceScreen}
+        options={{ title: 'Instanz hinzufügen' }}
+      />
+      <Stack.Screen
+        name="EditInstance"
+        component={AddEditInstanceScreen}
+        options={{ title: 'Instanz bearbeiten' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Navigation ref for external access
+export const navigationRef = React.createRef<NavigationContainerRef<any>>();
+
+// FAB with navigation access (must be inside NavigationContainer)
+function FABWithNavigation() {
+  const navigation = useNavigation<any>();
+
+  const fabItems = [
+    {
+      key: 'settings',
+      icon: 'cog' as const,
+      color: '#666',
+      backgroundColor: '#fff',
+      onPress: () => {
+        console.log('Settings pressed, navigating...');
+        navigation.navigate('Settings');
+      },
+    },
+    {
+      key: 'add',
+      icon: 'plus-box' as const,
+      color: '#666',
+      backgroundColor: '#fff',
+      onPress: () => console.log('Add new'),
+    },
+    {
+      key: 'search',
+      icon: 'magnify' as const,
+      color: '#666',
+      backgroundColor: '#fff',
+      onPress: () => {
+        console.log('Search pressed, navigating...');
+        navigation.navigate('Search');
+      },
+    },
+  ];
+
+  return (
+    <FloatingActionMenu
+      items={fabItems}
+      mainIcon="account-circle"
+      mainBackgroundColor={THEME.PRIMARY_COLOR}
+    />
+  );
+}
+
+// Main Tabs wrapper with FAB overlay
+function MainTabsWithFAB() {
+  return (
+    <View style={{ flex: 1 }}>
+      <MainTabs />
+      <FABWithNavigation />
+    </View>
+  );
+}
+
+// Root stack for modal screens
+const RootStackNav = createStackNavigator();
+
+function RootNavigatorWithFAB() {
+  return (
+    <RootStackNav.Navigator>
+      <RootStackNav.Screen
+        name="MainTabs"
+        component={MainTabsWithFAB}
+        options={{ headerShown: false }}
+      />
+      <RootStackNav.Screen
+        name="Settings"
+        component={SettingsStack}
         options={{
-          title: 'Settings',
-          drawerIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cog" size={size} color={color} />
-          ),
+          headerShown: false,
+          presentation: 'modal',
         }}
       />
-      {/* Placeholder menu items */}
-      <Drawer.Screen
-        name="PlaceholderSearch"
-        component={SearchPlaceholderScreen}
+      <RootStackNav.Screen
+        name="Search"
+        component={SearchScreen}
         options={{
-          title: 'Search',
-          drawerIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="magnify" size={size} color={color} />
-          ),
+          title: 'Suche',
+          presentation: 'modal',
         }}
       />
-      <Drawer.Screen
-        name="PlaceholderNotifications"
-        component={NotificationsPlaceholderScreen}
-        options={{
-          title: 'Notifications',
-          drawerIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="bell" size={size} color={color} />
-          ),
-        }}
-      />
-    </Drawer.Navigator>
+    </RootStackNav.Navigator>
+  );
+}
+
+// Main App with Drawer
+function MainAppContent() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { logout } = useAuthStore();
+
+  // Use navigationRef for drawer navigation (since drawer is outside navigator)
+  const navigateTo = (screen: string) => {
+    if (navigationRef.current) {
+      navigationRef.current.navigate(screen as never);
+    }
+  };
+
+  const drawerItems = [
+    {
+      key: 'home',
+      label: 'Home',
+      icon: 'home' as const,
+      onPress: () => navigateTo('MainTabs'),
+    },
+    {
+      key: 'search',
+      label: 'Suche',
+      icon: 'magnify' as const,
+      onPress: () => navigateTo('Search'),
+    },
+    {
+      key: 'settings',
+      label: 'Einstellungen',
+      icon: 'cog' as const,
+      onPress: () => navigateTo('Settings'),
+    },
+    {
+      key: 'logout',
+      label: 'Abmelden',
+      icon: 'logout' as const,
+      onPress: () => logout(),
+    },
+  ];
+
+  return (
+    <DrawerContext.Provider
+      value={{
+        isOpen: drawerOpen,
+        openDrawer: () => setDrawerOpen(true),
+        closeDrawer: () => setDrawerOpen(false),
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <RootNavigatorWithFAB />
+        <CustomDrawer
+          isOpen={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          items={drawerItems}
+        />
+      </View>
+    </DrawerContext.Provider>
   );
 }
 
 export default function AppNavigation() {
   const { isAuthenticated, loadAuthData } = useAuthStore();
-  const { instances, activeInstance, loadInstances } = useInstanceStore();
+  const { instances, loadInstances } = useInstanceStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -225,9 +432,9 @@ export default function AppNavigation() {
   const showInstanceSelection = !hasInstances && !isAuthenticated;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {isAuthenticated ? (
-        <DrawerNavigator />
+        <MainAppContent />
       ) : (
         <Stack.Navigator>
           {showInstanceSelection ? (
@@ -289,8 +496,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  userButton: {
-    marginRight: 16,
+  burgerButton: {
+    marginLeft: 16,
     padding: 4,
   },
 });

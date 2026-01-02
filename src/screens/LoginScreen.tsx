@@ -4,8 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { TextInput, Button, Title, Paragraph, Card, IconButton, Chip, Checkbox } from 'react-native-paper';
+
+const AppLogo = require('../../assets/logo.png');
 import { useAuthStore } from '../store/authStore';
 import { useInstanceStore } from '../store/instanceStore';
 import { AuthService } from '../apis/authService';
@@ -89,6 +91,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       <View style={styles.content}>
         <Card style={styles.card}>
           <Card.Content>
+            <View style={styles.logoContainer}>
+              <Image source={AppLogo} style={styles.logo} resizeMode="contain" />
+            </View>
             <Title style={styles.title}>Pimcore Voyager</Title>
             <Paragraph style={styles.subtitle}>
               Sign in to access your Pimcore data
@@ -174,6 +179,14 @@ const styles = StyleSheet.create({
   },
   card: {
     elevation: 4,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logo: {
+    width: 80,
+    height: 80,
   },
   title: {
     textAlign: 'center',

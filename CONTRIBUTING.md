@@ -135,9 +135,3 @@ We welcome feature requests! Please:
 - Welcome newcomers
 - Focus on constructive feedback
 - Assume good intentions
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the MIT License.
-
-Thank you for contributing to Pimcore Voyager! 🚀

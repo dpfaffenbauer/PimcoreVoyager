@@ -136,7 +136,7 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
           <View style={[styles.metaRow, { paddingLeft: 40 + (depth > 0 ? 20 : 0) }]}>
             <Text style={styles.path}>{item.path}</Text>
             <Text style={styles.meta}>
-              ID: {item.id}
+              {item.key || item.id}
               {item.modificationDate && (
                 <> • {new Date(item.modificationDate * 1000).toLocaleDateString()}</>
               )}

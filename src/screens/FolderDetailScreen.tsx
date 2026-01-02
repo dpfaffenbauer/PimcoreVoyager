@@ -3,15 +3,23 @@
  * Shows classes and objects within a folder
  * Uses /class/folder/:id to get classes
  * Uses /data-object/grid/configuration/:id/:classId to get grid data
+ *
+ * Features responsive split layout:
+ * - Tablet (width > 768): Side-by-side view with classes left, objects right
+ * - Phone (width <= 768): Stacked view with dropdown class selection
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface, Menu, Button } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, useWindowDimensions, Modal, TouchableWithoutFeedback } from 'react-native';
+import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface, Menu, Button, Title } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PimcoreService } from '../apis/pimcoreService';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Breakpoint for split layout (tablet vs phone)
+const SPLIT_LAYOUT_BREAKPOINT = 768;
 
 type RootStackParamList = {
   Home: undefined;
@@ -27,13 +35,49 @@ export default function FolderDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<FolderDetailScreenRouteProp>();
   const { folder } = route.params;
+  const { width } = useWindowDimensions();
+
+  // Determine if we should use split layout (tablet mode)
+  const isSplitLayout = width > SPLIT_LAYOUT_BREAKPOINT;
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingGrid, setLoadingGrid] = useState(false);
   const [classes, setClasses] = useState<Array<{id: string, name: string}>>([]);
   const [gridData, setGridData] = useState<any>(null);
   const [selectedClass, setSelectedClass] = useState<{id: string, name: string} | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [propertiesMenuVisible, setPropertiesMenuVisible] = useState(false);
+
+  // Navigate to Properties screen
+  const handlePropertiesOpen = () => {
+    setPropertiesMenuVisible(false);
+    (navigation as any).navigate('Properties', {
+      elementType: 'data-object',
+      elementId: folder.id,
+      elementName: folder.key || folder.filename || 'Folder',
+    });
+  };
+
+  // Navigate to Notes screen
+  const handleNotesOpen = () => {
+    setPropertiesMenuVisible(false);
+    (navigation as any).navigate('Notes', {
+      elementType: 'data-object',
+      elementId: folder.id,
+      elementName: folder.key || folder.filename || 'Folder',
+    });
+  };
+
+  // Navigate to Dependencies screen
+  const handleDependenciesOpen = () => {
+    setPropertiesMenuVisible(false);
+    (navigation as any).navigate('Dependencies', {
+      elementType: 'data-object',
+      elementId: folder.id,
+      elementName: folder.key || folder.filename || 'Folder',
+    });
+  };
 
   useEffect(() => {
     loadFolderData();
@@ -117,6 +161,78 @@ export default function FolderDetailScreen() {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadFolderData();
+    if (selectedClass) {
+      await loadGridData(selectedClass);
+    }
+    setRefreshing(false);
+  };
+
+  // Render class list for split layout sidebar
+  const renderClassListSidebar = () => {
+    return (
+      <View style={styles.sidebarContainer}>
+        <View style={styles.sidebarHeader}>
+          <LinearGradient
+            colors={['#6200ee', '#9d4edd']}
+            style={styles.sidebarHeaderGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <IconButton icon="cube-outline" iconColor="#fff" size={24} />
+            <Text style={styles.sidebarHeaderText}>Klassen</Text>
+          </LinearGradient>
+        </View>
+        <ScrollView style={styles.sidebarScroll}>
+          {classes.length === 0 ? (
+            <View style={styles.sidebarEmpty}>
+              <Text style={styles.sidebarEmptyText}>Keine Klassen gefunden</Text>
+            </View>
+          ) : (
+            classes.map((classObj) => (
+              <TouchableOpacity
+                key={classObj.id}
+                onPress={() => loadGridData(classObj)}
+                style={[
+                  styles.sidebarItem,
+                  selectedClass?.id === classObj.id && styles.sidebarItemActive,
+                ]}
+              >
+                <LinearGradient
+                  colors={selectedClass?.id === classObj.id ? ['#6200ee', '#9d4edd'] : ['#e0e0e0', '#e0e0e0']}
+                  style={styles.sidebarItemIcon}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <IconButton
+                    icon="cube"
+                    iconColor={selectedClass?.id === classObj.id ? '#fff' : '#666'}
+                    size={18}
+                  />
+                </LinearGradient>
+                <Text
+                  style={[
+                    styles.sidebarItemText,
+                    selectedClass?.id === classObj.id && styles.sidebarItemTextActive,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {classObj.name}
+                </Text>
+                {selectedClass?.id === classObj.id && (
+                  <IconButton icon="chevron-right" size={20} iconColor="#6200ee" />
+                )}
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
+      </View>
+    );
+  };
+
+  // Render dropdown class selection for stacked layout (phones)
   const renderClassSelection = () => {
     if (classes.length === 0) {
       return (
@@ -154,9 +270,9 @@ export default function FolderDetailScreen() {
                     <Text style={styles.dropdownText}>
                       {selectedClass ? selectedClass.name : 'Wählen Sie eine Klasse aus'}
                     </Text>
-                    <IconButton 
-                      icon={menuVisible ? "chevron-up" : "chevron-down"} 
-                      size={24} 
+                    <IconButton
+                      icon={menuVisible ? "chevron-up" : "chevron-down"}
+                      size={24}
                     />
                   </View>
                 </Surface>
@@ -277,8 +393,8 @@ export default function FolderDetailScreen() {
                 <View style={styles.objectInfo}>
                   <Text style={styles.objectName}>{displayName}</Text>
                   <View style={styles.objectMeta}>
-                    <Chip icon="identifier" style={styles.metaChip} textStyle={styles.metaChipText}>
-                      ID: {itemId}
+                    <Chip icon="key-variant" style={styles.metaChip} textStyle={styles.metaChipText}>
+                      {displayName}
                     </Chip>
                     <View style={[styles.statusDot, isPublished(item) ? styles.publishedDot : styles.draftDot]} />
                   </View>
@@ -305,16 +421,143 @@ export default function FolderDetailScreen() {
     );
   };
 
+  // Render content area (grid data) for split layout
+  const renderContentArea = () => {
+    if (loadingGrid && (!gridData || gridData.items.length === 0)) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.loadingText}>Lade Objekte...</Text>
+        </View>
+      );
+    }
+
+    if (!selectedClass) {
+      return (
+        <View style={styles.contentPlaceholder}>
+          <IconButton icon="cube-outline" size={64} iconColor="#ccc" />
+          <Text style={styles.contentPlaceholderText}>
+            Wählen Sie eine Klasse aus der Liste
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView
+        style={styles.contentScroll}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {renderGridData()}
+      </ScrollView>
+    );
+  };
+
+  // Menu Modal
+  const renderPropertiesModal = () => (
+    <Modal
+      visible={propertiesMenuVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setPropertiesMenuVisible(false)}
+    >
+      <TouchableWithoutFeedback onPress={() => setPropertiesMenuVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback>
+            <View style={styles.menuModal}>
+              <View style={styles.modalHeader}>
+                <Title style={styles.modalTitle}>Menü</Title>
+                <TouchableOpacity
+                  onPress={() => setPropertiesMenuVisible(false)}
+                  style={styles.modalCloseButton}
+                >
+                  <MaterialCommunityIcons name="close" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.menuItems}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handlePropertiesOpen}
+                >
+                  <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                  <Text style={styles.menuItemText}>Properties</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleNotesOpen}
+                >
+                  <MaterialCommunityIcons name="note-multiple-outline" size={24} color="#6200ee" />
+                  <Text style={styles.menuItemText}>Notes</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleDependenciesOpen}
+                >
+                  <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
+                  <Text style={styles.menuItemText}>Dependencies</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+
+  // Split layout for tablets
+  if (isSplitLayout) {
+    return (
+      <View style={styles.container}>
+        <Appbar.Header>
+          <Appbar.BackAction onPress={() => navigation.goBack()} />
+          <Appbar.Content title={folder.key || folder.filename || 'Ordner'} />
+          <Appbar.Action icon="refresh" onPress={onRefresh} />
+          <Appbar.Action icon="dots-vertical" onPress={() => setPropertiesMenuVisible(true)} />
+        </Appbar.Header>
+
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" />
+            <Text style={styles.loadingText}>Lade Daten...</Text>
+          </View>
+        ) : (
+          <View style={styles.splitContainer}>
+            {renderClassListSidebar()}
+            <View style={styles.splitDivider} />
+            <View style={styles.contentContainer}>
+              {renderContentArea()}
+            </View>
+          </View>
+        )}
+        {renderPropertiesModal()}
+      </View>
+    );
+  }
+
+  // Stacked layout for phones
   return (
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={folder.key || folder.filename || 'Ordner'} />
         <Appbar.Action icon="refresh" onPress={loadFolderData} />
+        <Appbar.Action icon="dots-vertical" onPress={() => setPropertiesMenuVisible(true)} />
       </Appbar.Header>
 
-      <ScrollView style={styles.content}>
-
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" />
@@ -327,6 +570,7 @@ export default function FolderDetailScreen() {
           </>
         )}
       </ScrollView>
+      {renderPropertiesModal()}
     </View>
   );
 }
@@ -340,13 +584,103 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingContainer: {
+    flex: 1,
     padding: 48,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   loadingText: {
     marginTop: 16,
     color: '#666',
   },
+  // Split layout styles (tablet)
+  splitContainer: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  splitDivider: {
+    width: 1,
+    backgroundColor: '#e0e0e0',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  contentScroll: {
+    flex: 1,
+  },
+  contentPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  contentPlaceholderText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+  },
+  // Sidebar styles
+  sidebarContainer: {
+    width: 280,
+    backgroundColor: '#fff',
+  },
+  sidebarHeader: {
+    overflow: 'hidden',
+  },
+  sidebarHeaderGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    paddingLeft: 8,
+  },
+  sidebarHeaderText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginLeft: 4,
+  },
+  sidebarScroll: {
+    flex: 1,
+  },
+  sidebarEmpty: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  sidebarEmptyText: {
+    fontSize: 14,
+    color: '#999',
+  },
+  sidebarItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  sidebarItemActive: {
+    backgroundColor: '#f0e7ff',
+  },
+  sidebarItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sidebarItemText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#333',
+    marginLeft: 12,
+  },
+  sidebarItemTextActive: {
+    color: '#6200ee',
+    fontWeight: '600',
+  },
+  // Stacked layout styles (phone)
   card: {
     margin: 16,
     borderRadius: 16,
@@ -454,5 +788,63 @@ const styles = StyleSheet.create({
   loadMoreButton: {
     marginTop: 16,
     marginBottom: 8,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  menuModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#f8f9fa',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 0,
+  },
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuItems: {
+    paddingVertical: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1a1a1a',
+    marginLeft: 16,
   },
 });

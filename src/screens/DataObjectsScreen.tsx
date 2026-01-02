@@ -1,13 +1,13 @@
 /**
- * Home Screen - Tree View
+ * Data Objects Screen - Tree View
  * Shows hierarchical tree structure with lazy loading
  * Only loads first level initially, children load on expand
- * Matches Pimcore Studio tree design
+ * Long-press on non-folder items to publish/unpublish
  */
 
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable } from 'react-native';
-import { Text, ActivityIndicator, IconButton } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable, Modal, Alert } from 'react-native';
+import { Text, ActivityIndicator, IconButton, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -28,13 +28,20 @@ interface TreeNode extends PimcoreDataObject {
   children?: TreeNode[];
   childrenLoaded?: boolean;
   level: number;
+  permissions?: {
+    publish?: boolean;
+    unpublish?: boolean;
+  };
 }
 
-export default function HomeScreen() {
+export default function DataObjectsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<{ node: TreeNode; path: number[] } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const loadRootLevel = useCallback(async () => {
     try {
@@ -52,7 +59,7 @@ export default function HomeScreen() {
       // Create Home node with ID 1 as root
       const homeNode: TreeNode = {
         id: 1,
-        key: 'Home',
+        key: 'Datenobjekte',
         type: 'folder',
         path: '/',
         parentId: 0,
@@ -96,16 +103,16 @@ export default function HomeScreen() {
 
     const newTreeData = [...treeData];
     let current: any = newTreeData;
-    
+
     // Navigate to the node
     for (let i = 0; i < path.length; i++) {
       if (i === path.length - 1) {
         const targetNode = current[path[i]];
-        
+
         if (!targetNode.expanded) {
           // Expand: load children if not loaded
           targetNode.expanded = true;
-          
+
           if (!targetNode.childrenLoaded) {
             try {
               const children = await PimcoreService.getTreeLevel(targetNode.id);
@@ -130,7 +137,7 @@ export default function HomeScreen() {
         current = current[path[i]].children;
       }
     }
-    
+
     setTreeData(newTreeData);
   };
 
@@ -144,6 +151,60 @@ export default function HomeScreen() {
         object: node,
         classDefinition: { id: node.className, name: node.className },
       });
+    }
+  };
+
+  const handleLongPress = (node: TreeNode, path: number[]) => {
+    // Only show action modal for non-folder items
+    if (node.type === 'folder') return;
+    setSelectedNode({ node, path });
+    setActionModalVisible(true);
+  };
+
+  const updateNodeInTree = (path: number[], updates: Partial<TreeNode>) => {
+    const newTreeData = [...treeData];
+    let current: any = newTreeData;
+
+    for (let i = 0; i < path.length; i++) {
+      if (i === path.length - 1) {
+        current[path[i]] = { ...current[path[i]], ...updates };
+      } else {
+        current = current[path[i]].children;
+      }
+    }
+
+    setTreeData(newTreeData);
+  };
+
+  const handlePublishToggle = async () => {
+    if (!selectedNode) return;
+
+    const { node, path } = selectedNode;
+    const newPublishState = !node.published;
+
+    setActionLoading(true);
+    try {
+      await PimcoreService.setDataObjectPublishState(node.id, newPublishState);
+      updateNodeInTree(path, { published: newPublishState });
+      setActionModalVisible(false);
+      setSelectedNode(null);
+    } catch (error: any) {
+      console.error('Error toggling publish state:', error);
+      // Check for permission error
+      const errorMessage = error?.response?.data?.message || error?.message || '';
+      if (errorMessage.toLowerCase().includes('permission') || error?.response?.status === 403) {
+        Alert.alert(
+          'Keine Berechtigung',
+          `Sie haben keine Berechtigung, dieses Objekt zu ${newPublishState ? 'veröffentlichen' : 'zurückziehen'}.`
+        );
+      } else {
+        Alert.alert(
+          'Fehler',
+          `Objekt konnte nicht ${newPublishState ? 'veröffentlicht' : 'zurückgezogen'} werden.`
+        );
+      }
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -168,6 +229,8 @@ export default function HomeScreen() {
       <View key={`${node.id}-${path.join('-')}`}>
         <TouchableOpacity
           onPress={() => handleNodeClick(node)}
+          onLongPress={() => handleLongPress(node, path)}
+          delayLongPress={500}
           style={[
             styles.treeItem,
             { paddingLeft: 16 + node.level * 24 }, // Indentation based on level
@@ -264,6 +327,102 @@ export default function HomeScreen() {
           <View style={styles.treeContainer}>{renderTree(treeData)}</View>
         )}
       </ScrollView>
+
+      {/* Context Menu Modal */}
+      <Modal
+        visible={actionModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setActionModalVisible(false);
+          setSelectedNode(null);
+        }}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            setActionModalVisible(false);
+            setSelectedNode(null);
+          }}
+        >
+          <View style={styles.contextMenu}>
+            {selectedNode && (
+              <>
+                {/* Header */}
+                <View style={styles.contextMenuHeader}>
+                  <LinearGradient
+                    colors={getNodeGradient(selectedNode.node)}
+                    style={styles.contextMenuIcon}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <MaterialCommunityIcons
+                      name={getNodeIcon(selectedNode.node) as any}
+                      size={20}
+                      color="#fff"
+                    />
+                  </LinearGradient>
+                  <View style={styles.contextMenuHeaderText}>
+                    <Text style={styles.contextMenuTitle} numberOfLines={1}>
+                      {selectedNode.node.key || selectedNode.node.filename}
+                    </Text>
+                    <Text style={styles.contextMenuSubtitle}>
+                      {selectedNode.node.className || 'Objekt'}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.contextMenuDivider} />
+
+                {/* Menu Items */}
+                <TouchableOpacity
+                  style={styles.contextMenuItem}
+                  onPress={handlePublishToggle}
+                  disabled={actionLoading}
+                >
+                  <MaterialCommunityIcons
+                    name={selectedNode.node.published ? 'eye-off' : 'eye'}
+                    size={22}
+                    color={selectedNode.node.published ? '#f44336' : '#4caf50'}
+                  />
+                  <Text style={[
+                    styles.contextMenuItemText,
+                    { color: selectedNode.node.published ? '#f44336' : '#4caf50' }
+                  ]}>
+                    {selectedNode.node.published ? 'Unpublish' : 'Publish'}
+                  </Text>
+                  {actionLoading && (
+                    <ActivityIndicator size="small" style={styles.contextMenuItemLoader} />
+                  )}
+                </TouchableOpacity>
+
+                {/* Placeholder for future menu items */}
+                {/*
+                <TouchableOpacity style={styles.contextMenuItem}>
+                  <MaterialCommunityIcons name="pencil" size={22} color="#666" />
+                  <Text style={styles.contextMenuItemText}>Bearbeiten</Text>
+                </TouchableOpacity>
+                */}
+
+                <View style={styles.contextMenuDivider} />
+
+                <TouchableOpacity
+                  style={styles.contextMenuItem}
+                  onPress={() => {
+                    setActionModalVisible(false);
+                    setSelectedNode(null);
+                  }}
+                >
+                  <MaterialCommunityIcons name="close" size={22} color="#999" />
+                  <Text style={[styles.contextMenuItemText, { color: '#999' }]}>
+                    Abbrechen
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -341,5 +500,69 @@ const styles = StyleSheet.create({
   },
   draftDot: {
     backgroundColor: '#ff9800',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contextMenu: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: '85%',
+    maxWidth: 340,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  contextMenuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  contextMenuIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contextMenuHeaderText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  contextMenuTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  contextMenuSubtitle: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
+  },
+  contextMenuDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
+  },
+  contextMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  contextMenuItemText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 14,
+    flex: 1,
+  },
+  contextMenuItemLoader: {
+    marginLeft: 8,
   },
 });

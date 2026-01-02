@@ -12,7 +12,6 @@ import {
   Button,
   FAB,
   IconButton,
-  Chip,
   ActivityIndicator,
 } from 'react-native-paper';
 import { useInstanceStore } from '../store/instanceStore';
@@ -76,12 +75,13 @@ export default function InstanceSelectionScreen({ navigation }: InstanceSelectio
       >
         <Card.Content>
           <View style={styles.cardHeader}>
-            <View style={styles.titleContainer}>
+            <View style={styles.titleRow}>
               <Title style={styles.instanceName}>{item.name}</Title>
               {isActive && (
-                <Chip mode="flat" compact style={styles.activeChip}>
-                  Active
-                </Chip>
+                <View style={styles.activeBadge}>
+                  <View style={styles.activeDot} />
+                  <Paragraph style={styles.activeBadgeText}>Aktiv</Paragraph>
+                </View>
               )}
             </View>
             <View style={styles.actions}>
@@ -193,18 +193,36 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 8,
   },
-  titleContainer: {
+  titleRow: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   instanceName: {
     fontSize: 18,
     marginBottom: 0,
   },
-  activeChip: {
-    height: 24,
+  activeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e8f5e9',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    gap: 6,
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4caf50',
+  },
+  activeBadgeText: {
+    color: '#2e7d32',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 0,
   },
   actions: {
     flexDirection: 'row',
