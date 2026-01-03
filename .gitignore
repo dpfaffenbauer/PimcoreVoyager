@@ -9,7 +9,6 @@ build/
 web-build/
 
 # Dependencies
-package-lock.json
 yarn.lock
 
 # IDE
