@@ -1,0 +1,57 @@
+# Edit Data Object Flow
+# Tests viewing object details and entering edit mode
+
+appId: gmbh.cors.pimcore.voyager
+name: "Edit Data Object"
+tags:
+  - editing
+  - data-objects
+---
+
+# Run setup and login first
+- runFlow: flows/setup_and_login.yaml
+
+# Verify we're on the main screen
+- assertVisible:
+    text: ".*Datenobjekte.*|.*Data Objects.*|.*Objekte.*"
+
+# Wait for Car objects to be visible
+- extendedWaitUntil:
+    visible: ".*Car.*"
+    timeout: 10000
+
+# Tap on a Car object (use coordinates)
+- tapOn:
+    point: "50%,19%"
+
+# Wait for detail screen to load (look for car name or tabs)
+- extendedWaitUntil:
+    visible: ".*Car-.*|.*Basic Information.*|.*Relations.*"
+    timeout: 10000
+
+# Take screenshot of detail view
+- takeScreenshot: "object_detail_view"
+
+# Enter edit mode by tapping pencil icon
+- tapOn:
+    point: "85%,7%"
+
+# Wait for edit mode to be active (look for tabs or fields)
+- extendedWaitUntil:
+    visible: ".*Basic Information.*|.*NAME.*|.*SERIES.*"
+    timeout: 5000
+
+# Take screenshot in edit mode
+- takeScreenshot: "object_edit_mode"
+
+# Navigate back
+- tapOn:
+    point: "10%,7%"
+
+# Verify we returned to list
+- extendedWaitUntil:
+    visible: ".*Car.*|.*Datenobjekte.*"
+    timeout: 5000
+
+# Take final screenshot
+- takeScreenshot: "edit_complete"

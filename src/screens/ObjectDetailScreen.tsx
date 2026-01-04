@@ -5,7 +5,7 @@
  * Features sticky tab headers for quick navigation
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, Pressable, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Card, Title, Paragraph, Chip, Surface, ActivityIndicator, Text, TextInput, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -14,6 +14,8 @@ import { PimcoreService, WorkflowItem, WorkflowTransition, WorkflowGlobalAction,
 import { LayoutNodeRenderer } from '../components/FieldRenderer';
 import { WorkflowSection } from '../components/WorkflowSection';
 import { WorkflowActionData } from '../components/WorkflowActionDialog';
+import { EditProvider, useEditContext } from '../contexts/EditContext';
+import { EditModeToolbar } from '../components/EditModeToolbar';
 
 interface ObjectDetailScreenProps {
   route: any;
@@ -74,7 +76,8 @@ const extractTabs = (layout: any): TabItem[] => {
   return [];
 };
 
-export default function ObjectDetailScreen({ route, navigation }: ObjectDetailScreenProps) {
+// Inner component that uses EditContext
+function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps) {
   const { object: initialObject } = route.params;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,6 +92,21 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
   const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
   const [workflowActionLoading, setWorkflowActionLoading] = useState(false);
 
+  // Edit context
+  const {
+    isEditing,
+    startEditing,
+    stopEditing,
+    isDirty,
+    isSaving,
+    setSaving,
+    formData,
+    setFieldValue,
+    getFieldValue,
+    errors,
+    getModifiedData,
+  } = useEditContext();
+
   // State for workflow action form (within menu modal)
   const [pendingAction, setPendingAction] = useState<{
     type: 'transition' | 'global';
@@ -102,19 +120,39 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
     additionalFields: Record<string, any>;
   }>({ comment: '', additionalFields: {} });
 
-  // Set up header right button
+  // Use fetched data or fall back to initial object
+  const object = objectData || initialObject;
+
+  // Start editing - initialize form with current object data
+  const handleStartEditing = useCallback(() => {
+    if (objectData?.objectData) {
+      startEditing(objectData.objectData);
+    }
+  }, [objectData, startEditing]);
+
+  // Set up header right button with edit toggle
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={() => setMenuModalVisible(true)}
-          style={{ marginRight: 16, padding: 4 }}
-        >
-          <MaterialCommunityIcons name="dots-vertical" size={24} color="#333" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
+          {!isEditing && object?.type !== 'folder' && (
+            <TouchableOpacity
+              onPress={handleStartEditing}
+              style={{ padding: 8 }}
+            >
+              <MaterialCommunityIcons name="pencil" size={22} color="#6200ee" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={() => setMenuModalVisible(true)}
+            style={{ padding: 8 }}
+          >
+            <MaterialCommunityIcons name="dots-vertical" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, isEditing, object, handleStartEditing]);
 
   const loadData = async () => {
     try {
@@ -154,6 +192,35 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
+  };
+
+  // Save changes
+  const handleSave = async (task: 'save' | 'publish') => {
+    if (!isDirty) return;
+
+    setSaving(true);
+    setError(null);
+    try {
+      const modifiedData = getModifiedData();
+      console.log('Saving modified data:', modifiedData);
+
+      // Call API to save data
+      await PimcoreService.saveDataObject(initialObject.id, modifiedData, { task });
+
+      // Reload data after save
+      await loadData();
+      stopEditing();
+    } catch (err: any) {
+      console.error('Error saving:', err);
+      setError(err.message || 'Fehler beim Speichern');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Discard changes
+  const handleDiscard = () => {
+    stopEditing();
   };
 
   // Check if action requires dialog (has comment or additional fields)
@@ -347,9 +414,6 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
     return new Date(timestamp * 1000).toLocaleString('de-DE');
   };
 
-  // Use fetched data or fall back to initial object
-  const object = objectData || initialObject;
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -426,6 +490,15 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
         )}
       </View>
 
+      {/* Edit Mode Toolbar */}
+      {isEditing && (
+        <EditModeToolbar
+          onSave={handleSave}
+          onDiscard={handleDiscard}
+          canEdit={object?.type !== 'folder'}
+        />
+      )}
+
       {/* Scrollable Content */}
       <ScrollView
         style={styles.scrollView}
@@ -457,11 +530,14 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
                 // Render active tab content
                 <LayoutNodeRenderer
                   node={tabs[activeTab].node}
-                  objectData={objectData.objectData}
+                  objectData={isEditing ? formData : objectData.objectData}
                   level={0}
                   skipWrapper
                   fieldCollectionLayouts={fieldCollectionLayouts}
                   objectBrickLayouts={objectBrickLayouts}
+                  isEditing={isEditing}
+                  onFieldChange={setFieldValue}
+                  errors={errors}
                 />
               ) : (
                 // Render full layout if no tabs
@@ -474,10 +550,13 @@ export default function ObjectDetailScreen({ route, navigation }: ObjectDetailSc
                     <LayoutNodeRenderer
                       key={`${child.name}-${index}`}
                       node={child}
-                      objectData={objectData.objectData}
+                      objectData={isEditing ? formData : objectData.objectData}
                       level={0}
                       fieldCollectionLayouts={fieldCollectionLayouts}
                       objectBrickLayouts={objectBrickLayouts}
+                      isEditing={isEditing}
+                      onFieldChange={setFieldValue}
+                      errors={errors}
                     />
                   ))}
                 </>
@@ -1223,3 +1302,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+// Wrapper component that provides EditContext
+export default function ObjectDetailScreen(props: ObjectDetailScreenProps) {
+  return (
+    <EditProvider>
+      <ObjectDetailScreenInner {...props} />
+    </EditProvider>
+  );
+}

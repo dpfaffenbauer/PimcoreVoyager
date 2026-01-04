@@ -71,7 +71,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
       const classDefinitions = await PimcoreService.getClassDefinitions();
       setClasses(classDefinitions.map((c) => ({ id: c.id, name: c.name })));
     } catch (error) {
-      console.error('Error loading classes:', error);
+      // Error loading classes
     }
   };
 
@@ -123,7 +123,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
           break;
       }
     } catch (error) {
-      console.error('Search error:', error);
+      // Search error - show empty results
     } finally {
       setIsLoading(false);
     }
@@ -177,7 +177,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
       }
       setPage(nextPage);
     } catch (error) {
-      console.error('Load more error:', error);
+      // Load more error
     } finally {
       setIsLoading(false);
     }
@@ -284,10 +284,8 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
       });
     } else if (elementType === 'asset' || item.type === 'image' || item.type === 'video') {
       // TODO: Navigate to asset detail
-      console.log('Asset clicked:', item.id);
     } else if (elementType === 'document' || item.type === 'page') {
       // TODO: Navigate to document detail
-      console.log('Document clicked:', item.id);
     }
   };
 

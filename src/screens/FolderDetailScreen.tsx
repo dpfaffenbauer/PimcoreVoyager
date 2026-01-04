@@ -10,8 +10,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, useWindowDimensions, Modal, TouchableWithoutFeedback } from 'react-native';
-import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface, Menu, Button, Title } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, useWindowDimensions, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
+import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface, Button, Title, Divider } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PimcoreService } from '../apis/pimcoreService';
@@ -244,50 +244,97 @@ export default function FolderDetailScreen() {
       );
     }
 
-    // Show dropdown menu for class selection
+    // Show dropdown for class selection (uses Modal instead of Menu for better touch handling)
     if (classes.length > 1) {
       return (
         <View style={styles.classDropdownContainer}>
           <Text style={styles.dropdownLabel}>Klasse auswählen:</Text>
-          <Menu
-            visible={menuVisible}
-            onDismiss={() => setMenuVisible(false)}
-            anchor={
-              <TouchableOpacity
-                onPress={() => setMenuVisible(true)}
-                style={styles.dropdownButton}
-              >
-                <Surface style={styles.dropdownSurface} elevation={2}>
-                  <View style={styles.dropdownContent}>
-                    <LinearGradient
-                      colors={['#6200ee', '#9d4edd']}
-                      style={styles.dropdownIcon}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                    >
-                      <IconButton icon="cube-outline" iconColor="#fff" size={20} />
-                    </LinearGradient>
-                    <Text style={styles.dropdownText}>
-                      {selectedClass ? selectedClass.name : 'Wählen Sie eine Klasse aus'}
-                    </Text>
-                    <IconButton
-                      icon={menuVisible ? "chevron-up" : "chevron-down"}
-                      size={24}
-                    />
-                  </View>
-                </Surface>
-              </TouchableOpacity>
-            }
+          <Pressable
+            onPress={() => setMenuVisible(true)}
+            style={styles.dropdownButton}
           >
-            {classes.map((classObj) => (
-              <Menu.Item
-                key={classObj.id}
-                onPress={() => loadGridData(classObj)}
-                title={classObj.name}
-                leadingIcon="cube-outline"
-              />
-            ))}
-          </Menu>
+            <Surface style={styles.dropdownSurface} elevation={2}>
+              <View style={styles.dropdownContent}>
+                <LinearGradient
+                  colors={['#6200ee', '#9d4edd']}
+                  style={styles.dropdownIcon}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <IconButton icon="cube-outline" iconColor="#fff" size={20} />
+                </LinearGradient>
+                <Text style={styles.dropdownText}>
+                  {selectedClass ? selectedClass.name : 'Wählen Sie eine Klasse aus'}
+                </Text>
+                <MaterialCommunityIcons
+                  name={menuVisible ? "chevron-up" : "chevron-down"}
+                  size={24}
+                  color="#666"
+                />
+              </View>
+            </Surface>
+          </Pressable>
+
+          {/* Class Selection Modal */}
+          <Modal
+            visible={menuVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setMenuVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.classSelectionModal}>
+                    <View style={styles.classModalHeader}>
+                      <Text style={styles.classModalTitle}>Klasse auswählen</Text>
+                      <Button onPress={() => setMenuVisible(false)}>Schließen</Button>
+                    </View>
+                    <Divider />
+                    <ScrollView style={styles.classModalList}>
+                      {classes.map((classObj) => (
+                        <Pressable
+                          key={classObj.id}
+                          onPress={() => {
+                            loadGridData(classObj);
+                            setMenuVisible(false);
+                          }}
+                          style={[
+                            styles.classModalItem,
+                            selectedClass?.id === classObj.id && styles.classModalItemSelected,
+                          ]}
+                        >
+                          <LinearGradient
+                            colors={selectedClass?.id === classObj.id ? ['#6200ee', '#9d4edd'] : ['#e0e0e0', '#e0e0e0']}
+                            style={styles.classModalItemIcon}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                          >
+                            <MaterialCommunityIcons
+                              name="cube"
+                              size={18}
+                              color={selectedClass?.id === classObj.id ? '#fff' : '#666'}
+                            />
+                          </LinearGradient>
+                          <Text
+                            style={[
+                              styles.classModalItemText,
+                              selectedClass?.id === classObj.id && styles.classModalItemTextSelected,
+                            ]}
+                          >
+                            {classObj.name}
+                          </Text>
+                          {selectedClass?.id === classObj.id && (
+                            <MaterialCommunityIcons name="check" size={20} color="#6200ee" />
+                          )}
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
         </View>
       );
     }
@@ -846,5 +893,59 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1a1a1a',
     marginLeft: 16,
+  },
+  // Class Selection Modal styles
+  classSelectionModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '70%',
+    overflow: 'hidden',
+  },
+  classModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingLeft: 20,
+    paddingRight: 8,
+    paddingVertical: 8,
+  },
+  classModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  classModalList: {
+    maxHeight: 400,
+  },
+  classModalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  classModalItemSelected: {
+    backgroundColor: '#f0e7ff',
+  },
+  classModalItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  classModalItemText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginLeft: 12,
+  },
+  classModalItemTextSelected: {
+    color: '#6200ee',
+    fontWeight: '600',
   },
 });

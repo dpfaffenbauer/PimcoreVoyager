@@ -112,21 +112,18 @@ export class SearchService {
         },
       });
 
-      console.log('Quick search response:', response.data);
-
       return {
         items: response.data.items || [],
         totalItems: response.data.totalItems || 0,
       };
     } catch (error) {
-      console.error('Error in quick search:', error);
       return { items: [], totalItems: 0 };
     }
   }
 
   /**
    * Search data objects
-   * POST /pimcore-studio/api/search/data-objects
+   * POST /pimcore-studio/api/search/data-objects?classId=XX
    */
   static async searchDataObjects(
     searchTerm: string,
@@ -137,26 +134,30 @@ export class SearchService {
     try {
       const apiClient = getApiClient();
 
+      const columnFilters: any[] = [];
+
+      // Add fulltext search filter
+      if (searchTerm && searchTerm.trim() && searchTerm !== '*') {
+        columnFilters.push({ type: 'system.fulltext', filterValue: searchTerm, locale: null });
+      }
+
+      // Add type filter to only get objects (not folders)
+      columnFilters.push({ key: 'type', filterValue: 'object', type: 'system.string' });
+
       const filters: any = {
         includeDescendants: true,
         page,
         pageSize,
-        columnFilters: [
-          { type: 'system.fulltext', filterValue: searchTerm, locale: null },
-        ],
+        columnFilters,
       };
 
-      // Add class filter if specified
-      if (classId) {
-        filters.classId = classId;
-      }
+      // classId is passed as query parameter, not in body
+      const url = classId ? `/search/data-objects?classId=${encodeURIComponent(classId)}` : '/search/data-objects';
 
-      const response = await apiClient.post('/search/data-objects', {
+      const response = await apiClient.post(url, {
         columns: DATA_OBJECT_COLUMNS,
         filters,
       });
-
-      console.log('Data objects search response:', response.data);
 
       // Transform response - columns are in a nested array
       const items = (response.data.items || []).map((item: any) => {
@@ -176,8 +177,8 @@ export class SearchService {
         totalItems: response.data.totalItems || 0,
       };
     } catch (error) {
-      console.error('Error searching data objects:', error);
-      return { items: [], totalItems: 0 };
+      // Re-throw error so caller can handle it (e.g., retry without class filter)
+      throw error;
     }
   }
 
@@ -194,19 +195,24 @@ export class SearchService {
     try {
       const apiClient = getApiClient();
 
+      const columnFilters: any[] = [];
+
+      // Add fulltext search if provided
+      if (searchTerm && searchTerm.trim()) {
+        columnFilters.push({ type: 'system.fulltext', filterValue: searchTerm, locale: null });
+      }
+
+      // Add type filter if specified
+      if (assetType) {
+        columnFilters.push({ key: 'type', filterValue: assetType, type: 'system.string' });
+      }
+
       const filters: any = {
         includeDescendants: true,
         page,
         pageSize,
-        columnFilters: [
-          { type: 'system.fulltext', filterValue: searchTerm, locale: null },
-        ],
+        columnFilters,
       };
-
-      // Add type filter if specified
-      if (assetType) {
-        filters.type = assetType;
-      }
 
       const response = await apiClient.post('/search/assets', {
         folderId: 1,
@@ -214,17 +220,22 @@ export class SearchService {
         filters,
       });
 
-      console.log('Assets search response:', response.data);
-
-      // Transform response - columns are in a nested array
+      // Transform response - columns are returned with key/value structure
       const items = (response.data.items || []).map((item: any) => {
-        const columnData = extractColumnsToObject(item.columns, ASSET_COLUMNS);
+        // Extract column values by key
+        const columnMap: Record<string, any> = {};
+        if (item.columns && Array.isArray(item.columns)) {
+          item.columns.forEach((col: any) => {
+            columnMap[col.key] = col.value;
+          });
+        }
+
         return {
           id: item.id,
-          type: columnData.type || 'asset',
-          fullpath: columnData.fullpath,
-          filename: columnData.filename,
-          preview: columnData.preview,
+          type: columnMap.type || 'asset',
+          fullpath: columnMap.fullpath,
+          filename: columnMap.filename,
+          preview: columnMap.preview, // Contains { thumbnail, icon }
         };
       });
 
@@ -233,7 +244,145 @@ export class SearchService {
         totalItems: response.data.totalItems || 0,
       };
     } catch (error) {
-      console.error('Error searching assets:', error);
+      return { items: [], totalItems: 0 };
+    }
+  }
+
+  /**
+   * Browse assets in folder (for picker)
+   * POST /pimcore-studio/api/search/assets
+   */
+  static async browseAssets(
+    folderId: number = 1,
+    page: number = 1,
+    pageSize: number = 20,
+    assetTypes?: string[]
+  ): Promise<{ items: any[]; totalItems: number }> {
+    try {
+      const apiClient = getApiClient();
+
+      const columnFilters: any[] = [];
+
+      // Add type filter if specified (for filtering to images/videos)
+      if (assetTypes && assetTypes.length > 0) {
+        // For single type, use simple filter
+        if (assetTypes.length === 1) {
+          columnFilters.push({ key: 'type', filterValue: assetTypes[0], type: 'system.string' });
+        }
+        // For multiple types, we need to filter client-side or use OR logic
+      }
+
+      const filters: any = {
+        includeDescendants: true,
+        page,
+        pageSize,
+        columnFilters,
+      };
+
+      const response = await apiClient.post('/search/assets', {
+        folderId,
+        columns: ASSET_COLUMNS,
+        filters,
+      });
+
+      // Transform response
+      const items = (response.data.items || []).map((item: any) => {
+        const columnMap: Record<string, any> = {};
+        if (item.columns && Array.isArray(item.columns)) {
+          item.columns.forEach((col: any) => {
+            columnMap[col.key] = col.value;
+          });
+        }
+
+        return {
+          id: item.id,
+          type: columnMap.type || 'asset',
+          fullpath: columnMap.fullpath,
+          filename: columnMap.filename,
+          preview: columnMap.preview,
+        };
+      });
+
+      // Client-side filter for multiple types
+      let filteredItems = items;
+      if (assetTypes && assetTypes.length > 1) {
+        filteredItems = items.filter((item: any) =>
+          item.type === 'folder' || assetTypes.includes(item.type)
+        );
+      }
+
+      return {
+        items: filteredItems,
+        totalItems: response.data.totalItems || 0,
+      };
+    } catch (error) {
+      return { items: [], totalItems: 0 };
+    }
+  }
+
+  /**
+   * Browse data objects (for picker)
+   * POST /pimcore-studio/api/search/data-objects
+   */
+  static async browseDataObjects(
+    folderId: number = 1,
+    page: number = 1,
+    pageSize: number = 20,
+    classIds?: string[]
+  ): Promise<{ items: any[]; totalItems: number }> {
+    try {
+      const apiClient = getApiClient();
+
+      const columnFilters: any[] = [];
+
+      // Note: class filtering might need to be done differently
+      // For now we'll filter client-side if needed
+
+      const filters: any = {
+        includeDescendants: true,
+        page,
+        pageSize,
+        columnFilters,
+      };
+
+      const response = await apiClient.post('/search/data-objects', {
+        folderId,
+        columns: DATA_OBJECT_COLUMNS,
+        filters,
+      });
+
+      // Transform response
+      const items = (response.data.items || []).map((item: any) => {
+        const columnMap: Record<string, any> = {};
+        if (item.columns && Array.isArray(item.columns)) {
+          item.columns.forEach((col: any) => {
+            columnMap[col.key] = col.value;
+          });
+        }
+
+        return {
+          id: item.id,
+          type: columnMap.type || 'object',
+          fullpath: columnMap.fullpath,
+          key: columnMap.key,
+          classname: columnMap.classname,
+          published: columnMap.published,
+        };
+      });
+
+      // Client-side filter by class if specified
+      let filteredItems = items;
+      if (classIds && classIds.length > 0) {
+        filteredItems = items.filter((item: any) =>
+          item.type === 'folder' || classIds.includes(item.classname)
+        );
+      }
+
+      return {
+        items: filteredItems,
+        totalItems: response.data.totalItems || 0,
+      };
+    } catch (error) {
       return { items: [], totalItems: 0 };
     }
   }
@@ -271,8 +420,6 @@ export class SearchService {
         filters,
       });
 
-      console.log('Documents search response:', response.data);
-
       // Transform response - columns are in a nested array
       const items = (response.data.items || []).map((item: any) => {
         const columnData = extractColumnsToObject(item.columns, DOCUMENT_COLUMNS);
@@ -292,7 +439,6 @@ export class SearchService {
         totalItems: response.data.totalItems || 0,
       };
     } catch (error) {
-      console.error('Error searching documents:', error);
       return { items: [], totalItems: 0 };
     }
   }

@@ -128,6 +128,7 @@ export default function InstanceSelectionScreen({ navigation }: InstanceSelectio
             onPress={handleAddInstance}
             style={styles.addButton}
             icon="plus"
+            testID="add-instance-button"
           >
             Add Instance
           </Button>
@@ -147,6 +148,7 @@ export default function InstanceSelectionScreen({ navigation }: InstanceSelectio
           style={styles.fab}
           onPress={handleAddInstance}
           label="Add Instance"
+          testID="add-instance-fab"
         />
       )}
     </View>

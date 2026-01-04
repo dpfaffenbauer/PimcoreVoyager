@@ -1,0 +1,43 @@
+# Assets Navigation Flow
+# Tests navigation to assets tab
+
+appId: gmbh.cors.pimcore.voyager
+name: "Browse Assets"
+tags:
+  - navigation
+  - assets
+---
+
+# Run setup and login first
+- runFlow: flows/setup_and_login.yaml
+
+# Verify we're on the main screen
+- assertVisible:
+    text: ".*Datenobjekte.*|.*Data Objects.*|.*Objekte.*"
+
+# Take initial screenshot
+- takeScreenshot: "main_screen_before_assets"
+
+# Navigate to Assets tab (in bottom navigation)
+- tapOn:
+    text: "Assets"
+
+# Wait for assets screen to load
+- extendedWaitUntil:
+    visible: ".*Assets.*|.*Images.*|.*Documents.*"
+    timeout: 10000
+
+# Take screenshot of assets view
+- takeScreenshot: "assets_screen"
+
+# Navigate back to Data Objects
+- tapOn:
+    text: ".*Objekte.*|.*Objects.*"
+
+# Verify we're back on data objects
+- extendedWaitUntil:
+    visible: ".*Datenobjekte.*|.*Data Objects.*|.*Car.*"
+    timeout: 5000
+
+# Take final screenshot
+- takeScreenshot: "assets_navigation_complete"

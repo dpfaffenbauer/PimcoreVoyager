@@ -122,6 +122,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               autoCapitalize="none"
               style={styles.input}
               mode="outlined"
+              testID="username-input"
+              accessibilityLabel="username-input"
             />
 
             <TextInput
@@ -131,6 +133,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               secureTextEntry
               style={styles.input}
               mode="outlined"
+              testID="password-input"
+              accessibilityLabel="password-input"
             />
 
             <View style={styles.checkboxRow}>
@@ -153,6 +157,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               loading={loading}
               disabled={loading}
               style={styles.button}
+              testID="login-button"
+              accessibilityLabel="login-button"
             >
               Sign In
             </Button>

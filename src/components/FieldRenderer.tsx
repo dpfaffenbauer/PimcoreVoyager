@@ -1,15 +1,13 @@
 /**
  * Field Renderer Component
  * Renders Pimcore data object fields based on their fieldtype
- * Supports tabs, HTML rendering for WYSIWYG, and localized fields
+ * All field components support both view and edit modes
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Image, ScrollView, useWindowDimensions, Pressable } from 'react-native';
-import { Text, Chip } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import RenderHtml from 'react-native-render-html';
-import { useInstanceStore } from '../store/instanceStore';
+import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Text } from 'react-native-paper';
+import { fieldRenderers, FieldWrapper } from './fields';
 
 interface FieldDefinition {
   name: string;
@@ -31,6 +29,10 @@ interface FieldRendererProps {
   level?: number;
   fieldCollectionLayouts?: any;
   objectBrickLayouts?: any;
+  // Edit mode props
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
 }
 
 interface TabItem {
@@ -39,460 +41,35 @@ interface TabItem {
   node: FieldDefinition;
 }
 
-// Format a Unix timestamp to a readable date
-const formatDateTime = (timestamp: number): string => {
-  if (!timestamp) return '-';
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-// Simple field wrapper with label
-const FieldWrapper: React.FC<{
-  label: string;
-  mandatory?: boolean;
-  children: React.ReactNode;
-}> = ({ label, mandatory, children }) => (
-  <View style={styles.fieldWrapper}>
-    <View style={styles.fieldLabelRow}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      {mandatory && <Text style={styles.mandatoryIndicator}>*</Text>}
-    </View>
-    {children}
-  </View>
-);
-
-// Input field (text)
-const InputField: React.FC<{ value: string; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <Text style={styles.textValue}>{value || '-'}</Text>
-  </FieldWrapper>
-);
-
-// Textarea field
-const TextareaField: React.FC<{ value: string; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <Text style={styles.textareaValue}>{value || '-'}</Text>
-  </FieldWrapper>
-);
-
-// WYSIWYG field (rich text with HTML rendering)
-const WysiwygField: React.FC<{ value: string; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => {
-  const { width } = useWindowDimensions();
-  const contentWidth = width - 64; // Account for padding
-
-  if (!value) {
-    return (
-      <FieldWrapper label={title} mandatory={mandatory}>
-        <Text style={styles.textValue}>-</Text>
-      </FieldWrapper>
-    );
-  }
-
-  return (
-    <FieldWrapper label={title} mandatory={mandatory}>
-      <RenderHtml
-        contentWidth={contentWidth}
-        source={{ html: value }}
-        baseStyle={styles.htmlContent}
-        tagsStyles={{
-          p: { marginVertical: 8, lineHeight: 22 },
-          h1: { fontSize: 24, fontWeight: '700', marginVertical: 12, color: '#333' },
-          h2: { fontSize: 20, fontWeight: '600', marginVertical: 10, color: '#333' },
-          h3: { fontSize: 18, fontWeight: '600', marginVertical: 8, color: '#333' },
-          ul: { marginVertical: 8 },
-          ol: { marginVertical: 8 },
-          li: { marginVertical: 4 },
-          a: { color: '#2196f3' },
-          strong: { fontWeight: '600' },
-          em: { fontStyle: 'italic' },
-        }}
-      />
-    </FieldWrapper>
-  );
-};
-
-// Datetime field
-const DatetimeField: React.FC<{ value: number; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <View style={styles.dateValue}>
-      <MaterialCommunityIcons name="calendar" size={18} color="#666" style={styles.dateIcon} />
-      <Text style={styles.textValue}>{formatDateTime(value)}</Text>
-    </View>
-  </FieldWrapper>
-);
-
-// Date field (without time)
-const DateField: React.FC<{ value: number; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => {
-  const formatDate = (timestamp: number): string => {
-    if (!timestamp) return '-';
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString('de-DE');
-  };
-
-  return (
-    <FieldWrapper label={title} mandatory={mandatory}>
-      <View style={styles.dateValue}>
-        <MaterialCommunityIcons name="calendar" size={18} color="#666" style={styles.dateIcon} />
-        <Text style={styles.textValue}>{formatDate(value)}</Text>
-      </View>
-    </FieldWrapper>
-  );
-};
-
-// Checkbox/Boolean field
-const CheckboxField: React.FC<{ value: boolean; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <View style={styles.checkboxValue}>
-      <MaterialCommunityIcons
-        name={value ? 'checkbox-marked' : 'checkbox-blank-outline'}
-        size={24}
-        color={value ? '#4caf50' : '#999'}
-      />
-      <Text style={[styles.textValue, { marginLeft: 8 }]}>{value ? 'Ja' : 'Nein'}</Text>
-    </View>
-  </FieldWrapper>
-);
-
-// Numeric field
-const NumericField: React.FC<{ value: number; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <Text style={styles.textValue}>{value !== null && value !== undefined ? value.toString() : '-'}</Text>
-  </FieldWrapper>
-);
-
-// Select field
-const SelectField: React.FC<{ value: string; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <Chip style={styles.selectChip}>{value || '-'}</Chip>
-  </FieldWrapper>
-);
-
-// Multiselect field
-const MultiselectField: React.FC<{ value: string[]; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => (
-  <FieldWrapper label={title} mandatory={mandatory}>
-    <View style={styles.multiselectContainer}>
-      {Array.isArray(value) && value.length > 0 ? (
-        value.map((item, index) => (
-          <Chip key={index} style={styles.selectChip}>
-            {item}
-          </Chip>
-        ))
-      ) : (
-        <Text style={styles.textValue}>-</Text>
-      )}
-    </View>
-  </FieldWrapper>
-);
-
-// Image field
-const ImageField: React.FC<{ value: any; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => {
-  const { activeInstance } = useInstanceStore();
-
-  // Debug: log the value structure
-  console.log('ImageField value:', JSON.stringify(value, null, 2));
-
-  if (!value || (!value.id && !value.fullPath && !value.path)) {
-    return (
-      <FieldWrapper label={title} mandatory={mandatory}>
-        <Text style={styles.textValue}>-</Text>
-      </FieldWrapper>
-    );
-  }
-
-  const baseUrl = activeInstance?.url?.replace('/pimcore-studio/api', '') || '';
-
-  // Try different possible path structures
-  const path = value.fullPath || value.path || value.fullpath || value.src || value.filename;
-  const imageId = value.id;
-
-  // If we have an ID but no path, try to construct the thumbnail URL
-  let imageUrl = null;
-  if (path) {
-    imageUrl = `${baseUrl}${decodeURIComponent(path)}`;
-  } else if (imageId) {
-    // Fallback: use Pimcore's thumbnail endpoint
-    imageUrl = `${baseUrl}/pimcore-studio/api/assets/${imageId}/image/stream/preview`;
-  }
-
-  return (
-    <FieldWrapper label={title} mandatory={mandatory}>
-      {imageUrl ? (
-        <View>
-          <Image source={{ uri: imageUrl }} style={styles.imagePreview} resizeMode="cover" />
-          {imageId && <Text style={styles.imageIdLabel}>ID: {imageId}</Text>}
-        </View>
-      ) : (
-        <Text style={styles.textValue}>Bild ID: {imageId}</Text>
-      )}
-    </FieldWrapper>
-  );
-};
-
-// Image Gallery field
-const ImageGalleryField: React.FC<{ value: any[]; title: string; mandatory?: boolean }> = ({
-  value,
-  title,
-  mandatory,
-}) => {
-  const { activeInstance } = useInstanceStore();
-
-  if (!Array.isArray(value) || value.length === 0) {
-    return (
-      <FieldWrapper label={title} mandatory={mandatory}>
-        <Text style={styles.textValue}>-</Text>
-      </FieldWrapper>
-    );
-  }
-
-  const baseUrl = activeInstance?.url?.replace('/pimcore-studio/api', '') || '';
-
-  return (
-    <FieldWrapper label={title} mandatory={mandatory}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll}>
-        {value.map((item, index) => {
-          const image = item.image;
-          if (!image || !image.fullPath) return null;
-          const imageUrl = `${baseUrl}${decodeURIComponent(image.fullPath)}`;
-          return (
-            <Image
-              key={index}
-              source={{ uri: imageUrl }}
-              style={styles.galleryImage}
-              resizeMode="cover"
-            />
-          );
-        })}
-      </ScrollView>
-    </FieldWrapper>
-  );
-};
-
-// Object Brick Fallback Renderer - renders brick data using same style as regular fields
-const ObjectBrickFallbackRenderer: React.FC<{ data: any }> = ({ data }) => {
-  if (!data || typeof data !== 'object') return null;
-
-  return (
-    <View>
-      {Object.entries(data).map(([fieldKey, fieldValue]: [string, any]) => {
-        if (fieldValue === null || fieldValue === undefined) return null;
-
-        // Handle quantityValue fields (value + unitId)
-        if (typeof fieldValue === 'object' && 'value' in fieldValue && 'unitId' in fieldValue) {
-          const displayValue = `${fieldValue.value}${fieldValue.unitId ? ` ${fieldValue.unitId}` : ''}`;
-          return (
-            <FieldWrapper key={fieldKey} label={fieldKey}>
-              <Text style={styles.textValue}>{displayValue}</Text>
-            </FieldWrapper>
-          );
-        }
-
-        // Handle simple values
-        if (typeof fieldValue !== 'object') {
-          return (
-            <FieldWrapper key={fieldKey} label={fieldKey}>
-              <Text style={styles.textValue}>{String(fieldValue)}</Text>
-            </FieldWrapper>
-          );
-        }
-
-        // Handle other objects
-        return (
-          <FieldWrapper key={fieldKey} label={fieldKey}>
-            <Text style={styles.textValue}>{JSON.stringify(fieldValue)}</Text>
-          </FieldWrapper>
-        );
-      })}
-    </View>
-  );
-};
-
-// Check if a path is an image
-const isImagePath = (path: string): boolean => {
-  if (!path) return false;
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
-  const lowerPath = path.toLowerCase();
-  return imageExtensions.some(ext => lowerPath.endsWith(ext));
-};
-
-// Get image URL for an asset (with fallback to thumbnail API)
-const getAssetImageUrl = (baseUrl: string, id: number | undefined, path: string | undefined): string | null => {
-  if (path) {
-    return `${baseUrl}${decodeURIComponent(path)}`;
-  } else if (id) {
-    // Fallback: use Pimcore's thumbnail endpoint
-    return `${baseUrl}/pimcore-studio/api/assets/${id}/image/stream/preview`;
-  }
-  return null;
-};
-
-// Relation field - shows list of related objects with ID and path
-const RelationField: React.FC<{
-  value: any[];
-  title: string;
-  mandatory?: boolean;
-  single?: boolean;
-}> = ({ value, title, mandatory, single }) => {
-  const { activeInstance } = useInstanceStore();
-  const baseUrl = activeInstance?.url?.replace('/pimcore-studio/api', '') || '';
-
-  // Debug: log the value structure
-  console.log('RelationField value:', JSON.stringify(value, null, 2));
-
-  if (!value || value.length === 0) {
-    return (
-      <FieldWrapper label={title} mandatory={mandatory}>
-        <Text style={styles.textValue}>-</Text>
-      </FieldWrapper>
-    );
-  }
-
-  // Check if all items are assets (potential images)
-  const allAssets = value.every(item => {
-    const type = item?.type || item?.element?.type;
-    return type === 'asset';
-  });
-
-  // Render as image gallery if all are assets
-  if (allAssets) {
-    return (
-      <FieldWrapper label={title} mandatory={mandatory}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.relationImageGallery}>
-          {value.map((item, index) => {
-            const path = item?.fullPath || item?.path || item?.element?.fullPath || item?.element?.path;
-            const id = item?.id || item?.element?.id;
-            const imageUrl = getAssetImageUrl(baseUrl, id, path);
-            if (!imageUrl) return null;
-            return (
-              <View key={`${id}-${index}`} style={styles.relationImageContainer}>
-                <Image
-                  source={{ uri: imageUrl }}
-                  style={styles.relationImage}
-                  resizeMode="cover"
-                />
-                <Text style={styles.relationImageId}>ID: {id}</Text>
-              </View>
-            );
-          })}
-        </ScrollView>
-        {!single && value.length > 0 && (
-          <Text style={styles.relationCount}>{value.length} Bild{value.length !== 1 ? 'er' : ''}</Text>
-        )}
-      </FieldWrapper>
-    );
-  }
-
-  // Regular relation list
-  return (
-    <FieldWrapper label={title} mandatory={mandatory}>
-      <View style={styles.relationList}>
-        {value.map((item, index) => {
-          const id = item?.id || item?.element?.id;
-          const path = item?.fullPath || item?.path || item?.element?.fullPath || item?.element?.path;
-          const type = item?.type || item?.element?.type || 'object';
-
-          if (!id) return null;
-
-          // Show inline image preview for asset types
-          if (type === 'asset') {
-            const imageUrl = getAssetImageUrl(baseUrl, id, path);
-            if (imageUrl) {
-              return (
-                <View key={`${id}-${index}`} style={styles.relationItemWithImage}>
-                  <Image
-                    source={{ uri: imageUrl }}
-                    style={styles.relationInlineImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.relationInfo}>
-                    <Text style={styles.relationId}>ID: {id}</Text>
-                    {path && <Text style={styles.relationPath} numberOfLines={1}>{path}</Text>}
-                  </View>
-                </View>
-              );
-            }
-          }
-
-          return (
-            <View key={`${id}-${index}`} style={styles.relationItem}>
-              <View style={styles.relationIcon}>
-                <MaterialCommunityIcons
-                  name={type === 'asset' ? 'image' : type === 'document' ? 'file-document' : 'cube'}
-                  size={16}
-                  color="#6200ee"
-                />
-              </View>
-              <View style={styles.relationInfo}>
-                <Text style={styles.relationId}>ID: {id}</Text>
-                {path && <Text style={styles.relationPath} numberOfLines={1}>{path}</Text>}
-              </View>
-            </View>
-          );
-        })}
-      </View>
-      {!single && value.length > 0 && (
-        <Text style={styles.relationCount}>{value.length} Verknüpfung{value.length !== 1 ? 'en' : ''}</Text>
-      )}
-    </FieldWrapper>
-  );
-};
-
 // Localized fields container with language tabs
 const LocalizedFieldsRenderer: React.FC<{
   field: FieldDefinition;
   value: any;
-}> = ({ field, value }) => {
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
+}> = ({ field, value, isEditing, onFieldChange, errors }) => {
   const languages = field.permissionView || ['default'];
   const [selectedLang, setSelectedLang] = useState(languages[0] || 'default');
 
   if (!value || typeof value !== 'object') {
     return null;
   }
+
+  // Handle localized field changes - updates the parent localizedfields object
+  const handleLocalizedFieldChange = (childFieldName: string, newValue: any) => {
+    // Build the updated localizedfields object
+    const updatedLocalizedFields = {
+      ...value,
+      [childFieldName]: {
+        ...(value?.[childFieldName] || {}),
+        [selectedLang]: newValue,
+      },
+    };
+    // Call onFieldChange with the parent field name (usually 'localizedfields')
+    // This ensures the data is stored correctly for the API
+    onFieldChange?.(field.name, updatedLocalizedFields);
+  };
 
   return (
     <View style={styles.localizedContainer}>
@@ -521,6 +98,9 @@ const LocalizedFieldsRenderer: React.FC<{
             key={childField.name}
             field={childField}
             value={localizedValue}
+            isEditing={isEditing}
+            onFieldChange={(name, newValue) => handleLocalizedFieldChange(name, newValue)}
+            errors={errors}
           />
         );
       })}
@@ -535,6 +115,9 @@ interface TabPanelProps {
   onTabChange?: (index: number) => void;
   fieldCollectionLayouts?: any;
   objectBrickLayouts?: any;
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
 }
 
 export const TabPanel: React.FC<TabPanelProps> = ({
@@ -543,6 +126,9 @@ export const TabPanel: React.FC<TabPanelProps> = ({
   onTabChange,
   fieldCollectionLayouts = {},
   objectBrickLayouts = {},
+  isEditing = false,
+  onFieldChange,
+  errors = {},
 }) => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -581,6 +167,9 @@ export const TabPanel: React.FC<TabPanelProps> = ({
           skipWrapper
           fieldCollectionLayouts={fieldCollectionLayouts}
           objectBrickLayouts={objectBrickLayouts}
+          isEditing={isEditing}
+          onFieldChange={onFieldChange}
+          errors={errors}
         />
       </View>
     </View>
@@ -594,7 +183,10 @@ const PanelRenderer: React.FC<{
   level: number;
   fieldCollectionLayouts?: any;
   objectBrickLayouts?: any;
-}> = ({ field, objectData, level, fieldCollectionLayouts = {}, objectBrickLayouts = {} }) => {
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
+}> = ({ field, objectData, level, fieldCollectionLayouts = {}, objectBrickLayouts = {}, isEditing = false, onFieldChange, errors = {} }) => {
   const title = field.title || field.name;
   const showTitle = title && title !== '' && title !== 'Layout' && level > 0;
 
@@ -613,6 +205,9 @@ const PanelRenderer: React.FC<{
           level={level + 1}
           fieldCollectionLayouts={fieldCollectionLayouts}
           objectBrickLayouts={objectBrickLayouts}
+          isEditing={isEditing}
+          onFieldChange={onFieldChange}
+          errors={errors}
         />
       ))}
     </View>
@@ -627,6 +222,9 @@ interface LayoutNodeRendererProps {
   skipWrapper?: boolean;
   fieldCollectionLayouts?: any;
   objectBrickLayouts?: any;
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
 }
 
 export const LayoutNodeRenderer: React.FC<LayoutNodeRendererProps> = ({
@@ -636,6 +234,9 @@ export const LayoutNodeRenderer: React.FC<LayoutNodeRendererProps> = ({
   skipWrapper = false,
   fieldCollectionLayouts = {},
   objectBrickLayouts = {},
+  isEditing = false,
+  onFieldChange,
+  errors = {},
 }) => {
   const { datatype, fieldtype } = node;
 
@@ -652,7 +253,17 @@ export const LayoutNodeRenderer: React.FC<LayoutNodeRendererProps> = ({
         }));
 
       if (tabs.length > 1) {
-        return <TabPanel tabs={tabs} objectData={objectData} fieldCollectionLayouts={fieldCollectionLayouts} objectBrickLayouts={objectBrickLayouts} />;
+        return (
+          <TabPanel
+            tabs={tabs}
+            objectData={objectData}
+            fieldCollectionLayouts={fieldCollectionLayouts}
+            objectBrickLayouts={objectBrickLayouts}
+            isEditing={isEditing}
+            onFieldChange={onFieldChange}
+            errors={errors}
+          />
+        );
       }
     }
 
@@ -669,12 +280,26 @@ export const LayoutNodeRenderer: React.FC<LayoutNodeRendererProps> = ({
                 level={level}
                 fieldCollectionLayouts={fieldCollectionLayouts}
                 objectBrickLayouts={objectBrickLayouts}
+                isEditing={isEditing}
+                onFieldChange={onFieldChange}
+                errors={errors}
               />
             ))}
           </>
         );
       }
-      return <PanelRenderer field={node} objectData={objectData} level={level} fieldCollectionLayouts={fieldCollectionLayouts} objectBrickLayouts={objectBrickLayouts} />;
+      return (
+        <PanelRenderer
+          field={node}
+          objectData={objectData}
+          level={level}
+          fieldCollectionLayouts={fieldCollectionLayouts}
+          objectBrickLayouts={objectBrickLayouts}
+          isEditing={isEditing}
+          onFieldChange={onFieldChange}
+          errors={errors}
+        />
+      );
     }
 
     // For other layout types, just render children
@@ -688,6 +313,9 @@ export const LayoutNodeRenderer: React.FC<LayoutNodeRendererProps> = ({
             level={level}
             fieldCollectionLayouts={fieldCollectionLayouts}
             objectBrickLayouts={objectBrickLayouts}
+            isEditing={isEditing}
+            onFieldChange={onFieldChange}
+            errors={errors}
           />
         ))}
       </>
@@ -704,11 +332,87 @@ export const LayoutNodeRenderer: React.FC<LayoutNodeRendererProps> = ({
         level={level}
         fieldCollectionLayouts={fieldCollectionLayouts}
         objectBrickLayouts={objectBrickLayouts}
+        isEditing={isEditing}
+        onFieldChange={onFieldChange}
+        errors={errors}
       />
     );
   }
 
   return null;
+};
+
+// Field Collection Data Renderer - renders the data inside a field collection item
+const FieldCollectionDataRenderer: React.FC<{
+  data: any;
+  fieldCollectionLayouts?: any;
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
+}> = ({ data, fieldCollectionLayouts = {}, isEditing, onFieldChange, errors }) => {
+  if (!data) return null;
+
+  return (
+    <View>
+      {Object.entries(data).map(([fieldKey, fieldValue]: [string, any]) => {
+        if (fieldValue === null || fieldValue === undefined) return null;
+
+        // Create a simple field definition
+        const fieldDef: FieldDefinition = {
+          name: fieldKey,
+          title: fieldKey,
+          fieldtype: typeof fieldValue === 'boolean' ? 'checkbox' :
+                     typeof fieldValue === 'number' ? 'numeric' : 'input',
+          datatype: 'data',
+        };
+
+        // Use the fieldRenderers to render the field
+        const FieldComponent = fieldRenderers[fieldDef.fieldtype];
+        if (FieldComponent) {
+          return (
+            <FieldComponent
+              key={fieldKey}
+              value={fieldValue}
+              title={fieldKey}
+              mandatory={false}
+              field={fieldDef}
+              isEditing={isEditing}
+              onFieldChange={onFieldChange ? (val) => onFieldChange(fieldKey, val) : undefined}
+              error={errors?.[fieldKey]}
+            />
+          );
+        }
+
+        // Fallback for unknown types
+        return (
+          <FieldWrapper key={fieldKey} label={fieldKey}>
+            <Text style={styles.textValue}>
+              {typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : String(fieldValue)}
+            </Text>
+          </FieldWrapper>
+        );
+      })}
+    </View>
+  );
+};
+
+// Object Brick Fallback Renderer
+const ObjectBrickFallbackRenderer: React.FC<{
+  data: any;
+  isEditing?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+  errors?: Record<string, string>;
+}> = ({ data, isEditing, onFieldChange, errors }) => {
+  if (!data || typeof data !== 'object') return null;
+
+  return (
+    <FieldCollectionDataRenderer
+      data={data}
+      isEditing={isEditing}
+      onFieldChange={onFieldChange}
+      errors={errors}
+    />
+  );
 };
 
 // Main field renderer component
@@ -718,343 +422,218 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   level = 0,
   fieldCollectionLayouts = {},
   objectBrickLayouts = {},
+  isEditing = false,
+  onFieldChange,
+  errors = {},
 }) => {
   const { fieldtype, title, name, mandatory } = field;
   const displayTitle = title || name;
+  const fieldError = errors[name];
 
-  switch (fieldtype) {
-    case 'input':
-      return <InputField value={value} title={displayTitle} mandatory={mandatory} />;
+  // Handle field change - pass field name to parent
+  const handleFieldChange = (newValue: any) => {
+    onFieldChange?.(name, newValue);
+  };
 
-    case 'textarea':
-      return <TextareaField value={value} title={displayTitle} mandatory={mandatory} />;
+  // Special case: localized fields need custom handling
+  if (fieldtype === 'localizedfields') {
+    return (
+      <LocalizedFieldsRenderer
+        field={field}
+        value={value}
+        isEditing={isEditing}
+        onFieldChange={onFieldChange}
+        errors={errors}
+      />
+    );
+  }
 
-    case 'wysiwyg':
-      return <WysiwygField value={value} title={displayTitle} mandatory={mandatory} />;
+  // Special case: field collections
+  if (fieldtype === 'fieldcollections') {
+    if (Array.isArray(value) && value.length > 0) {
+      return (
+        <FieldWrapper label={displayTitle} mandatory={mandatory}>
+          {value.map((item, index) => {
+            const fcType = item.type;
+            const fcLayout = fieldCollectionLayouts?.items?.[fcType] || fieldCollectionLayouts?.[fcType];
 
-    case 'datetime':
-      return <DatetimeField value={value} title={displayTitle} mandatory={mandatory} />;
+            return (
+              <View key={index} style={styles.fieldCollectionItem}>
+                <Text style={styles.fieldCollectionType}>{fcType}</Text>
+                {item.data && fcLayout?.children ? (
+                  fcLayout.children.map((layoutChild: any, childIndex: number) => (
+                    <LayoutNodeRenderer
+                      key={`${layoutChild.name}-${childIndex}`}
+                      node={layoutChild}
+                      objectData={item.data}
+                      level={level + 1}
+                      fieldCollectionLayouts={fieldCollectionLayouts}
+                      objectBrickLayouts={objectBrickLayouts}
+                      isEditing={isEditing}
+                      onFieldChange={onFieldChange}
+                      errors={errors}
+                    />
+                  ))
+                ) : item.data ? (
+                  <FieldCollectionDataRenderer
+                    data={item.data}
+                    fieldCollectionLayouts={fieldCollectionLayouts}
+                    isEditing={isEditing}
+                    onFieldChange={onFieldChange}
+                    errors={errors}
+                  />
+                ) : null}
+              </View>
+            );
+          })}
+        </FieldWrapper>
+      );
+    }
+    return (
+      <FieldWrapper label={displayTitle} mandatory={mandatory}>
+        <Text style={styles.textValue}>-</Text>
+      </FieldWrapper>
+    );
+  }
 
-    case 'date':
-      return <DateField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'checkbox':
-    case 'booleanSelect':
-      return <CheckboxField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'numeric':
-    case 'quantityValue':
-      return <NumericField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'select':
-      return <SelectField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'multiselect':
-      return <MultiselectField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'image':
-      return <ImageField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'imageGallery':
-      return <ImageGalleryField value={value} title={displayTitle} mandatory={mandatory} />;
-
-    case 'localizedfields':
-      return <LocalizedFieldsRenderer field={field} value={value} />;
-
-    case 'fieldcollections':
-      // Render field collections with their layout
-      if (Array.isArray(value) && value.length > 0) {
+  // Special case: object bricks
+  if (fieldtype === 'objectbricks') {
+    if (value && typeof value === 'object') {
+      const brickEntries = Object.entries(value).filter(([key, val]) => val && typeof val === 'object');
+      if (brickEntries.length > 0) {
         return (
           <FieldWrapper label={displayTitle} mandatory={mandatory}>
-            {value.map((item, index) => {
-              const fcType = item.type;
-              const fcLayout = fieldCollectionLayouts?.items?.[fcType] || fieldCollectionLayouts?.[fcType];
+            {brickEntries.map(([brickName, brickData]: [string, any]) => {
+              const capitalizedName = brickName.charAt(0).toUpperCase() + brickName.slice(1);
+              const obLayoutEntry = objectBrickLayouts?.items?.[brickName]
+                || objectBrickLayouts?.items?.[capitalizedName]
+                || objectBrickLayouts?.[brickName]
+                || objectBrickLayouts?.[capitalizedName];
+              const layoutDef = obLayoutEntry?.layoutDefinition || obLayoutEntry;
 
               return (
-                <View key={index} style={styles.fieldCollectionItem}>
-                  <Text style={styles.fieldCollectionType}>{fcType}</Text>
-                  {item.data && fcLayout?.children ? (
-                    // Render with layout
-                    fcLayout.children.map((layoutChild: any, childIndex: number) => (
+                <View key={brickName} style={styles.objectBrickItem}>
+                  <Text style={styles.objectBrickType}>{brickName}</Text>
+                  {layoutDef?.children ? (
+                    layoutDef.children.map((layoutChild: any, childIndex: number) => (
                       <LayoutNodeRenderer
-                        key={`${layoutChild.name}-${childIndex}`}
+                        key={`${layoutChild.name || childIndex}-${childIndex}`}
                         node={layoutChild}
-                        objectData={item.data}
+                        objectData={brickData}
                         level={level + 1}
                         fieldCollectionLayouts={fieldCollectionLayouts}
                         objectBrickLayouts={objectBrickLayouts}
+                        isEditing={isEditing}
+                        onFieldChange={onFieldChange}
+                        errors={errors}
                       />
                     ))
-                  ) : item.data ? (
-                    // Fallback: render data without layout
-                    <FieldCollectionDataRenderer data={item.data} fieldCollectionLayouts={fieldCollectionLayouts} />
-                  ) : null}
+                  ) : (
+                    <ObjectBrickFallbackRenderer
+                      data={brickData}
+                      isEditing={isEditing}
+                      onFieldChange={onFieldChange}
+                      errors={errors}
+                    />
+                  )}
                 </View>
               );
             })}
           </FieldWrapper>
         );
       }
-      return (
-        <FieldWrapper label={displayTitle} mandatory={mandatory}>
-          <Text style={styles.textValue}>-</Text>
-        </FieldWrapper>
-      );
-
-    case 'objectbricks':
-      // Render object bricks with their layout
-      console.log('ObjectBricks value:', JSON.stringify(value, null, 2));
-      console.log('ObjectBricks layouts:', JSON.stringify(objectBrickLayouts, null, 2));
-
-      if (value && typeof value === 'object') {
-        const brickEntries = Object.entries(value).filter(([key, val]) => val && typeof val === 'object');
-        if (brickEntries.length > 0) {
-          return (
-            <FieldWrapper label={displayTitle} mandatory={mandatory}>
-              {brickEntries.map(([brickName, brickData]: [string, any]) => {
-                // Try to find the layout - check various possible structures
-                // The API returns: { items: { BrickName: { layoutDefinition: {...} } } }
-                const capitalizedName = brickName.charAt(0).toUpperCase() + brickName.slice(1);
-                const obLayoutEntry = objectBrickLayouts?.items?.[brickName]
-                  || objectBrickLayouts?.items?.[capitalizedName]
-                  || objectBrickLayouts?.[brickName]
-                  || objectBrickLayouts?.[capitalizedName];
-
-                console.log(`ObjectBrick "${brickName}" layout entry:`, obLayoutEntry);
-
-                // Extract the actual layout definition
-                const layoutDef = obLayoutEntry?.layoutDefinition || obLayoutEntry;
-
-                return (
-                  <View key={brickName} style={styles.objectBrickItem}>
-                    <Text style={styles.objectBrickType}>{brickName}</Text>
-                    {layoutDef?.children ? (
-                      // Render with layout - same as other fields
-                      layoutDef.children.map((layoutChild: any, childIndex: number) => (
-                        <LayoutNodeRenderer
-                          key={`${layoutChild.name || childIndex}-${childIndex}`}
-                          node={layoutChild}
-                          objectData={brickData}
-                          level={level + 1}
-                          fieldCollectionLayouts={fieldCollectionLayouts}
-                          objectBrickLayouts={objectBrickLayouts}
-                        />
-                      ))
-                    ) : (
-                      // Fallback: render fields from data
-                      <ObjectBrickFallbackRenderer data={brickData} />
-                    )}
-                  </View>
-                );
-              })}
-            </FieldWrapper>
-          );
-        }
-      }
-      return (
-        <FieldWrapper label={displayTitle} mandatory={mandatory}>
-          <Text style={styles.textValue}>-</Text>
-        </FieldWrapper>
-      );
-
-    case 'block':
-      return (
-        <FieldWrapper label={displayTitle} mandatory={mandatory}>
-          <Text style={styles.textValue}>
-            {Array.isArray(value) ? `${value.length} Blöcke` : '-'}
-          </Text>
-        </FieldWrapper>
-      );
-
-    // Relations
-    case 'manyToOneRelation':
-      return <RelationField value={value ? [value] : []} title={displayTitle} mandatory={mandatory} single />;
-
-    case 'manyToManyRelation':
-    case 'manyToManyObjectRelation':
-    case 'advancedManyToManyRelation':
-      return <RelationField value={Array.isArray(value) ? value : []} title={displayTitle} mandatory={mandatory} />;
-
-    default:
-      // Fallback for unknown field types
-      if (value !== null && value !== undefined) {
-        if (typeof value === 'string' || typeof value === 'number') {
-          return (
-            <FieldWrapper label={`${displayTitle}`} mandatory={mandatory}>
-              <Text style={styles.textValue}>{String(value)}</Text>
-            </FieldWrapper>
-          );
-        }
-      }
-      return null;
-  }
-};
-
-// Field Collection Data Renderer - renders the data inside a field collection item
-const FieldCollectionDataRenderer: React.FC<{ data: any; fieldCollectionLayouts?: any }> = ({ data, fieldCollectionLayouts = {} }) => {
-  const { width } = useWindowDimensions();
-
-  if (!data) return null;
-
-  // Handle localized fields in field collections
-  if (data.localizedfields) {
-    const localizedData = data.localizedfields;
-    const languages = Object.keys(localizedData[Object.keys(localizedData)[0]] || {});
-    const [selectedLang, setSelectedLang] = useState(languages[0] || 'default');
-
+    }
     return (
-      <View style={styles.fcLocalizedContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.langTabs}>
-          {languages.filter(l => l !== 'default').map((lang) => (
-            <Pressable
-              key={lang}
-              onPress={() => setSelectedLang(lang)}
-              style={[styles.langTab, selectedLang === lang && styles.langTabSelected]}
-            >
-              <Text style={[styles.langTabText, selectedLang === lang && styles.langTabTextSelected]}>
-                {lang.toUpperCase()}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        {Object.entries(localizedData).map(([fieldName, fieldValues]: [string, any]) => {
-          const localizedValue = fieldValues?.[selectedLang];
-          if (!localizedValue) return null;
-
-          // Check if it's HTML content
-          if (typeof localizedValue === 'string' && localizedValue.includes('<')) {
-            return (
-              <View key={fieldName} style={styles.fcField}>
-                <RenderHtml
-                  contentWidth={width - 80}
-                  source={{ html: localizedValue }}
-                  baseStyle={styles.htmlContent}
-                  tagsStyles={{
-                    p: { marginVertical: 8, lineHeight: 22 },
-                    h1: { fontSize: 24, fontWeight: '700', marginVertical: 12, color: '#333' },
-                    h2: { fontSize: 20, fontWeight: '600', marginVertical: 10, color: '#333' },
-                    h3: { fontSize: 18, fontWeight: '600', marginVertical: 8, color: '#333' },
-                    ul: { marginVertical: 8 },
-                    ol: { marginVertical: 8 },
-                    li: { marginVertical: 4 },
-                    a: { color: '#2196f3' },
-                  }}
-                />
-              </View>
-            );
-          }
-
-          return (
-            <View key={fieldName} style={styles.fcField}>
-              <Text style={styles.textValue}>{localizedValue}</Text>
-            </View>
-          );
-        })}
-      </View>
+      <FieldWrapper label={displayTitle} mandatory={mandatory}>
+        <Text style={styles.textValue}>-</Text>
+      </FieldWrapper>
     );
   }
 
+  // Special case: block field
+  if (fieldtype === 'block') {
+    return (
+      <FieldWrapper label={displayTitle} mandatory={mandatory}>
+        <Text style={styles.textValue}>
+          {Array.isArray(value) ? `${value.length} Blöcke` : '-'}
+        </Text>
+      </FieldWrapper>
+    );
+  }
+
+  // Look up the field renderer from the registry
+  const FieldComponent = fieldRenderers[fieldtype];
+
+  if (FieldComponent) {
+    // All field components now support both view and edit modes
+    return (
+      <FieldComponent
+        value={value}
+        title={displayTitle}
+        mandatory={mandatory}
+        field={field}
+        isEditing={isEditing}
+        onFieldChange={handleFieldChange}
+        error={fieldError}
+      />
+    );
+  }
+
+  // Unknown field types (e.g. from extensions like dataQuality) are not rendered
   return null;
 };
 
-// Export layout renderer for use in ObjectDetailScreen
-export const ObjectLayoutRenderer: React.FC<{
-  layout: FieldDefinition;
-  objectData: any;
-}> = ({ layout, objectData }) => {
-  return (
-    <View style={styles.layoutContainer}>
-      {layout.children?.map((child, index) => (
-        <LayoutNodeRenderer
-          key={`${child.name}-${index}`}
-          node={child}
-          objectData={objectData}
-          level={0}
-        />
-      ))}
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
-  layoutContainer: {
-    flex: 1,
-  },
-  fieldWrapper: {
+  // Tab styles
+  tabPanel: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
     marginBottom: 16,
   },
-  fieldLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
+  tabHeader: {
+    backgroundColor: '#f5f5f5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#666',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  tab: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
   },
-  mandatoryIndicator: {
-    color: '#f44336',
-    marginLeft: 4,
+  tabActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#6200ee',
+  },
+  tabText: {
     fontSize: 14,
-  },
-  textValue: {
-    fontSize: 15,
-    color: '#333',
-  },
-  textareaValue: {
-    fontSize: 15,
-    color: '#333',
-    lineHeight: 22,
-  },
-  htmlContent: {
-    fontSize: 15,
-    color: '#333',
-    lineHeight: 22,
-  },
-  dateValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dateIcon: {
-    marginRight: 8,
-  },
-  checkboxValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  selectChip: {
-    alignSelf: 'flex-start',
-  },
-  multiselectContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  imagePreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  imageIdLabel: {
-    fontSize: 12,
+    fontWeight: '500',
     color: '#666',
-    marginTop: 6,
   },
-  galleryScroll: {
-    marginHorizontal: -4,
+  tabTextActive: {
+    color: '#6200ee',
   },
-  galleryImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    backgroundColor: '#f0f0f0',
+  tabContent: {
+    padding: 16,
   },
+  // Panel styles
+  panelContainer: {
+    marginBottom: 16,
+  },
+  panelNested: {
+    marginLeft: 8,
+    paddingLeft: 12,
+    borderLeftWidth: 2,
+    borderLeftColor: '#e0e0e0',
+  },
+  panelHeader: {
+    marginBottom: 12,
+  },
+  panelTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  // Localized fields
   localizedContainer: {
     marginBottom: 16,
   },
@@ -1065,202 +644,56 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: '#f0f0f0',
   },
   langTabSelected: {
-    backgroundColor: '#2196f3',
+    backgroundColor: '#6200ee',
   },
   langTabText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#666',
   },
   langTabTextSelected: {
     color: '#fff',
   },
-  // Tab Panel styles
-  tabPanel: {
-    flex: 1,
-  },
-  tabHeader: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    marginBottom: 16,
-    marginHorizontal: -16,
-    paddingHorizontal: 16,
-  },
-  tab: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    marginRight: 4,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: '#2196f3',
-  },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#666',
-  },
-  tabTextActive: {
-    color: '#2196f3',
-  },
-  tabContent: {
-    flex: 1,
-  },
-  panelContainer: {
-    marginBottom: 16,
-  },
-  panelNested: {
-    paddingLeft: 0,
-  },
-  panelHeader: {
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  panelTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  // Field Collection styles
+  // Field collection styles
   fieldCollectionItem: {
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 12,
     borderLeftWidth: 3,
-    borderLeftColor: '#2196f3',
+    borderLeftColor: '#6200ee',
   },
   fieldCollectionType: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#2196f3',
+    color: '#6200ee',
     marginBottom: 8,
     textTransform: 'uppercase',
   },
-  // Object Brick styles
+  // Object brick styles
   objectBrickItem: {
-    marginBottom: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#ff9800',
   },
   objectBrickType: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#666',
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  brickField: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  brickFieldLabel: {
-    fontSize: 13,
-    color: '#666',
-    flex: 1,
-  },
-  brickFieldValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    flex: 1,
-    textAlign: 'right',
-  },
-  fcLocalizedContainer: {
-    marginTop: 4,
-  },
-  fcField: {
+    color: '#ff9800',
     marginBottom: 8,
+    textTransform: 'uppercase',
   },
-  // Relation styles
-  relationList: {
-    gap: 8,
-  },
-  relationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    padding: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: '#6200ee',
-  },
-  relationIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#f0e7ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  relationInfo: {
-    flex: 1,
-  },
-  relationId: {
-    fontSize: 13,
-    fontWeight: '600',
+  // Fallback text
+  textValue: {
+    fontSize: 15,
     color: '#333',
-  },
-  relationPath: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  relationCount: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 8,
-    fontStyle: 'italic',
-  },
-  // Relation image styles
-  relationImageGallery: {
-    marginHorizontal: -4,
-  },
-  relationImageContainer: {
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  relationImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  relationImageId: {
-    fontSize: 10,
-    color: '#666',
-    marginTop: 4,
-  },
-  relationItemWithImage: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    padding: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#6200ee',
-  },
-  relationInlineImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 6,
-    backgroundColor: '#f0f0f0',
-    marginRight: 10,
   },
 });
 

@@ -1,0 +1,16 @@
+# Maestro Configuration
+# https://maestro.mobile.dev/
+
+# App configuration
+appId: gmbh.cors.pimcore.voyager
+
+# Output directory for test results
+output: .maestro/tests
+
+# Environment variables (override via CLI or CI)
+# Default: Use mock server on localhost:3333
+# For real Pimcore instance, override PIMCORE_URL
+env:
+  PIMCORE_URL: "http://localhost:3333/pimcore-studio/api"
+  TEST_USERNAME: "admin"
+  TEST_PASSWORD: "admin"

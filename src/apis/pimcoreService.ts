@@ -69,6 +69,7 @@ export class PimcoreService {
   static deleteDataObject = DataObjectService.deleteDataObject;
   static batchDeleteDataObjects = DataObjectService.batchDeleteDataObjects;
   static setDataObjectPublishState = DataObjectService.setDataObjectPublishState;
+  static saveDataObject = DataObjectService.saveDataObject;
   static getTreeLevel = DataObjectService.getTreeLevel;
   static getGridConfiguration = DataObjectService.getGridConfiguration;
 

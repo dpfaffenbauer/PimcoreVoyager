@@ -1,0 +1,95 @@
+# Setup and Login Flow
+# Reusable flow that handles Expo Dev Client, adds Mock Server instance, and logs in
+# Include this at the start of other test flows
+
+appId: gmbh.cors.pimcore.voyager
+name: "Setup and Login"
+tags:
+  - setup
+  - auth
+---
+
+# Start fresh
+- launchApp:
+    clearState: true
+
+# Handle Expo Dev Client screen (select development server)
+- runFlow:
+    when:
+      visible: "DEVELOPMENT SERVERS"
+    commands:
+      - tapOn:
+          text: ".*localhost:8081.*"
+      - extendedWaitUntil:
+          visible: ".*Instance.*|.*Instanz.*|.*Voyager.*|.*Continue.*"
+          timeout: 30000
+
+# Handle Expo Developer Menu popup (first time)
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+
+# Handle Expo Dev Tools menu (close it by tapping outside)
+- runFlow:
+    when:
+      visible: "Go home"
+    commands:
+      - tapOn:
+          point: "50%,20%"
+      - extendedWaitUntil:
+          visible: ".*Add Instance.*|.*Username.*|.*Sign In.*|.*Pimcore Voyager.*"
+          timeout: 10000
+
+# Wait for app to load (either login screen or instance selection)
+- extendedWaitUntil:
+    visible: ".*Instance.*|.*Instanz.*|.*Login.*|.*Voyager.*|.*Add Instance.*|.*Username.*|.*Sign In.*"
+    timeout: 15000
+
+# Case 1: Add Mock Server instance if on empty instance screen
+- runFlow:
+    when:
+      visible: "No Pimcore Instances"
+    commands:
+      - tapOn: "Add Instance"
+      - extendedWaitUntil:
+          visible: "instance-name-input"
+          timeout: 5000
+      - tapOn: "instance-name-input"
+      - inputText: "Mock Server"
+      - tapOn: "instance-url-input"
+      - inputText: "http://localhost:3333/pimcore-studio/api"
+      - hideKeyboard
+      - tapOn:
+          text: "Add Instance"
+          index: 1
+      - extendedWaitUntil:
+          notVisible: "Studio API URL"
+          timeout: 10000
+      - extendedWaitUntil:
+          visible: "Select Pimcore Instance"
+          timeout: 10000
+      # Tap on the instance card
+      - tapOn:
+          point: "50%,18%"
+
+# Case 2: If already on login screen, continue
+- extendedWaitUntil:
+    visible: ".*Username.*|.*Sign In.*"
+    timeout: 10000
+
+# Enter credentials
+- tapOn: "Username"
+- inputText: "admin"
+
+- tapOn: "Password"
+- inputText: "admin"
+
+# Submit login
+- tapOn: "Sign In"
+
+# Wait for main screen to load (support German locale)
+- extendedWaitUntil:
+    visible: ".*Data Objects.*|.*Datenobjekte.*|.*Objekte.*"
+    timeout: 15000

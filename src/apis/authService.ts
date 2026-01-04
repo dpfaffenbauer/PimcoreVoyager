@@ -33,6 +33,9 @@ export class AuthService {
    */
   static async login(username: string, password: string): Promise<boolean> {
     try {
+      // Clear any existing session before new login attempt
+      await this.logout();
+
       const authAxios = this.getAuthAxios();
       const response = await authAxios.post('/login', {
         username,
@@ -42,25 +45,17 @@ export class AuthService {
       // Session is stored in cookies by the server
       // Return success if status is 200
       return response.status === 200;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      // Fallback to mock for development/testing
-      return this.mockLogin(username, password);
+
+      // Check if it's an authentication error (401)
+      if (error.response?.status === 401) {
+        return false;
+      }
+
+      // For network errors (no response), throw to let caller handle
+      throw error;
     }
-  }
-
-  /**
-   * Mock authentication for development without Pimcore backend
-   */
-  private static async mockLogin(username: string, password: string): Promise<boolean> {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    if (username && password) {
-      return true;
-    }
-
-    throw new Error('Invalid credentials');
   }
 
   /**

@@ -1,10 +1,32 @@
 /**
  * Data Object Service
  * Handles all data object related API calls
+ *
+ * Uses types from @pimcore/studio-ui-bundle for API consistency
  */
 
 import { getApiClient } from './apiClient';
-import { PimcoreDataObject, PimcoreListResponse } from '../types/pimcore';
+import type {
+  DataObject,
+  DataObjectFolder,
+  DataObjectWithDetailData,
+  DataObjectGetByIdApiResponse,
+  DataObjectGetTreeApiResponse,
+  DataObjectGetTreeApiArg,
+  DataObjectUpdateByIdApiArg,
+  DataObjectAddApiArg,
+  DataObjectAddApiResponse,
+  DataObjectBatchDeleteApiResponse,
+  DataObjectGetGridApiResponse,
+  GridColumnRequest,
+  Layout,
+} from '../types/pimcore';
+
+// Legacy response type for backwards compatibility
+export interface DataObjectListResponse<T> {
+  data: T[];
+  total: number;
+}
 
 export class DataObjectService {
   /**
@@ -16,10 +38,10 @@ export class DataObjectService {
     page: number = 1,
     limit: number = 100,
     parentId?: number
-  ): Promise<PimcoreListResponse<PimcoreDataObject>> {
+  ): Promise<DataObjectListResponse<DataObject | DataObjectFolder>> {
     try {
       const apiClient = getApiClient();
-      const params: any = {
+      const params: Partial<DataObjectGetTreeApiArg> = {
         page,
         pageSize: limit,
       };
@@ -32,14 +54,13 @@ export class DataObjectService {
         params.classIds = JSON.stringify([classId]);
       }
 
-      const response = await apiClient.get('/data-objects/tree', { params });
+      const response = await apiClient.get<DataObjectGetTreeApiResponse>('/data-objects/tree', { params });
 
       return {
         data: response.data.items || [],
         total: response.data.totalItems || 0,
       };
     } catch (error) {
-      console.error('Error fetching data objects:', error);
       return { data: [], total: 0 };
     }
   }
@@ -48,13 +69,12 @@ export class DataObjectService {
    * Fetch a single data object by ID
    * Endpoint: GET /pimcore-studio/api/data-objects/{id}
    */
-  static async getDataObject(id: number): Promise<PimcoreDataObject> {
+  static async getDataObject(id: number): Promise<DataObjectGetByIdApiResponse> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.get(`/data-objects/${id}`);
+      const response = await apiClient.get<DataObjectGetByIdApiResponse>(`/data-objects/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching data object:', error);
       throw error;
     }
   }
@@ -63,14 +83,12 @@ export class DataObjectService {
    * Fetch full data object with objectData (field values)
    * Endpoint: GET /pimcore-studio/api/data-objects/{id}
    */
-  static async getDataObjectFull(id: number): Promise<any> {
+  static async getDataObjectFull(id: number): Promise<DataObjectWithDetailData | DataObjectFolder> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.get(`/data-objects/${id}`);
-      console.log('Full object data:', response.data);
+      const response = await apiClient.get<DataObjectGetByIdApiResponse>(`/data-objects/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching full data object:', error);
       throw error;
     }
   }
@@ -79,35 +97,31 @@ export class DataObjectService {
    * Fetch layout definition for a data object
    * Endpoint: GET /pimcore-studio/api/data-objects/{id}/layout
    */
-  static async getDataObjectLayout(id: number): Promise<any> {
+  static async getDataObjectLayout(id: number): Promise<Layout> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.get(`/data-objects/${id}/layout`);
-      console.log('Object layout:', response.data);
+      const response = await apiClient.get<Layout>(`/data-objects/${id}/layout`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching data object layout:', error);
       throw error;
     }
   }
 
   /**
    * Update a data object
-   * Endpoint: PATCH /pimcore-studio/api/data-objects
+   * Endpoint: PUT /pimcore-studio/api/data-objects/{id}
    */
   static async updateDataObject(
     id: number,
-    data: Partial<PimcoreDataObject>
-  ): Promise<PimcoreDataObject> {
+    data: DataObjectUpdateByIdApiArg['body']['data']
+  ): Promise<DataObjectGetByIdApiResponse> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.patch('/data-objects', {
-        id,
-        ...data,
+      const response = await apiClient.put<DataObjectGetByIdApiResponse>(`/data-objects/${id}`, {
+        data,
       });
       return response.data;
     } catch (error) {
-      console.error('Error updating data object:', error);
       throw error;
     }
   }
@@ -118,14 +132,13 @@ export class DataObjectService {
    */
   static async createDataObject(
     parentId: number,
-    data: Partial<PimcoreDataObject>
-  ): Promise<PimcoreDataObject> {
+    data: DataObjectAddApiArg['dataObjectAddParameters']
+  ): Promise<DataObjectAddApiResponse> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.post(`/data-objects/add/${parentId}`, data);
+      const response = await apiClient.post<DataObjectAddApiResponse>(`/data-objects/add/${parentId}`, data);
       return response.data;
     } catch (error) {
-      console.error('Error creating data object:', error);
       throw error;
     }
   }
@@ -141,7 +154,6 @@ export class DataObjectService {
         data: { ids: [id] },
       });
     } catch (error) {
-      console.error('Error deleting data object:', error);
       throw error;
     }
   }
@@ -150,15 +162,14 @@ export class DataObjectService {
    * Batch delete multiple data objects
    * Endpoint: DELETE /pimcore-studio/api/data-objects/batch-delete
    */
-  static async batchDeleteDataObjects(ids: number[]): Promise<{ jobRunId?: string }> {
+  static async batchDeleteDataObjects(ids: number[]): Promise<DataObjectBatchDeleteApiResponse> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.delete('/data-objects/batch-delete', {
+      const response = await apiClient.delete<DataObjectBatchDeleteApiResponse>('/data-objects/batch-delete', {
         data: { ids },
       });
       return response.data;
     } catch (error) {
-      console.error('Error batch deleting data objects:', error);
       throw error;
     }
   }
@@ -167,17 +178,87 @@ export class DataObjectService {
    * Publish or unpublish a data object
    * Endpoint: PUT /pimcore-studio/api/data-objects/{id}
    */
-  static async setDataObjectPublishState(id: number, publish: boolean): Promise<any> {
+  static async setDataObjectPublishState(
+    id: number,
+    publish: boolean
+  ): Promise<DataObjectGetByIdApiResponse> {
     try {
       const apiClient = getApiClient();
-      const response = await apiClient.put(`/data-objects/${id}`, {
+      const response = await apiClient.put<DataObjectGetByIdApiResponse>(`/data-objects/${id}`, {
         data: {
           task: publish ? 'publish' : 'unpublish',
         },
       });
       return response.data;
     } catch (error) {
-      console.error('Error setting data object publish state:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save data object field values
+   * Endpoint: PUT /pimcore-studio/api/data-objects/{id}
+   *
+   * Pimcore Studio API expects:
+   * {
+   *   "data": {
+   *     "editableData": { ... field values ... },
+   *     "task": "save" | "publish",
+   *     "useDraftData": true
+   *   }
+   * }
+   *
+   * @param id - The object ID
+   * @param fieldData - The modified field values (already in correct structure)
+   * @param options - Save options (task: 'save' | 'publish')
+   * @returns The updated object data
+   */
+  static async saveDataObject(
+    id: number,
+    fieldData: Record<string, unknown>,
+    options: { task: 'save' | 'publish' } = { task: 'save' }
+  ): Promise<DataObjectGetByIdApiResponse> {
+    try {
+      const apiClient = getApiClient();
+
+      // Transform field data to the format Pimcore Studio expects
+      // Structure: { data: { editableData: {...}, task: "save|publish", useDraftData: true } }
+      const payload: { data: DataObjectUpdateByIdApiArg['body']['data'] } = {
+        data: {
+          editableData: fieldData,
+          task: options.task,
+          useDraftData: true,
+        },
+      };
+
+      console.log('Saving data object:', id, 'with payload:', JSON.stringify(payload, null, 2));
+
+      const response = await apiClient.put<DataObjectGetByIdApiResponse>(`/data-objects/${id}`, payload);
+
+      console.log('Save response:', response.data);
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error saving data object:', error);
+
+      // Type-safe error handling
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { errors?: Record<string, string>; message?: string } } };
+
+        // Extract validation errors if present
+        if (axiosError.response?.data?.errors) {
+          const validationErrors = axiosError.response.data.errors;
+          const errorMessage = Object.entries(validationErrors)
+            .map(([field, msg]) => `${field}: ${msg}`)
+            .join(', ');
+          throw new Error(`Validation error: ${errorMessage}`);
+        }
+
+        // Check for API error message
+        if (axiosError.response?.data?.message) {
+          throw new Error(axiosError.response.data.message);
+        }
+      }
+
       throw error;
     }
   }
@@ -186,18 +267,17 @@ export class DataObjectService {
    * Get tree structure starting from root or specific parent
    * Endpoint: GET /pimcore-studio/api/data-objects/tree
    */
-  static async getTreeLevel(parentId: number = 1): Promise<PimcoreDataObject[]> {
+  static async getTreeLevel(parentId: number = 1): Promise<(DataObject | DataObjectFolder)[]> {
     try {
       const apiClient = getApiClient();
-      const params: any = {
+      const params: Partial<DataObjectGetTreeApiArg> = {
         parentId,
         pageSize: 1000,
       };
 
-      const response = await apiClient.get('/data-objects/tree', { params });
+      const response = await apiClient.get<DataObjectGetTreeApiResponse>('/data-objects/tree', { params });
       return response.data.items || [];
     } catch (error) {
-      console.error('Error fetching tree level:', error);
       return [];
     }
   }
@@ -211,12 +291,11 @@ export class DataObjectService {
     classId: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<any> {
+  ): Promise<DataObjectGetGridApiResponse> {
     try {
       const apiClient = getApiClient();
-      console.log(`Fetching grid data for class ${classId} in folder ${folderId}`);
 
-      const columns = [
+      const columns: GridColumnRequest[] = [
         { key: 'id', type: 'system.id', group: ['system'], config: [] },
         { key: 'key', type: 'system.string', group: ['system'], config: [] },
         { key: 'fullpath', type: 'system.string', group: ['system'], config: [] },
@@ -228,7 +307,7 @@ export class DataObjectService {
         { key: 'type', type: 'system.string', group: ['system'], config: [] },
       ];
 
-      const response = await apiClient.post(`/data-objects/grid/${classId}`, {
+      const response = await apiClient.post<DataObjectGetGridApiResponse>(`/data-objects/grid/${classId}`, {
         folderId: folderId,
         columns: columns,
         filters: {
@@ -238,11 +317,9 @@ export class DataObjectService {
           columnFilters: [],
         },
       });
-      console.log('Grid response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching grid data:', error);
-      return { items: [], data: [], total: 0 };
+      return { items: [], totalItems: 0 };
     }
   }
 }

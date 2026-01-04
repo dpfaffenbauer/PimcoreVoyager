@@ -58,7 +58,7 @@ export const useInstanceStore = create<InstanceStore>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error('Error loading instances:', error);
+      // Error loading instances
     } finally {
       set({ isLoading: false });
     }
@@ -81,7 +81,6 @@ export const useInstanceStore = create<InstanceStore>((set, get) => ({
         await get().setActiveInstance(newInstance.id);
       }
     } catch (error) {
-      console.error('Error adding instance:', error);
       throw error;
     }
   },
@@ -102,7 +101,6 @@ export const useInstanceStore = create<InstanceStore>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error('Error updating instance:', error);
       throw error;
     }
   },
@@ -123,7 +121,6 @@ export const useInstanceStore = create<InstanceStore>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error('Error deleting instance:', error);
       throw error;
     }
   },

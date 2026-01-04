@@ -1,0 +1,51 @@
+# Browse Data Objects Flow
+# Tests navigation through data objects tree
+
+appId: gmbh.cors.pimcore.voyager
+name: "Browse Data Objects"
+tags:
+  - navigation
+  - data-objects
+---
+
+# Run setup and login first
+- runFlow: flows/setup_and_login.yaml
+
+# Verify we're on the main screen with data objects
+- assertVisible:
+    text: ".*Datenobjekte.*|.*Data Objects.*|.*Objekte.*"
+
+# Take screenshot of initial tree
+- takeScreenshot: "data_objects_tree_root"
+
+# The data is loaded - tap on the root folder to see children
+- tapOn:
+    text: ".*Datenobjekte.*"
+    optional: true
+
+# Wait for children to load (Car objects from mock server)
+- extendedWaitUntil:
+    visible: ".*Car.*"
+    timeout: 10000
+
+# Take screenshot showing objects
+- takeScreenshot: "data_objects_with_cars"
+
+# Tap on first Car object (use coordinates - first object row after folder)
+- tapOn:
+    point: "50%,19%"
+
+# Wait for detail screen to load (could be any car)
+- extendedWaitUntil:
+    visible: ".*Car-.*|.*Published.*|.*Objektdaten.*"
+    timeout: 10000
+
+# Take screenshot of object detail
+- takeScreenshot: "car_detail"
+
+# Verify detail content is visible
+- assertVisible:
+    text: ".*Car.*|.*Published.*"
+
+# Take final screenshot
+- takeScreenshot: "browse_complete"

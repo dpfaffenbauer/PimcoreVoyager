@@ -1,0 +1,3 @@
+[submodule "lib/PimcoreStudio"]
+	path = lib/PimcoreStudio
+	url = git@github.com:pimcore/studio-ui-bundle.git

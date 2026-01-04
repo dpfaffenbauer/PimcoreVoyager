@@ -115,6 +115,8 @@ export default function AddEditInstanceScreen({ route, navigation }: AddEditInst
               mode="outlined"
               placeholder="e.g., Production, Staging, Demo"
               error={!!errors.name}
+              testID="instance-name-input"
+              accessibilityLabel="instance-name-input"
             />
             {errors.name ? <HelperText type="error">{errors.name}</HelperText> : null}
 
@@ -131,6 +133,8 @@ export default function AddEditInstanceScreen({ route, navigation }: AddEditInst
               autoCapitalize="none"
               keyboardType="url"
               error={!!errors.url}
+              testID="instance-url-input"
+              accessibilityLabel="instance-url-input"
             />
             {errors.url ? (
               <HelperText type="error">{errors.url}</HelperText>
@@ -166,6 +170,8 @@ export default function AddEditInstanceScreen({ route, navigation }: AddEditInst
                 loading={loading}
                 disabled={loading}
                 style={styles.saveButton}
+                testID="save-instance-button"
+                accessibilityLabel="save-instance-button"
               >
                 {isEditing ? 'Update' : 'Add Instance'}
               </Button>

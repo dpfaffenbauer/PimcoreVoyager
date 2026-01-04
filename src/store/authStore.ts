@@ -7,6 +7,7 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { User, AuthState } from '../types/auth';
+import { AuthService } from '../apis/authService';
 
 const USER_KEY = 'auth_user';
 const CREDENTIALS_KEY = 'saved_credentials';
@@ -43,10 +44,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   logout: async () => {
     try {
+      // Call server logout to invalidate session cookie
+      await AuthService.logout();
+      // Clear local data
       await SecureStore.deleteItemAsync(USER_KEY);
       set({ token: null, user: null, isAuthenticated: false });
     } catch (error) {
       console.error('Error during logout:', error);
+      // Still clear local state even if server logout fails
+      set({ token: null, user: null, isAuthenticated: false });
     }
   },
 
