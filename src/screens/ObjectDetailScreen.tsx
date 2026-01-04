@@ -16,6 +16,7 @@ import { WorkflowSection } from '../components/WorkflowSection';
 import { WorkflowActionData } from '../components/WorkflowActionDialog';
 import { EditProvider, useEditContext } from '../contexts/EditContext';
 import { EditModeToolbar } from '../components/EditModeToolbar';
+import { useInstanceStore } from '../store/instanceStore';
 
 interface ObjectDetailScreenProps {
   route: any;
@@ -388,6 +389,37 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
     });
   };
 
+  // Open preview in WebView
+  const handlePreviewOpen = () => {
+    const instanceUrl = useInstanceStore.getState().getActiveInstanceUrl();
+    const timestamp = Date.now();
+    const previewUrl = `${instanceUrl}/data-objects/preview/${initialObject.id}?timestamp=${timestamp}`;
+
+    setMenuModalVisible(false);
+    navigation.navigate('WebView', {
+      url: previewUrl,
+      title: `Vorschau: ${object.key || object.filename || 'Object'}`,
+    });
+  };
+
+  // Navigate to children (like folder detail)
+  const handleChildrenOpen = () => {
+    setMenuModalVisible(false);
+    navigation.navigate('FolderDetail', {
+      folder: object,
+    });
+  };
+
+  // Navigate to Tags screen
+  const handleTagsOpen = () => {
+    setMenuModalVisible(false);
+    navigation.navigate('Tags', {
+      elementType: 'data-object',
+      elementId: initialObject.id,
+      elementName: object.key || object.filename || 'Object',
+    });
+  };
+
   // Update form field value
   const updateFormField = (name: string, value: any) => {
     setActionFormData((prev) => ({
@@ -670,6 +702,37 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                     >
                       <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
                       <Text style={styles.menuItemText}>Dependencies</Text>
+                      <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                    </TouchableOpacity>
+
+                    {object?.hasPreview && (
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={handlePreviewOpen}
+                      >
+                        <MaterialCommunityIcons name="eye-outline" size={24} color="#6200ee" />
+                        <Text style={styles.menuItemText}>Vorschau</Text>
+                        <MaterialCommunityIcons name="open-in-new" size={24} color="#999" />
+                      </TouchableOpacity>
+                    )}
+
+                    {object?.hasChildren && (
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={handleChildrenOpen}
+                      >
+                        <MaterialCommunityIcons name="file-tree-outline" size={24} color="#6200ee" />
+                        <Text style={styles.menuItemText}>Children</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                      </TouchableOpacity>
+                    )}
+
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={handleTagsOpen}
+                    >
+                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                      <Text style={styles.menuItemText}>Tags</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
                   </View>

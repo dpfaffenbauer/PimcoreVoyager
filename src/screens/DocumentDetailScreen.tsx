@@ -69,6 +69,16 @@ export default function DocumentDetailScreen({ route }: any) {
     });
   };
 
+  // Navigate to Tags screen
+  const handleTagsOpen = () => {
+    setMenuModalVisible(false);
+    navigation.navigate('Tags', {
+      elementType: 'document',
+      elementId: initialDocument.id,
+      elementName: initialDocument.key || 'Document',
+    });
+  };
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -336,6 +346,15 @@ export default function DocumentDetailScreen({ route }: any) {
                   >
                     <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
                     <Text style={styles.menuItemText}>Dependencies</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={handleTagsOpen}
+                  >
+                    <MaterialCommunityIcons name="tag-outline" size={24} color="#6200ee" />
+                    <Text style={styles.menuItemText}>Tags</Text>
                     <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                   </TouchableOpacity>
                 </View>

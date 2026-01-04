@@ -1,0 +1,118 @@
+name: E2E Tests (Maestro)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-tests:
+    name: Run Maestro E2E Tests
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Setup iOS Simulator
+        uses: futureware-tech/simulator-action@v3
+        with:
+          model: 'iPhone 15 Pro Max'
+          os_version: '17.0'
+
+      - name: Start Mock Server
+        run: |
+          cd mock-server
+          npm install
+          node server.js &
+          echo "Waiting for mock server to start..."
+          sleep 5
+          curl -s http://localhost:3333/pimcore-studio/api/pimcore-studio/api/user || echo "Mock server started"
+
+      - name: Build and Install App on Simulator
+        run: |
+          # Build the development client for simulator
+          npx expo prebuild --platform ios --clean
+          cd ios
+          xcodebuild -workspace PimcoreVoyager.xcworkspace \
+            -scheme PimcoreVoyager \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max' \
+            -derivedDataPath build \
+            build
+
+          # Install on simulator
+          xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/PimcoreVoyager.app
+
+      - name: Start Expo Development Server
+        run: |
+          npx expo start --ios --no-dev --minify &
+          echo "Waiting for Expo server to start..."
+          sleep 30
+
+      - name: Run Maestro Tests
+        run: |
+          export PATH="$PATH:$HOME/.maestro/bin"
+          maestro test .maestro/ --format junit --output maestro-results.xml
+        env:
+          PIMCORE_URL: "http://localhost:3333/pimcore-studio/api"
+          TEST_USERNAME: "admin"
+          TEST_PASSWORD: "admin"
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-test-results
+          path: |
+            maestro-results.xml
+            .maestro/tests/
+          retention-days: 30
+
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-screenshots
+          path: .maestro/tests/**/screenshot-*.png
+          retention-days: 30
+
+      - name: Publish Test Results
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: 'maestro-results.xml'
+          check_name: 'Maestro E2E Test Results'
+          fail_on_failure: true

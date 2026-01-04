@@ -79,6 +79,16 @@ export default function FolderDetailScreen() {
     });
   };
 
+  // Navigate to Tags screen
+  const handleTagsOpen = () => {
+    setPropertiesMenuVisible(false);
+    (navigation as any).navigate('Tags', {
+      elementType: 'data-object',
+      elementId: folder.id,
+      elementName: folder.key || folder.filename || 'Folder',
+    });
+  };
+
   useEffect(() => {
     loadFolderData();
   }, [folder.id]);
@@ -549,6 +559,15 @@ export default function FolderDetailScreen() {
                 >
                   <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
                   <Text style={styles.menuItemText}>Dependencies</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleTagsOpen}
+                >
+                  <MaterialCommunityIcons name="tag-outline" size={24} color="#6200ee" />
+                  <Text style={styles.menuItemText}>Tags</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
               </View>

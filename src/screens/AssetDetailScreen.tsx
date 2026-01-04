@@ -142,6 +142,16 @@ export default function AssetDetailScreen() {
     });
   };
 
+  // Navigate to Tags screen
+  const handleTagsOpen = () => {
+    setMenuModalVisible(false);
+    navigation.navigate('Tags', {
+      elementType: 'asset',
+      elementId: asset.id,
+      elementName: asset.filename || 'Asset',
+    });
+  };
+
   useEffect(() => {
     navigation.setOptions({
       title: asset.filename || 'Asset Detail',
@@ -274,6 +284,15 @@ export default function AssetDetailScreen() {
                 >
                   <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
                   <Text style={styles.menuItemText}>Dependencies</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleTagsOpen}
+                >
+                  <MaterialCommunityIcons name="tag-outline" size={24} color="#6200ee" />
+                  <Text style={styles.menuItemText}>Tags</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
               </View>

@@ -31,6 +31,8 @@ import SearchScreen from '../screens/SearchScreen';
 import PropertiesScreen from '../screens/PropertiesScreen';
 import NotesScreen from '../screens/NotesScreen';
 import DependenciesScreen from '../screens/DependenciesScreen';
+import WebViewScreen from '../screens/WebViewScreen';
+import TagsScreen from '../screens/TagsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -104,6 +106,18 @@ function DataObjectsStack() {
         component={DependenciesScreen}
         options={{ title: 'Dependencies' }}
       />
+      <Stack.Screen
+        name="WebView"
+        component={WebViewScreen}
+        options={({ route }: any) => ({
+          title: route.params?.title || 'Vorschau',
+        })}
+      />
+      <Stack.Screen
+        name="Tags"
+        component={TagsScreen}
+        options={{ title: 'Tags' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -142,6 +156,11 @@ function AssetsStack() {
         component={DependenciesScreen}
         options={{ title: 'Dependencies' }}
       />
+      <Stack.Screen
+        name="Tags"
+        component={TagsScreen}
+        options={{ title: 'Tags' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -179,6 +198,11 @@ function DocumentsStack() {
         name="Dependencies"
         component={DependenciesScreen}
         options={{ title: 'Dependencies' }}
+      />
+      <Stack.Screen
+        name="Tags"
+        component={TagsScreen}
+        options={{ title: 'Tags' }}
       />
     </Stack.Navigator>
   );
