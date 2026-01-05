@@ -1,30 +1,57 @@
 /**
  * Tags Service
  * Handles tag operations for all element types (data-objects, assets, documents)
+ * Types based on Pimcore Studio API (@pimcore/studio-ui-bundle)
  */
 
 import { getApiClient } from './apiClient';
 
+/**
+ * Tag type based on Pimcore Studio API
+ * @see @pimcore/studio-ui-bundle tags-api-slice.gen.d.ts
+ */
 export interface Tag {
+  /** tag ID */
   id: number;
+  /** parent tag ID */
   parentId: number;
-  hasChildren: boolean;
-  path: string;
+  /** tag text */
   text: string;
+  /** path */
+  path: string;
+  /** has children */
+  hasChildren: boolean;
+  /** IconName */
+  iconName?: string;
+  /** AdditionalAttributes */
+  additionalAttributes?: {
+    [key: string]: string | number | boolean | object;
+  };
+  /** Children tags (for hierarchical display) */
   children: Tag[];
-  iconName: string;
-  additionalAttributes: any[];
 }
 
+/**
+ * Response for element tags
+ * @see TagGetCollectionForElementByTypeAndIdApiResponse
+ */
 export interface ElementTagsResponse {
   totalItems: number;
   items: Tag[];
 }
 
+/**
+ * Response for all available tags
+ * @see TagGetCollectionApiResponse
+ */
 export interface AllTagsResponse {
-  items: Tag[];
+  items?: Tag[];
 }
 
+/**
+ * Element type as defined in Pimcore API
+ * @see TagAssignToElementApiArg.elementType
+ */
 export type ElementType = 'data-object' | 'asset' | 'document';
 
 export class TagsService {

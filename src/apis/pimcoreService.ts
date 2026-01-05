@@ -82,6 +82,8 @@ export class PimcoreService {
   static getDocumentTreeLevel = DocumentService.getDocumentTreeLevel;
   static getDocument = DocumentService.getDocument;
   static setDocumentPublishState = DocumentService.setDocumentPublishState;
+  static updateLinkDocument = DocumentService.updateLinkDocument;
+  static updateHardlinkDocument = DocumentService.updateHardlinkDocument;
 
   // Workflow methods
   static getWorkflowDetails = WorkflowService.getWorkflowDetails;

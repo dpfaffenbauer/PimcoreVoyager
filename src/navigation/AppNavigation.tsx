@@ -204,6 +204,13 @@ function DocumentsStack() {
         component={TagsScreen}
         options={{ title: 'Tags' }}
       />
+      <Stack.Screen
+        name="WebView"
+        component={WebViewScreen}
+        options={({ route }: any) => ({
+          title: route.params?.title || 'Vorschau',
+        })}
+      />
     </Stack.Navigator>
   );
 }
