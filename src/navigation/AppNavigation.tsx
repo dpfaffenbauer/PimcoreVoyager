@@ -75,7 +75,9 @@ function DataObjectsStack() {
       <Stack.Screen
         name="FolderDetail"
         component={FolderDetailScreen}
-        options={{ headerShown: false }}
+        options={({ route }: any) => ({
+          title: route.params?.folder?.key || 'Ordner',
+        })}
       />
       <Stack.Screen
         name="ObjectList"

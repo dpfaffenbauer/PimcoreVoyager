@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
-import { Text, ActivityIndicator } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, RefreshControl, Text, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { PimcoreService, ElementProperty, PropertyElementType } from '../apis/pimcoreService';
 import { PropertiesSection } from '../components/PropertiesSection';
@@ -53,7 +53,7 @@ export default function PropertiesScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Properties...</Text>
       </View>
     );

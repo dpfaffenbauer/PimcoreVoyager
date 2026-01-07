@@ -5,8 +5,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Pressable, Text } from 'react-native';
 import { fieldRenderers, FieldWrapper } from './fields';
 
 interface FieldDefinition {

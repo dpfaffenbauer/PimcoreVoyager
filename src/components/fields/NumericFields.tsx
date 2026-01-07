@@ -4,9 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { Text, TextInput, Button, Portal, Modal } from 'react-native-paper';
+import { View, StyleSheet, Pressable, ScrollView, Text, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../../config/constants';
 import Slider from '@react-native-community/slider';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps, FieldOption } from './types';
@@ -63,15 +63,17 @@ export const NumericField: React.FC<FieldRendererProps> = ({
         <TextInput
           value={formatValue(value)}
           onChangeText={handleChange}
-          mode="outlined"
-          dense
           keyboardType="decimal-pad"
-          disabled={isDisabled}
-          error={!!error}
-          style={styles.numericInput}
+          editable={!isDisabled}
+          style={[
+            styles.numericInput,
+            isDisabled && styles.inputDisabled,
+            error && styles.inputError,
+          ]}
           placeholder={minValue !== undefined && maxValue !== undefined
             ? `${minValue} - ${maxValue}`
             : 'Zahl eingeben...'}
+          placeholderTextColor="#999"
         />
         {(minValue !== undefined || maxValue !== undefined) && (
           <Text style={styles.numericHint}>
@@ -143,13 +145,15 @@ export const QuantityValueField: React.FC<FieldRendererProps> = ({
           <TextInput
             value={currentValue !== null && currentValue !== undefined ? String(currentValue) : ''}
             onChangeText={handleValueChange}
-            mode="outlined"
-            dense
             keyboardType="decimal-pad"
-            disabled={isDisabled}
-            error={!!error}
-            style={styles.quantityInput}
+            editable={!isDisabled}
+            style={[
+              styles.quantityInput,
+              isDisabled && styles.inputDisabled,
+              error && styles.inputError,
+            ]}
             placeholder="Wert"
+            placeholderTextColor="#999"
           />
           {units.length > 0 && (
             <Pressable
@@ -163,16 +167,19 @@ export const QuantityValueField: React.FC<FieldRendererProps> = ({
         </View>
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <Portal>
-          <Modal
-            visible={unitModalVisible}
-            onDismiss={() => setUnitModalVisible(false)}
-            contentContainerStyle={styles.unitModalContainer}
-          >
+        <Modal
+          visible={unitModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setUnitModalVisible(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setUnitModalVisible(false)}>
             <View style={styles.unitModal}>
               <View style={styles.unitModalHeader}>
                 <Text style={styles.unitModalTitle}>Einheit wählen</Text>
-                <Button onPress={() => setUnitModalVisible(false)}>Schließen</Button>
+                <TouchableOpacity onPress={() => setUnitModalVisible(false)}>
+                  <Text style={styles.modalCloseButton}>Schließen</Text>
+                </TouchableOpacity>
               </View>
               <ScrollView style={styles.unitModalList} bounces={false}>
                 {units.map((unit) => (
@@ -185,7 +192,7 @@ export const QuantityValueField: React.FC<FieldRendererProps> = ({
                     ]}
                   >
                     {currentUnit === unit.key && (
-                      <MaterialCommunityIcons name="check" size={20} color="#6200ee" style={{ marginRight: 12 }} />
+                      <MaterialCommunityIcons name="check" size={20} color={THEME.PRIMARY_COLOR} style={{ marginRight: 12 }} />
                     )}
                     <Text style={[
                       styles.unitModalItemText,
@@ -197,8 +204,8 @@ export const QuantityValueField: React.FC<FieldRendererProps> = ({
                 ))}
               </ScrollView>
             </View>
-          </Modal>
-        </Portal>
+          </Pressable>
+        </Modal>
       </FieldWrapper>
     );
   }
@@ -244,9 +251,9 @@ export const SliderField: React.FC<FieldRendererProps> = ({
             maximumValue={maxValue}
             step={increment}
             disabled={isDisabled}
-            minimumTrackTintColor="#6200ee"
+            minimumTrackTintColor={THEME.PRIMARY_COLOR}
             maximumTrackTintColor="#ddd"
-            thumbTintColor="#6200ee"
+            thumbTintColor={THEME.PRIMARY_COLOR}
             style={styles.slider}
           />
           <View style={styles.sliderLabels}>
@@ -316,11 +323,10 @@ export const NumericRangeField: React.FC<FieldRendererProps> = ({
             <TextInput
               value={minVal !== null && minVal !== undefined ? String(minVal) : ''}
               onChangeText={handleMinChange}
-              mode="outlined"
-              dense
               keyboardType="decimal-pad"
-              disabled={isDisabled}
-              style={styles.rangeInput}
+              editable={!isDisabled}
+              style={[styles.rangeInput, isDisabled && styles.inputDisabled]}
+              placeholderTextColor="#999"
             />
           </View>
           <View style={styles.rangeSeparator}>
@@ -331,11 +337,10 @@ export const NumericRangeField: React.FC<FieldRendererProps> = ({
             <TextInput
               value={maxVal !== null && maxVal !== undefined ? String(maxVal) : ''}
               onChangeText={handleMaxChange}
-              mode="outlined"
-              dense
               keyboardType="decimal-pad"
-              disabled={isDisabled}
-              style={styles.rangeInput}
+              editable={!isDisabled}
+              style={[styles.rangeInput, isDisabled && styles.inputDisabled]}
+              placeholderTextColor="#999"
             />
           </View>
         </View>
@@ -361,9 +366,23 @@ export const NumericRangeField: React.FC<FieldRendererProps> = ({
 };
 
 const styles = StyleSheet.create({
-  // Numeric input styles
+  // Input base styles
   numericInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
+  },
+  inputDisabled: {
+    backgroundColor: '#f5f5f5',
+    color: THEME.TEXT_DISABLED,
+  },
+  inputError: {
+    borderColor: '#f44336',
   },
   numericHint: {
     fontSize: 11,
@@ -383,14 +402,21 @@ const styles = StyleSheet.create({
   quantityInput: {
     flex: 1,
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
   },
   unitButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#e0e0e0',
     borderRadius: 4,
     backgroundColor: '#fff',
     gap: 4,
@@ -401,14 +427,14 @@ const styles = StyleSheet.create({
   },
   unitButtonText: {
     fontSize: 14,
-    color: '#333',
+    color: THEME.TEXT_PRIMARY,
   },
-  // Unit modal styles
-  unitModalContainer: {
-    paddingTop: '20%',
-    paddingHorizontal: 20,
+  // Modal styles
+  modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-start',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   unitModal: {
     backgroundColor: '#fff',
@@ -428,7 +454,12 @@ const styles = StyleSheet.create({
   unitModalTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#333',
+    color: THEME.TEXT_PRIMARY,
+  },
+  modalCloseButton: {
+    fontSize: 15,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
   },
   unitModalList: {
     flexGrow: 0,
@@ -446,10 +477,10 @@ const styles = StyleSheet.create({
   },
   unitModalItemText: {
     fontSize: 15,
-    color: '#333',
+    color: THEME.TEXT_PRIMARY,
   },
   unitModalItemTextSelected: {
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
     fontWeight: '500',
   },
   // Slider styles
@@ -473,7 +504,7 @@ const styles = StyleSheet.create({
   sliderValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
   },
   // Slider view mode styles
   sliderViewContainer: {
@@ -490,12 +521,12 @@ const styles = StyleSheet.create({
   },
   sliderViewProgress: {
     height: '100%',
-    backgroundColor: '#6200ee',
+    backgroundColor: THEME.PRIMARY_COLOR,
     borderRadius: 4,
   },
   sliderViewValue: {
     fontSize: 14,
-    color: '#666',
+    color: THEME.TEXT_SECONDARY,
     fontWeight: '500',
   },
   // Range styles
@@ -508,11 +539,18 @@ const styles = StyleSheet.create({
   },
   rangeLabel: {
     fontSize: 12,
-    color: '#666',
+    color: THEME.TEXT_SECONDARY,
     marginBottom: 4,
   },
   rangeInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
   },
   rangeSeparator: {
     paddingHorizontal: 8,

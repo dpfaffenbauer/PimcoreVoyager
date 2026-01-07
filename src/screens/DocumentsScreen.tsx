@@ -6,10 +6,10 @@
  */
 
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable, Modal, Alert } from 'react-native';
-import { Text, ActivityIndicator, IconButton } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable, Modal, Alert, Text, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { PimcoreService } from '../apis/pimcoreService';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -249,11 +249,10 @@ export default function DocumentsScreen() {
                 }}
                 style={styles.chevronButton}
               >
-                <IconButton
-                  icon={node.expanded ? 'chevron-down' : 'chevron-right'}
+                <MaterialCommunityIcons
+                  name={node.expanded ? 'chevron-down' : 'chevron-right'}
                   size={20}
-                  iconColor="#666"
-                  style={{ margin: 0 }}
+                  color="#666"
                 />
               </TouchableOpacity>
             )}
@@ -266,7 +265,7 @@ export default function DocumentsScreen() {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <IconButton icon={icon} iconColor="#fff" size={18} style={{ margin: 0 }} />
+              <MaterialCommunityIcons name={icon} size={18} color="#fff" />
             </LinearGradient>
 
             {/* Node Label */}
@@ -326,7 +325,7 @@ export default function DocumentsScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
           <Text style={styles.loadingText}>Lade Dokumente...</Text>
         </View>
       </View>
@@ -343,7 +342,7 @@ export default function DocumentsScreen() {
       >
         {treeData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <IconButton icon="file-document-multiple-outline" size={64} iconColor="#ccc" />
+            <MaterialCommunityIcons name="file-document-multiple-outline" size={64} color="#ccc" />
             <Text style={styles.emptyText}>Keine Dokumente gefunden</Text>
           </View>
         ) : (

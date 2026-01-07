@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, Surface } from 'react-native-paper';
+import { View, StyleSheet, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Surface } from './ui';
 import { WorkflowItem } from '../apis/pimcoreService';
 
 interface WorkflowSectionProps {

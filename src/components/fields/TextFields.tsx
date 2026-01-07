@@ -4,11 +4,12 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, useWindowDimensions, Pressable } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import { View, StyleSheet, useWindowDimensions, Pressable, Text, TextInput, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RenderHtml from 'react-native-render-html';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps } from './types';
+import { THEME } from '../../config/constants';
 
 // Helper to safely format any value as a string for display
 const formatDisplayValue = (val: any): string => {
@@ -53,11 +54,13 @@ export const InputField: React.FC<FieldRendererProps> = ({
         <TextInput
           value={value || ''}
           onChangeText={(text) => onFieldChange?.(text)}
-          mode="outlined"
-          dense
-          disabled={isDisabled}
-          error={!!error}
-          style={styles.textInput}
+          editable={!isDisabled}
+          style={[
+            styles.textInput,
+            isDisabled && styles.textInputDisabled,
+            error && styles.textInputError,
+          ]}
+          placeholderTextColor="#999"
         />
         {error && <Text style={styles.errorText}>{error}</Text>}
       </FieldWrapper>
@@ -91,12 +94,16 @@ export const TextareaField: React.FC<FieldRendererProps> = ({
         <TextInput
           value={value || ''}
           onChangeText={(text) => onFieldChange?.(text)}
-          mode="outlined"
+          editable={!isDisabled}
           multiline
           numberOfLines={4}
-          disabled={isDisabled}
-          error={!!error}
-          style={styles.textareaInput}
+          textAlignVertical="top"
+          style={[
+            styles.textareaInput,
+            isDisabled && styles.textInputDisabled,
+            error && styles.textInputError,
+          ]}
+          placeholderTextColor="#999"
         />
         {error && <Text style={styles.errorText}>{error}</Text>}
       </FieldWrapper>
@@ -157,13 +164,17 @@ export const WysiwygField: React.FC<FieldRendererProps> = ({
           <TextInput
             value={value || ''}
             onChangeText={(text) => onFieldChange?.(text)}
-            mode="outlined"
+            editable={!isDisabled}
             multiline
             numberOfLines={8}
-            disabled={isDisabled}
-            error={!!error}
-            style={styles.wysiwygInput}
+            textAlignVertical="top"
+            style={[
+              styles.wysiwygInput,
+              isDisabled && styles.textInputDisabled,
+              error && styles.textInputError,
+            ]}
             placeholder="HTML-Inhalt eingeben..."
+            placeholderTextColor="#999"
           />
         )}
         {error && <Text style={styles.errorText}>{error}</Text>}
@@ -209,22 +220,31 @@ export const PasswordField: React.FC<FieldRendererProps> = ({
   if (isEditing) {
     return (
       <FieldWrapper label={title} mandatory={mandatory}>
-        <TextInput
-          value={value || ''}
-          onChangeText={(text) => onFieldChange?.(text)}
-          mode="outlined"
-          dense
-          secureTextEntry={!showPassword}
-          disabled={isDisabled}
-          error={!!error}
-          style={styles.textInput}
-          right={
-            <TextInput.Icon
-              icon={showPassword ? 'eye-off' : 'eye'}
-              onPress={() => setShowPassword(!showPassword)}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            value={value || ''}
+            onChangeText={(text) => onFieldChange?.(text)}
+            editable={!isDisabled}
+            secureTextEntry={!showPassword}
+            style={[
+              styles.textInput,
+              styles.passwordInput,
+              isDisabled && styles.textInputDisabled,
+              error && styles.textInputError,
+            ]}
+            placeholderTextColor="#999"
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.passwordToggle}
+          >
+            <MaterialCommunityIcons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={22}
+              color={THEME.TEXT_SECONDARY}
             />
-          }
-        />
+          </TouchableOpacity>
+        </View>
         {error && <Text style={styles.errorText}>{error}</Text>}
       </FieldWrapper>
     );
@@ -288,15 +308,50 @@ const styles = StyleSheet.create({
   // Edit mode styles
   textInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
+  },
+  textInputDisabled: {
+    backgroundColor: '#f5f5f5',
+    color: THEME.TEXT_DISABLED,
+  },
+  textInputError: {
+    borderColor: '#f44336',
   },
   textareaInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
     minHeight: 100,
   },
   errorText: {
     fontSize: 12,
     color: '#f44336',
     marginTop: 4,
+  },
+  // Password field styles
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  passwordInput: {
+    flex: 1,
+    paddingRight: 44,
+  },
+  passwordToggle: {
+    position: 'absolute',
+    right: 12,
+    padding: 4,
   },
   // WYSIWYG edit styles
   wysiwygToolbar: {
@@ -334,6 +389,13 @@ const styles = StyleSheet.create({
   },
   wysiwygInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
     minHeight: 200,
   },
   // Calculated field styles

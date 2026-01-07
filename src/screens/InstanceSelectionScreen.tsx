@@ -4,18 +4,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
-import {
-  Card,
-  Title,
-  Paragraph,
-  Button,
-  FAB,
-  IconButton,
-  ActivityIndicator,
-} from 'react-native-paper';
+import { View, StyleSheet, FlatList, Alert, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useInstanceStore } from '../store/instanceStore';
 import { PimcoreInstance } from '../types/instance';
+import { THEME } from '../config/constants';
 
 interface InstanceSelectionScreenProps {
   navigation: any;
@@ -69,48 +62,48 @@ export default function InstanceSelectionScreen({ navigation }: InstanceSelectio
     const isActive = activeInstance?.id === item.id;
 
     return (
-      <Card
+      <TouchableOpacity
         style={[styles.card, isActive && styles.activeCard]}
         onPress={() => handleSelectInstance(item.id)}
       >
-        <Card.Content>
-          <View style={styles.cardHeader}>
-            <View style={styles.titleRow}>
-              <Title style={styles.instanceName}>{item.name}</Title>
-              {isActive && (
-                <View style={styles.activeBadge}>
-                  <View style={styles.activeDot} />
-                  <Paragraph style={styles.activeBadgeText}>Aktiv</Paragraph>
-                </View>
-              )}
-            </View>
-            <View style={styles.actions}>
-              <IconButton
-                icon="pencil"
-                size={20}
-                onPress={() => handleEditInstance(item)}
-              />
-              <IconButton
-                icon="delete"
-                size={20}
-                onPress={() => handleDeleteInstance(item)}
-              />
-            </View>
+        <View style={styles.cardHeader}>
+          <View style={styles.titleRow}>
+            <Text style={styles.instanceName}>{item.name}</Text>
+            {isActive && (
+              <View style={styles.activeBadge}>
+                <View style={styles.activeDot} />
+                <Text style={styles.activeBadgeText}>Aktiv</Text>
+              </View>
+            )}
           </View>
-          <Paragraph style={styles.url}>{item.url}</Paragraph>
-          {item.description && (
-            <Paragraph style={styles.description}>{item.description}</Paragraph>
-          )}
-        </Card.Content>
-      </Card>
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => handleEditInstance(item)}
+            >
+              <MaterialCommunityIcons name="pencil" size={20} color="#666" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => handleDeleteInstance(item)}
+            >
+              <MaterialCommunityIcons name="delete" size={20} color="#666" />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <Text style={styles.url}>{item.url}</Text>
+        {item.description && (
+          <Text style={styles.description}>{item.description}</Text>
+        )}
+      </TouchableOpacity>
     );
   };
 
   if (isLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" />
-        <Paragraph style={styles.loadingText}>Loading instances...</Paragraph>
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
+        <Text style={styles.loadingText}>Loading instances...</Text>
       </View>
     );
   }
@@ -119,19 +112,18 @@ export default function InstanceSelectionScreen({ navigation }: InstanceSelectio
     <View style={styles.container}>
       {instances.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Title>No Pimcore Instances</Title>
-          <Paragraph style={styles.emptyText}>
+          <Text style={styles.emptyTitle}>No Pimcore Instances</Text>
+          <Text style={styles.emptyText}>
             Add your first Pimcore instance to get started
-          </Paragraph>
-          <Button
-            mode="contained"
+          </Text>
+          <TouchableOpacity
             onPress={handleAddInstance}
             style={styles.addButton}
-            icon="plus"
             testID="add-instance-button"
           >
-            Add Instance
-          </Button>
+            <MaterialCommunityIcons name="plus" size={18} color="#fff" />
+            <Text style={styles.addButtonText}>Add Instance</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -143,13 +135,14 @@ export default function InstanceSelectionScreen({ navigation }: InstanceSelectio
       )}
 
       {instances.length > 0 && (
-        <FAB
-          icon="plus"
+        <TouchableOpacity
           style={styles.fab}
           onPress={handleAddInstance}
-          label="Add Instance"
           testID="add-instance-fab"
-        />
+        >
+          <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+          <Text style={styles.fabText}>Add Instance</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -172,22 +165,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 32,
   },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
   emptyText: {
     marginTop: 8,
     marginBottom: 24,
     textAlign: 'center',
     color: '#666',
+    fontSize: 14,
   },
   listContent: {
     padding: 16,
   },
   card: {
     marginBottom: 12,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 2,
   },
   activeCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#6200ee',
+    borderLeftColor: THEME.PRIMARY_COLOR,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -203,7 +209,8 @@ const styles = StyleSheet.create({
   },
   instanceName: {
     fontSize: 18,
-    marginBottom: 0,
+    fontWeight: '600',
+    color: '#333',
   },
   activeBadge: {
     flexDirection: 'row',
@@ -224,11 +231,13 @@ const styles = StyleSheet.create({
     color: '#2e7d32',
     fontSize: 12,
     fontWeight: '600',
-    marginBottom: 0,
   },
   actions: {
     flexDirection: 'row',
     marginLeft: 8,
+  },
+  iconButton: {
+    padding: 8,
   },
   url: {
     color: '#666',
@@ -242,14 +251,43 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
+    color: '#666',
+    fontSize: 14,
   },
   addButton: {
-    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.PRIMARY_COLOR,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 4,
+    gap: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
   fab: {
     position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
+    right: 16,
+    bottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.PRIMARY_COLOR,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 28,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  fabText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

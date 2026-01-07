@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, IconButton } from 'react-native-paper';
+import { View, StyleSheet, Text } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { THEME } from '../config/constants';
 
 interface PlaceholderScreenProps {
@@ -34,7 +34,7 @@ export default function PlaceholderScreen({
   return (
     <View style={styles.container}>
       <View style={styles.placeholderContainer}>
-        <IconButton icon={icon} size={64} iconColor={THEME.ICON_DISABLED} />
+        <MaterialCommunityIcons name={icon as any} size={64} color={THEME.ICON_DISABLED} />
         <Text style={styles.placeholderTitle}>{screenName}</Text>
         <Text style={styles.placeholderText}>
           {description}

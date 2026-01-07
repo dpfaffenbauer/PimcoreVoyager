@@ -16,9 +16,12 @@ import {
   TextInput,
   Alert,
   FlatList,
+  Text,
+  ActivityIndicator,
+  Switch,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Text, ActivityIndicator, IconButton, Title, Button, Card, Surface, Chip, Paragraph, Switch } from 'react-native-paper';
+import { THEME } from '../config/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PimcoreService } from '../apis/pimcoreService';
@@ -246,7 +249,7 @@ function DocumentDetailScreenInner({ route }: any) {
               onPress={handleStartEditing}
               style={{ padding: 8 }}
             >
-              <MaterialCommunityIcons name="pencil" size={22} color="#6200ee" />
+              <MaterialCommunityIcons name="pencil" size={22} color={THEME.PRIMARY_COLOR} />
             </TouchableOpacity>
           )}
           <TouchableOpacity
@@ -476,7 +479,7 @@ function DocumentDetailScreenInner({ route }: any) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Dokument...</Text>
       </View>
     );
@@ -492,7 +495,7 @@ function DocumentDetailScreenInner({ route }: any) {
     <View style={styles.container}>
       {/* Sticky Header */}
       <View style={styles.stickyHeader}>
-        <Surface style={styles.headerCard} elevation={2}>
+        <View style={styles.headerCard}>
           <LinearGradient
             colors={gradient}
             style={styles.headerGradient}
@@ -504,31 +507,35 @@ function DocumentDetailScreenInner({ route }: any) {
                 <MaterialCommunityIcons name={icon} size={36} color="#fff" />
               </View>
               <View style={styles.headerText}>
-                <Title style={styles.headerTitle} numberOfLines={1}>
+                <Text style={styles.headerTitle} numberOfLines={1}>
                   {document.key}
-                </Title>
+                </Text>
                 <View style={styles.headerMeta}>
-                  <Paragraph style={styles.headerSubtitle}>
+                  <Text style={styles.headerSubtitle}>
                     {document.type.charAt(0).toUpperCase() + document.type.slice(1)}
-                  </Paragraph>
+                  </Text>
                   {document.type !== 'folder' && (
-                    <Chip
-                      icon={document.published ? 'check-circle' : 'clock-outline'}
+                    <View
                       style={[
                         styles.statusChip,
                         document.published ? styles.publishedChip : styles.draftChip,
                       ]}
-                      textStyle={styles.statusChipText}
-                      compact
                     >
-                      {document.published ? 'Published' : 'Draft'}
-                    </Chip>
+                      <MaterialCommunityIcons
+                        name={document.published ? 'check-circle' : 'clock-outline'}
+                        size={14}
+                        color="#fff"
+                      />
+                      <Text style={styles.statusChipText}>
+                        {document.published ? 'Published' : 'Draft'}
+                      </Text>
+                    </View>
                   )}
                 </View>
               </View>
             </View>
           </LinearGradient>
-        </Surface>
+        </View>
       </View>
 
       {/* Edit Mode Toolbar */}
@@ -548,12 +555,11 @@ function DocumentDetailScreenInner({ route }: any) {
       >
         {/* Link Edit Section - Only for link documents */}
         {document.type === 'link' && (
-          <Card style={styles.card}>
-            <Card.Content>
-              <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons name="link" size={24} color="#6200ee" />
-                <Title style={styles.sectionTitle}>Link-Ziel</Title>
-              </View>
+          <View style={styles.card}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons name="link" size={24} color={THEME.PRIMARY_COLOR} />
+              <Text style={styles.sectionTitle}>Link-Ziel</Text>
+            </View>
 
               {/* Link Type Selector */}
               <View style={styles.linkTypeContainer}>
@@ -651,19 +657,16 @@ function DocumentDetailScreenInner({ route }: any) {
                   </TouchableOpacity>
                 </View>
               )}
-
-            </Card.Content>
-          </Card>
+          </View>
         )}
 
         {/* Hardlink Edit Section - Only for hardlink documents */}
         {document.type === 'hardlink' && (
-          <Card style={styles.card}>
-            <Card.Content>
-              <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
-                <Title style={styles.sectionTitle}>Hardlink-Einstellungen</Title>
-              </View>
+          <View style={styles.card}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons name="link-variant" size={24} color={THEME.PRIMARY_COLOR} />
+              <Text style={styles.sectionTitle}>Hardlink-Einstellungen</Text>
+            </View>
 
               {/* Source Document */}
               <View style={styles.fieldContainer}>
@@ -710,6 +713,8 @@ function DocumentDetailScreenInner({ route }: any) {
                   value={isEditing ? getFieldValue('propertiesFromSource') : document.settingsData?.propertiesFromSource}
                   onValueChange={handlePropertiesFromSourceChange}
                   disabled={!isEditing}
+                  trackColor={{ false: '#767577', true: THEME.PRIMARY_COLOR + '80' }}
+                  thumbColor={isEditing ? (getFieldValue('propertiesFromSource') ? THEME.PRIMARY_COLOR : '#f4f3f4') : '#f4f3f4'}
                 />
               </View>
 
@@ -722,23 +727,22 @@ function DocumentDetailScreenInner({ route }: any) {
                   value={isEditing ? getFieldValue('childrenFromSource') : document.settingsData?.childrenFromSource}
                   onValueChange={handleChildrenFromSourceChange}
                   disabled={!isEditing}
+                  trackColor={{ false: '#767577', true: THEME.PRIMARY_COLOR + '80' }}
+                  thumbColor={isEditing ? (getFieldValue('childrenFromSource') ? THEME.PRIMARY_COLOR : '#f4f3f4') : '#f4f3f4'}
                 />
               </View>
-
-            </Card.Content>
-          </Card>
+          </View>
         )}
 
         {/* Page/Snippet/Email Preview Section */}
         {isEditableDocumentType && (
           <>
             {/* Preview Card */}
-            <Card style={styles.card}>
-              <Card.Content>
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons name="eye" size={24} color="#6200ee" />
-                  <Title style={styles.sectionTitle}>Vorschau</Title>
-                </View>
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons name="eye" size={24} color={THEME.PRIMARY_COLOR} />
+                <Text style={styles.sectionTitle}>Vorschau</Text>
+              </View>
 
                 {/* Preview WebView */}
                 <View style={styles.previewContainer}>
@@ -770,17 +774,15 @@ function DocumentDetailScreenInner({ route }: any) {
                     Vorschau öffnen
                   </Text>
                 </TouchableOpacity>
-              </Card.Content>
-            </Card>
+            </View>
 
             {/* Content Settings Card - for page/snippet */}
             {(document.type === 'page' || document.type === 'snippet') && (
-              <Card style={styles.card}>
-                <Card.Content>
-                  <View style={styles.sectionHeader}>
-                    <MaterialCommunityIcons name="file-document-edit" size={24} color="#6200ee" />
-                    <Title style={styles.sectionTitle}>Content Settings</Title>
-                  </View>
+              <View style={styles.card}>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons name="file-document-edit" size={24} color={THEME.PRIMARY_COLOR} />
+                  <Text style={styles.sectionTitle}>Content Settings</Text>
+                </View>
 
                   <View style={styles.settingRow}>
                     <Text style={styles.settingLabel}>Title</Text>
@@ -805,18 +807,16 @@ function DocumentDetailScreenInner({ route }: any) {
                       <Text style={styles.settingValue}>{document.settingsData.contentMainDocumentPath}</Text>
                     </View>
                   )}
-                </Card.Content>
-              </Card>
+              </View>
             )}
 
             {/* Email Settings Card - for email/newsletter */}
             {(document.type === 'email' || document.type === 'newsletter') && (
-              <Card style={styles.card}>
-                <Card.Content>
-                  <View style={styles.sectionHeader}>
-                    <MaterialCommunityIcons name="email-edit" size={24} color="#6200ee" />
-                    <Title style={styles.sectionTitle}>Email Settings</Title>
-                  </View>
+              <View style={styles.card}>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons name="email-edit" size={24} color={THEME.PRIMARY_COLOR} />
+                  <Text style={styles.sectionTitle}>Email Settings</Text>
+                </View>
 
                   <View style={styles.settingRow}>
                     <Text style={styles.settingLabel}>Subject</Text>
@@ -853,17 +853,15 @@ function DocumentDetailScreenInner({ route }: any) {
                     <Text style={styles.settingLabel}>Bcc</Text>
                     <Text style={styles.settingValue}>{document.settingsData?.bcc || '-'}</Text>
                   </View>
-                </Card.Content>
-              </Card>
+              </View>
             )}
 
             {/* Document Configuration Card */}
-            <Card style={styles.card}>
-              <Card.Content>
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons name="cog" size={24} color="#6200ee" />
-                  <Title style={styles.sectionTitle}>Document Configuration</Title>
-                </View>
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons name="cog" size={24} color={THEME.PRIMARY_COLOR} />
+                <Text style={styles.sectionTitle}>Document Configuration</Text>
+              </View>
 
                 <View style={styles.settingRow}>
                   <Text style={styles.settingLabel}>Controller</Text>
@@ -900,16 +898,14 @@ function DocumentDetailScreenInner({ route }: any) {
                     </View>
                   </>
                 )}
-              </Card.Content>
-            </Card>
+            </View>
 
             {/* Navigation Settings Card */}
-            <Card style={styles.card}>
-              <Card.Content>
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons name="navigation" size={24} color="#6200ee" />
-                  <Title style={styles.sectionTitle}>Navigation</Title>
-                </View>
+            <View style={styles.card}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons name="navigation" size={24} color={THEME.PRIMARY_COLOR} />
+                <Text style={styles.sectionTitle}>Navigation</Text>
+              </View>
 
                 <View style={styles.settingRow}>
                   <Text style={styles.settingLabel}>Exclude from Navigation</Text>
@@ -924,8 +920,7 @@ function DocumentDetailScreenInner({ route }: any) {
                     {document.settingsData?.url || document.fullPath || '-'}
                   </Text>
                 </View>
-              </Card.Content>
-            </Card>
+            </View>
           </>
         )}
 
@@ -950,10 +945,10 @@ function DocumentDetailScreenInner({ route }: any) {
             <TouchableWithoutFeedback>
               <View style={styles.menuModal}>
                 <View style={styles.modalHeader}>
-                  <Title style={styles.modalTitle}>
+                  <Text style={styles.modalTitle}>
                     {activeMenuSection === 'info' ? 'Dokumentinformationen' :
                      activeMenuSection === 'permissions' ? 'Berechtigungen' : 'Menü'}
-                  </Title>
+                  </Text>
                   <TouchableOpacity
                     onPress={() => {
                       if (activeMenuSection) {
@@ -978,7 +973,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       style={styles.menuItem}
                       onPress={() => setActiveMenuSection('info')}
                     >
-                      <MaterialCommunityIcons name="information-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="information-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Dokumentinformationen</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -987,7 +982,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       style={styles.menuItem}
                       onPress={() => setActiveMenuSection('permissions')}
                     >
-                      <MaterialCommunityIcons name="shield-check-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="shield-check-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Berechtigungen</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -996,7 +991,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       style={styles.menuItem}
                       onPress={handlePropertiesOpen}
                     >
-                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Properties</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -1005,7 +1000,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       style={styles.menuItem}
                       onPress={handleNotesOpen}
                     >
-                      <MaterialCommunityIcons name="note-multiple-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="note-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Notes</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -1014,7 +1009,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       style={styles.menuItem}
                       onPress={handleDependenciesOpen}
                     >
-                      <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="link-variant" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Dependencies</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -1023,7 +1018,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       style={styles.menuItem}
                       onPress={handleTagsOpen}
                     >
-                      <MaterialCommunityIcons name="tag-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="tag-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Tags</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -1032,24 +1027,24 @@ function DocumentDetailScreenInner({ route }: any) {
                   <ScrollView style={styles.modalContent}>
                     <View style={styles.modalSection}>
                       <View style={styles.modalSectionHeader}>
-                        <MaterialCommunityIcons name="information-outline" size={20} color="#6200ee" />
+                        <MaterialCommunityIcons name="information-outline" size={20} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalSectionTitle}>Allgemein</Text>
                       </View>
 
                       <View style={styles.modalInfoRow}>
-                        <MaterialCommunityIcons name="pound" size={18} color="#6200ee" />
+                        <MaterialCommunityIcons name="pound" size={18} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalInfoLabel}>ID</Text>
                         <Text style={styles.modalInfoValue}>{document.id?.toString()}</Text>
                       </View>
 
                       <View style={styles.modalInfoRow}>
-                        <MaterialCommunityIcons name="tag-outline" size={18} color="#6200ee" />
+                        <MaterialCommunityIcons name="tag-outline" size={18} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalInfoLabel}>Typ</Text>
                         <Text style={styles.modalInfoValue}>{document.type}</Text>
                       </View>
 
                       <View style={styles.modalInfoRow}>
-                        <MaterialCommunityIcons name="folder-open-outline" size={18} color="#6200ee" />
+                        <MaterialCommunityIcons name="folder-open-outline" size={18} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalInfoLabel}>Pfad</Text>
                         <Text style={styles.modalInfoValue} numberOfLines={2}>
                           {document.fullPath || document.path}
@@ -1059,7 +1054,7 @@ function DocumentDetailScreenInner({ route }: any) {
 
                     <View style={styles.modalSection}>
                       <View style={styles.modalSectionHeader}>
-                        <MaterialCommunityIcons name="clock-outline" size={20} color="#6200ee" />
+                        <MaterialCommunityIcons name="clock-outline" size={20} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalSectionTitle}>Metadaten</Text>
                       </View>
 
@@ -1103,21 +1098,20 @@ function DocumentDetailScreenInner({ route }: any) {
                         {Object.entries(document.permissions).map(([key, value]) => {
                           if (typeof value === 'boolean') {
                             return (
-                              <Surface
+                              <View
                                 key={key}
                                 style={[
                                   styles.permissionCard,
                                   value ? styles.permissionEnabled : styles.permissionDisabled,
                                 ]}
-                                elevation={0}
                               >
                                 <MaterialCommunityIcons
                                   name={value ? 'check-circle' : 'close-circle'}
                                   size={20}
                                   color={value ? '#4caf50' : '#f44336'}
                                 />
-                                <Paragraph style={styles.permissionText}>{key}</Paragraph>
-                              </Surface>
+                                <Text style={styles.permissionText}>{key}</Text>
+                              </View>
                             );
                           }
                           return null;
@@ -1148,7 +1142,7 @@ function DocumentDetailScreenInner({ route }: any) {
         <View style={styles.pickerModalContainer}>
           <View style={styles.pickerModal}>
             <View style={styles.pickerHeader}>
-              <Title style={styles.pickerTitle}>Dokument auswählen</Title>
+              <Text style={styles.pickerTitle}>Dokument auswählen</Text>
               <TouchableOpacity
                 onPress={() => {
                   setDocumentPickerVisible(false);
@@ -1171,7 +1165,7 @@ function DocumentDetailScreenInner({ route }: any) {
                 placeholderTextColor="#999"
                 autoFocus
               />
-              {searching && <ActivityIndicator size="small" />}
+              {searching && <ActivityIndicator size="small" color={THEME.PRIMARY_COLOR} />}
             </View>
 
             {(() => {
@@ -1199,7 +1193,7 @@ function DocumentDetailScreenInner({ route }: any) {
                       <MaterialCommunityIcons
                         name={getNodeIcon(item.type)}
                         size={24}
-                        color="#6200ee"
+                        color={THEME.PRIMARY_COLOR}
                       />
                       <View style={styles.searchResultInfo}>
                         <Text style={styles.searchResultName}>{item.key}</Text>
@@ -1212,7 +1206,7 @@ function DocumentDetailScreenInner({ route }: any) {
                   ListEmptyComponent={
                     searching ? (
                       <View style={styles.noResultsContainer}>
-                        <ActivityIndicator size="large" color="#6200ee" />
+                        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.noResultsText}>Lade Dokumente...</Text>
                       </View>
                     ) : null
@@ -1254,6 +1248,11 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     borderRadius: 16,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerGradient: {
     padding: 16,
@@ -1291,15 +1290,17 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     height: 26,
-    marginVertical: 0,
+    paddingHorizontal: 8,
+    borderRadius: 13,
+    gap: 4,
   },
   statusChipText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 11,
-    marginVertical: 0,
-    lineHeight: 14,
   },
   publishedChip: {
     backgroundColor: 'rgba(76, 175, 80, 0.9)',
@@ -1317,6 +1318,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginBottom: 12,
     borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 2,
   },
   sectionHeader: {

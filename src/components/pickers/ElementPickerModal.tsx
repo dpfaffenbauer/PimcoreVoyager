@@ -14,16 +14,11 @@ import {
   FlatList,
   Image,
   ScrollView,
-} from 'react-native';
-import {
   Text,
   TextInput,
-  IconButton,
   ActivityIndicator,
-  Divider,
-  Button,
-  Portal,
-} from 'react-native-paper';
+  TouchableOpacity,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SearchService, SearchResult } from '../../apis/searchService';
@@ -530,19 +525,15 @@ export const ElementPickerModal: React.FC<ElementPickerModalProps> = ({
                 value={searchTerm}
                 onChangeText={setSearchTerm}
                 placeholder="Suchen..."
-                mode="outlined"
-                dense
+                placeholderTextColor="#999"
                 onSubmitEditing={handleSearch}
               />
-              <IconButton
-                icon="magnify"
-                mode="contained"
-                containerColor={THEME.PRIMARY_COLOR}
-                iconColor="#fff"
-                size={18}
+              <TouchableOpacity
                 onPress={handleSearch}
                 style={styles.searchButton}
-              />
+              >
+                <MaterialCommunityIcons name="magnify" size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -555,7 +546,7 @@ export const ElementPickerModal: React.FC<ElementPickerModalProps> = ({
             </View>
           )}
 
-          <Divider />
+          <View style={styles.divider} />
 
           {/* Results List */}
           {isLoading && results.length === 0 ? (
@@ -568,7 +559,7 @@ export const ElementPickerModal: React.FC<ElementPickerModalProps> = ({
               data={results}
               renderItem={renderItem}
               keyExtractor={(item) => `${item.id}-${item.type}`}
-              ItemSeparatorComponent={() => <Divider />}
+              ItemSeparatorComponent={() => <View style={styles.divider} />}
               contentContainerStyle={styles.listContent}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
@@ -595,18 +586,18 @@ export const ElementPickerModal: React.FC<ElementPickerModalProps> = ({
           {/* Footer for multi-select */}
           {multiSelect && (
             <>
-              <Divider />
+              <View style={styles.divider} />
               <View style={styles.footer}>
                 <Text style={styles.selectedCount}>
                   {selectedElements.length} ausgewählt
                 </Text>
-                <Button
-                  mode="contained"
+                <TouchableOpacity
                   onPress={handleConfirmMultiSelect}
                   disabled={selectedElements.length === 0}
+                  style={[styles.confirmButton, selectedElements.length === 0 && styles.confirmButtonDisabled]}
                 >
-                  Übernehmen
-                </Button>
+                  <Text style={styles.confirmButtonText}>Übernehmen</Text>
+                </TouchableOpacity>
               </View>
             </>
           )}
@@ -759,10 +750,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: THEME.TEXT_PRIMARY,
   },
   searchButton: {
-    margin: 0,
+    width: 40,
+    height: 40,
     borderRadius: 4,
+    backgroundColor: THEME.PRIMARY_COLOR,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
   },
   resultsInfo: {
     paddingHorizontal: 16,
@@ -863,6 +868,20 @@ const styles = StyleSheet.create({
   selectedCount: {
     fontSize: 14,
     color: '#666',
+  },
+  confirmButton: {
+    backgroundColor: THEME.PRIMARY_COLOR,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 4,
+  },
+  confirmButtonDisabled: {
+    opacity: 0.5,
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
   },
   // Filter Modal styles
   filterModalOverlay: {

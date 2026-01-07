@@ -4,8 +4,7 @@
  */
 
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, Image, StyleSheet, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps } from './types';

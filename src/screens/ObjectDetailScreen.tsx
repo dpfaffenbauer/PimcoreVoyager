@@ -6,10 +6,10 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, Pressable, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { Card, Title, Paragraph, Chip, Surface, ActivityIndicator, Text, TextInput, Button } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, RefreshControl, Pressable, Modal, TouchableOpacity, TouchableWithoutFeedback, Text, TextInput, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { THEME } from '../config/constants';
 import { PimcoreService, WorkflowItem, WorkflowTransition, WorkflowGlobalAction, WorkflowNotes } from '../apis/pimcoreService';
 import { LayoutNodeRenderer } from '../components/FieldRenderer';
 import { WorkflowSection } from '../components/WorkflowSection';
@@ -141,7 +141,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
               onPress={handleStartEditing}
               style={{ padding: 8 }}
             >
-              <MaterialCommunityIcons name="pencil" size={22} color="#6200ee" />
+              <MaterialCommunityIcons name="pencil" size={22} color={THEME.PRIMARY_COLOR} />
             </TouchableOpacity>
           )}
           <TouchableOpacity
@@ -449,7 +449,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Objektdaten...</Text>
       </View>
     );
@@ -462,7 +462,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
       {/* Sticky Header Area */}
       <View style={styles.stickyHeader}>
         {/* Object Header */}
-        <Surface style={styles.headerCard} elevation={2}>
+        <View style={styles.headerCard}>
           <LinearGradient
             colors={object.type === 'folder' ? ['#FFB300', '#FF6F00'] : ['#2196F3', '#1565C0']}
             style={styles.headerGradient}
@@ -478,29 +478,33 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                 />
               </View>
               <View style={styles.headerText}>
-                <Title style={styles.headerTitle} numberOfLines={1}>
+                <Text style={styles.headerTitle} numberOfLines={1}>
                   {object.key || object.filename}
-                </Title>
+                </Text>
                 <View style={styles.headerMeta}>
-                  <Paragraph style={styles.headerSubtitle}>
+                  <Text style={styles.headerSubtitle}>
                     {object.className || 'Data Object'}
-                  </Paragraph>
-                  <Chip
-                    icon={object.published ? 'check-circle' : 'clock-outline'}
+                  </Text>
+                  <View
                     style={[
                       styles.statusChip,
                       object.published ? styles.publishedChip : styles.draftChip,
                     ]}
-                    textStyle={styles.statusChipText}
-                    compact
                   >
-                    {object.published ? 'Published' : 'Draft'}
-                  </Chip>
+                    <MaterialCommunityIcons
+                      name={object.published ? 'check-circle' : 'clock-outline'}
+                      size={14}
+                      color="#fff"
+                    />
+                    <Text style={styles.statusChipText}>
+                      {object.published ? 'Published' : 'Draft'}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </View>
           </LinearGradient>
-        </Surface>
+        </View>
 
         {/* Sticky Tab Bar */}
         {hasTabs && (
@@ -539,14 +543,12 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
       >
         {/* Error Message */}
         {error && (
-          <Card style={styles.errorCard}>
-            <Card.Content>
-              <View style={styles.errorContent}>
-                <MaterialCommunityIcons name="alert-circle" size={24} color="#f44336" />
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
-            </Card.Content>
-          </Card>
+          <View style={styles.errorCard}>
+            <View style={styles.errorContent}>
+              <MaterialCommunityIcons name="alert-circle" size={24} color="#f44336" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          </View>
         )}
 
         {/* Workflow Section */}
@@ -556,45 +558,43 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
 
         {/* Object Data - Tab Content or Full Layout */}
         {objectData?.objectData && layout && (
-          <Card style={styles.card}>
-            <Card.Content>
-              {hasTabs ? (
-                // Render active tab content
-                <LayoutNodeRenderer
-                  node={tabs[activeTab].node}
-                  objectData={isEditing ? formData : objectData.objectData}
-                  level={0}
-                  skipWrapper
-                  fieldCollectionLayouts={fieldCollectionLayouts}
-                  objectBrickLayouts={objectBrickLayouts}
-                  isEditing={isEditing}
-                  onFieldChange={setFieldValue}
-                  errors={errors}
-                />
-              ) : (
-                // Render full layout if no tabs
-                <>
-                  <View style={styles.sectionHeader}>
-                    <MaterialCommunityIcons name="form-textbox" size={24} color="#6200ee" />
-                    <Title style={styles.sectionTitle}>Objektdaten</Title>
-                  </View>
-                  {layout.children?.map((child: any, index: number) => (
-                    <LayoutNodeRenderer
-                      key={`${child.name}-${index}`}
-                      node={child}
-                      objectData={isEditing ? formData : objectData.objectData}
-                      level={0}
-                      fieldCollectionLayouts={fieldCollectionLayouts}
-                      objectBrickLayouts={objectBrickLayouts}
-                      isEditing={isEditing}
-                      onFieldChange={setFieldValue}
-                      errors={errors}
-                    />
-                  ))}
-                </>
-              )}
-            </Card.Content>
-          </Card>
+          <View style={styles.card}>
+            {hasTabs ? (
+              // Render active tab content
+              <LayoutNodeRenderer
+                node={tabs[activeTab].node}
+                objectData={isEditing ? formData : objectData.objectData}
+                level={0}
+                skipWrapper
+                fieldCollectionLayouts={fieldCollectionLayouts}
+                objectBrickLayouts={objectBrickLayouts}
+                isEditing={isEditing}
+                onFieldChange={setFieldValue}
+                errors={errors}
+              />
+            ) : (
+              // Render full layout if no tabs
+              <>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons name="form-textbox" size={24} color={THEME.PRIMARY_COLOR} />
+                  <Text style={styles.sectionTitle}>Objektdaten</Text>
+                </View>
+                {layout.children?.map((child: any, index: number) => (
+                  <LayoutNodeRenderer
+                    key={`${child.name}-${index}`}
+                    node={child}
+                    objectData={isEditing ? formData : objectData.objectData}
+                    level={0}
+                    fieldCollectionLayouts={fieldCollectionLayouts}
+                    objectBrickLayouts={objectBrickLayouts}
+                    isEditing={isEditing}
+                    onFieldChange={setFieldValue}
+                    errors={errors}
+                  />
+                ))}
+              </>
+            )}
+          </View>
         )}
 
         <View style={styles.bottomPadding} />
@@ -619,12 +619,12 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
               <View style={styles.menuModal}>
                 {/* Menu Header */}
                 <View style={styles.modalHeader}>
-                  <Title style={styles.modalTitle}>
+                  <Text style={styles.modalTitle}>
                     {activeMenuSection === 'info' ? 'Objektinformationen' :
                      activeMenuSection === 'permissions' ? 'Berechtigungen' :
                      activeMenuSection === 'workflows' ? 'Workflow Aktionen' :
                      activeMenuSection === 'action-form' ? pendingAction?.title || 'Aktion' : 'Menü'}
-                  </Title>
+                  </Text>
                   <TouchableOpacity
                     onPress={() => {
                       if (activeMenuSection === 'action-form') {
@@ -654,7 +654,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                         style={styles.menuItem}
                         onPress={() => setActiveMenuSection('workflows')}
                       >
-                        <MaterialCommunityIcons name="state-machine" size={24} color="#6200ee" />
+                        <MaterialCommunityIcons name="state-machine" size={24} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.menuItemText}>Workflow Aktionen</Text>
                         <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                       </TouchableOpacity>
@@ -664,7 +664,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                       style={styles.menuItem}
                       onPress={() => setActiveMenuSection('info')}
                     >
-                      <MaterialCommunityIcons name="information-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="information-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Objektinformationen</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -673,7 +673,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                       style={styles.menuItem}
                       onPress={() => setActiveMenuSection('permissions')}
                     >
-                      <MaterialCommunityIcons name="shield-check-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="shield-check-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Berechtigungen</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -682,7 +682,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                       style={styles.menuItem}
                       onPress={handlePropertiesOpen}
                     >
-                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Properties</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -691,7 +691,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                       style={styles.menuItem}
                       onPress={handleNotesOpen}
                     >
-                      <MaterialCommunityIcons name="note-multiple-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="note-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Notes</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -700,7 +700,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                       style={styles.menuItem}
                       onPress={handleDependenciesOpen}
                     >
-                      <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="link-variant" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Dependencies</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -710,7 +710,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                         style={styles.menuItem}
                         onPress={handlePreviewOpen}
                       >
-                        <MaterialCommunityIcons name="eye-outline" size={24} color="#6200ee" />
+                        <MaterialCommunityIcons name="eye-outline" size={24} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.menuItemText}>Vorschau</Text>
                         <MaterialCommunityIcons name="open-in-new" size={24} color="#999" />
                       </TouchableOpacity>
@@ -721,7 +721,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                         style={styles.menuItem}
                         onPress={handleChildrenOpen}
                       >
-                        <MaterialCommunityIcons name="file-tree-outline" size={24} color="#6200ee" />
+                        <MaterialCommunityIcons name="file-tree-outline" size={24} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.menuItemText}>Children</Text>
                         <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                       </TouchableOpacity>
@@ -731,7 +731,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                       style={styles.menuItem}
                       onPress={handleTagsOpen}
                     >
-                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                      <MaterialCommunityIcons name="tag-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                       <Text style={styles.menuItemText}>Tags</Text>
                       <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
@@ -741,7 +741,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                   <ScrollView style={styles.modalContent}>
                     {workflowActionLoading ? (
                       <View style={styles.workflowLoading}>
-                        <ActivityIndicator size="large" color="#6200ee" />
+                        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.workflowLoadingText}>Aktion wird ausgeführt...</Text>
                       </View>
                     ) : (
@@ -784,7 +784,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                   <ScrollView style={styles.modalContent}>
                     {workflowActionLoading ? (
                       <View style={styles.workflowLoading}>
-                        <ActivityIndicator size="large" color="#6200ee" />
+                        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.workflowLoadingText}>Aktion wird ausgeführt...</Text>
                       </View>
                     ) : (
@@ -797,12 +797,12 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                               {pendingAction.notes.commentRequired && <Text style={styles.required}> *</Text>}
                             </Text>
                             <TextInput
-                              mode="outlined"
                               value={actionFormData.comment}
                               onChangeText={(text) => setActionFormData((prev) => ({ ...prev, comment: text }))}
                               multiline
                               numberOfLines={4}
                               placeholder="Kommentar eingeben..."
+                              placeholderTextColor="#999"
                               style={styles.actionFormTextArea}
                             />
                           </View>
@@ -817,26 +817,26 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                             </Text>
                             {field.fieldType === 'textarea' ? (
                               <TextInput
-                                mode="outlined"
                                 value={actionFormData.additionalFields[field.name] || ''}
                                 onChangeText={(text) => updateFormField(field.name, text)}
                                 multiline
                                 numberOfLines={4}
+                                placeholderTextColor="#999"
                                 style={styles.actionFormTextArea}
                               />
                             ) : field.fieldType === 'numeric' ? (
                               <TextInput
-                                mode="outlined"
                                 value={actionFormData.additionalFields[field.name] || ''}
                                 onChangeText={(text) => updateFormField(field.name, text.replace(/[^0-9.-]/g, ''))}
                                 keyboardType="numeric"
+                                placeholderTextColor="#999"
                                 style={styles.actionFormInput}
                               />
                             ) : (
                               <TextInput
-                                mode="outlined"
                                 value={actionFormData.additionalFields[field.name] || ''}
                                 onChangeText={(text) => updateFormField(field.name, text)}
+                                placeholderTextColor="#999"
                                 style={styles.actionFormInput}
                               />
                             )}
@@ -844,16 +844,20 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                         ))}
 
                         {/* Submit Button */}
-                        <Button
-                          mode="contained"
+                        <TouchableOpacity
                           onPress={handleActionFormSubmit}
-                          loading={workflowActionLoading}
                           disabled={workflowActionLoading}
-                          icon="check"
-                          style={styles.actionFormSubmitButton}
+                          style={[styles.actionFormSubmitButton, workflowActionLoading && styles.buttonDisabled]}
                         >
-                          Ausführen
-                        </Button>
+                          {workflowActionLoading ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                          ) : (
+                            <>
+                              <MaterialCommunityIcons name="check" size={20} color="#fff" />
+                              <Text style={styles.submitButtonText}>Ausführen</Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
                       </View>
                     )}
                   </ScrollView>
@@ -862,24 +866,24 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                   <ScrollView style={styles.modalContent}>
                     <View style={styles.modalSection}>
                       <View style={styles.modalSectionHeader}>
-                        <MaterialCommunityIcons name="information-outline" size={20} color="#6200ee" />
+                        <MaterialCommunityIcons name="information-outline" size={20} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalSectionTitle}>Allgemein</Text>
                       </View>
 
                       <View style={styles.modalInfoRow}>
-                        <MaterialCommunityIcons name="pound" size={18} color="#6200ee" />
+                        <MaterialCommunityIcons name="pound" size={18} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalInfoLabel}>ID</Text>
                         <Text style={styles.modalInfoValue}>{object.id?.toString()}</Text>
                       </View>
 
                       <View style={styles.modalInfoRow}>
-                        <MaterialCommunityIcons name="tag-outline" size={18} color="#6200ee" />
+                        <MaterialCommunityIcons name="tag-outline" size={18} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalInfoLabel}>Typ</Text>
                         <Text style={styles.modalInfoValue}>{object.type}</Text>
                       </View>
 
                       <View style={styles.modalInfoRow}>
-                        <MaterialCommunityIcons name="folder-open-outline" size={18} color="#6200ee" />
+                        <MaterialCommunityIcons name="folder-open-outline" size={18} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalInfoLabel}>Pfad</Text>
                         <Text style={styles.modalInfoValue} numberOfLines={2}>
                           {object.fullPath || object.path}
@@ -889,7 +893,7 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
 
                     <View style={styles.modalSection}>
                       <View style={styles.modalSectionHeader}>
-                        <MaterialCommunityIcons name="clock-outline" size={20} color="#6200ee" />
+                        <MaterialCommunityIcons name="clock-outline" size={20} color={THEME.PRIMARY_COLOR} />
                         <Text style={styles.modalSectionTitle}>Metadaten</Text>
                       </View>
 
@@ -934,21 +938,20 @@ function ObjectDetailScreenInner({ route, navigation }: ObjectDetailScreenProps)
                         {Object.entries(object.permissions).map(([key, value]) => {
                           if (typeof value === 'boolean') {
                             return (
-                              <Surface
+                              <View
                                 key={key}
                                 style={[
                                   styles.permissionCard,
                                   value ? styles.permissionEnabled : styles.permissionDisabled,
                                 ]}
-                                elevation={0}
                               >
                                 <MaterialCommunityIcons
                                   name={value ? 'check-circle' : 'close-circle'}
                                   size={20}
                                   color={value ? '#4caf50' : '#f44336'}
                                 />
-                                <Paragraph style={styles.permissionText}>{key}</Paragraph>
-                              </Surface>
+                                <Text style={styles.permissionText}>{key}</Text>
+                              </View>
                             );
                           }
                           return null;
@@ -994,6 +997,11 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     borderRadius: 16,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerGradient: {
     padding: 16,
@@ -1031,15 +1039,17 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     height: 26,
-    marginVertical: 0,
+    paddingHorizontal: 8,
+    borderRadius: 13,
+    gap: 4,
   },
   statusChipText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 11,
-    marginVertical: 0,
-    lineHeight: 14,
   },
   publishedChip: {
     backgroundColor: 'rgba(76, 175, 80, 0.9)',
@@ -1086,6 +1096,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 16,
     backgroundColor: '#ffebee',
+    padding: 16,
   },
   errorContent: {
     flexDirection: 'row',
@@ -1100,6 +1111,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginBottom: 12,
     borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 2,
   },
   sectionHeader: {
@@ -1270,7 +1287,7 @@ const styles = StyleSheet.create({
   modalSectionTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
     marginLeft: 8,
   },
   modalInfoRow: {
@@ -1326,7 +1343,7 @@ const styles = StyleSheet.create({
   workflowActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#6200ee',
+    backgroundColor: THEME.PRIMARY_COLOR,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
@@ -1356,13 +1373,44 @@ const styles = StyleSheet.create({
   },
   actionFormInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#79747E',
+    borderRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
   },
   actionFormTextArea: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#79747E',
+    borderRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
     minHeight: 100,
+    textAlignVertical: 'top',
   },
   actionFormSubmitButton: {
     marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: THEME.PRIMARY_COLOR,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    gap: 8,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });
 

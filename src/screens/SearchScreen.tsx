@@ -11,17 +11,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-} from 'react-native';
-import {
   Text,
   TextInput,
-  IconButton,
   ActivityIndicator,
-  Divider,
-  Chip,
-  Menu,
-  Button,
-} from 'react-native-paper';
+  Modal,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { THEME } from '../config/constants';
 import {
@@ -454,103 +449,132 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
       <View style={styles.searchContainer}>
         {/* Type Filter (for Documents/Assets) */}
         {(activeTab === 'documents' || activeTab === 'assets') && (
-          <Menu
-            visible={typeMenuVisible}
-            onDismiss={() => setTypeMenuVisible(false)}
-            anchor={
-              <TouchableOpacity
-                style={styles.filterButton}
-                onPress={() => setTypeMenuVisible(true)}
-              >
-                <Text style={styles.filterButtonText}>
-                  {typeFilter || 'All types'}
-                </Text>
-                <MaterialCommunityIcons name="chevron-down" size={20} color={THEME.TEXT_SECONDARY} />
-              </TouchableOpacity>
-            }
-          >
-            <Menu.Item
-              onPress={() => {
-                setTypeFilter(undefined);
-                setTypeMenuVisible(false);
-              }}
-              title="All types"
-            />
-            {(activeTab === 'documents' ? documentTypes : assetTypes).map((type) => (
-              <Menu.Item
-                key={type}
-                onPress={() => {
-                  setTypeFilter(type);
-                  setTypeMenuVisible(false);
-                }}
-                title={type}
-              />
-            ))}
-          </Menu>
+          <>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setTypeMenuVisible(true)}
+            >
+              <Text style={styles.filterButtonText}>
+                {typeFilter || 'All types'}
+              </Text>
+              <MaterialCommunityIcons name="chevron-down" size={20} color={THEME.TEXT_SECONDARY} />
+            </TouchableOpacity>
+            <Modal
+              visible={typeMenuVisible}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setTypeMenuVisible(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setTypeMenuVisible(false)}>
+                <View style={styles.menuOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={styles.menuContainer}>
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                          setTypeFilter(undefined);
+                          setTypeMenuVisible(false);
+                        }}
+                      >
+                        <Text style={styles.menuItemText}>All types</Text>
+                      </TouchableOpacity>
+                      {(activeTab === 'documents' ? documentTypes : assetTypes).map((type) => (
+                        <TouchableOpacity
+                          key={type}
+                          style={styles.menuItem}
+                          onPress={() => {
+                            setTypeFilter(type);
+                            setTypeMenuVisible(false);
+                          }}
+                        >
+                          <Text style={styles.menuItemText}>{type}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          </>
         )}
 
         {/* Class Filter (for Data Objects) */}
         {activeTab === 'dataObjects' && (
-          <Menu
-            visible={classMenuVisible}
-            onDismiss={() => setClassMenuVisible(false)}
-            anchor={
-              <TouchableOpacity
-                style={styles.filterButton}
-                onPress={() => setClassMenuVisible(true)}
-              >
-                <Text style={styles.filterButtonText}>
-                  {classFilter || 'All classes'}
-                </Text>
-                <MaterialCommunityIcons name="chevron-down" size={20} color={THEME.TEXT_SECONDARY} />
-              </TouchableOpacity>
-            }
-          >
-            <Menu.Item
-              onPress={() => {
-                setClassFilter(undefined);
-                setClassMenuVisible(false);
-              }}
-              title="All classes"
-            />
-            {classes.map((cls) => (
-              <Menu.Item
-                key={cls.id}
-                onPress={() => {
-                  setClassFilter(cls.id);
-                  setClassMenuVisible(false);
-                }}
-                title={cls.name}
-              />
-            ))}
-          </Menu>
+          <>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setClassMenuVisible(true)}
+            >
+              <Text style={styles.filterButtonText}>
+                {classFilter || 'All classes'}
+              </Text>
+              <MaterialCommunityIcons name="chevron-down" size={20} color={THEME.TEXT_SECONDARY} />
+            </TouchableOpacity>
+            <Modal
+              visible={classMenuVisible}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setClassMenuVisible(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setClassMenuVisible(false)}>
+                <View style={styles.menuOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={styles.menuContainer}>
+                      <ScrollView style={styles.menuScroll}>
+                        <TouchableOpacity
+                          style={styles.menuItem}
+                          onPress={() => {
+                            setClassFilter(undefined);
+                            setClassMenuVisible(false);
+                          }}
+                        >
+                          <Text style={styles.menuItemText}>All classes</Text>
+                        </TouchableOpacity>
+                        {classes.map((cls) => (
+                          <TouchableOpacity
+                            key={cls.id}
+                            style={styles.menuItem}
+                            onPress={() => {
+                              setClassFilter(cls.id);
+                              setClassMenuVisible(false);
+                            }}
+                          >
+                            <Text style={styles.menuItemText}>{cls.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          </>
         )}
 
         {/* Search Input */}
         <View style={styles.searchInputContainer}>
-          <TextInput
-            style={styles.searchInput}
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-            placeholder="Search..."
-            mode="outlined"
-            dense
-            right={
-              searchTerm ? (
-                <TextInput.Icon icon="close" onPress={clearSearch} />
-              ) : undefined
-            }
-            onSubmitEditing={handleSearch}
-          />
-          <IconButton
-            icon="magnify"
-            mode="contained"
-            containerColor={THEME.PRIMARY_COLOR}
-            iconColor="#fff"
-            size={20}
-            onPress={handleSearch}
+          <View style={styles.searchInputWrapper}>
+            <TextInput
+              style={styles.searchInput}
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+              placeholder="Search..."
+              placeholderTextColor={THEME.TEXT_SECONDARY}
+              onSubmitEditing={handleSearch}
+              returnKeyType="search"
+            />
+            {searchTerm ? (
+              <TouchableOpacity style={styles.clearButton} onPress={clearSearch}>
+                <MaterialCommunityIcons name="close" size={20} color={THEME.TEXT_SECONDARY} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+          <TouchableOpacity
             style={styles.searchButton}
-          />
+            onPress={handleSearch}
+          >
+            <MaterialCommunityIcons name="magnify" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -560,14 +584,14 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
       {/* Results */}
       {isLoading && getCurrentResults().length === 0 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         </View>
       ) : (
         <FlatList
           data={getCurrentResults()}
           renderItem={activeTab === 'all' ? renderQuickResultItem : renderSearchResultItem}
           keyExtractor={(item) => `${item.id}-${item.type}`}
-          ItemSeparatorComponent={() => <Divider />}
+          ItemSeparatorComponent={() => <View style={styles.divider} />}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             searchTerm ? (
@@ -594,7 +618,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             isLoading && getCurrentResults().length > 0 ? (
-              <ActivityIndicator style={styles.footerLoader} />
+              <ActivityIndicator style={styles.footerLoader} color={THEME.PRIMARY_COLOR} />
             ) : null
           }
         />
@@ -665,13 +689,63 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  searchInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+  },
   searchInput: {
     flex: 1,
-    backgroundColor: '#fff',
+    fontSize: 14,
+    color: THEME.TEXT_PRIMARY,
+    paddingVertical: 10,
+  },
+  clearButton: {
+    padding: 4,
   },
   searchButton: {
-    margin: 0,
+    backgroundColor: THEME.PRIMARY_COLOR,
+    padding: 10,
     borderRadius: 4,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    minWidth: 200,
+    maxHeight: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  menuScroll: {
+    maxHeight: 400,
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e0e0e0',
+  },
+  menuItemText: {
+    fontSize: 14,
+    color: THEME.TEXT_PRIMARY,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
   },
   tableHeader: {
     flexDirection: 'row',

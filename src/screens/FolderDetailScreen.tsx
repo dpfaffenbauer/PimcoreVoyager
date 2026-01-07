@@ -9,14 +9,14 @@
  * - Phone (width <= 768): Stacked view with dropdown class selection
  */
 
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, useWindowDimensions, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
-import { Text, ActivityIndicator, Card, Chip, IconButton, Appbar, Surface, Button, Title, Divider } from 'react-native-paper';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, useWindowDimensions, Modal, TouchableWithoutFeedback, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PimcoreService } from '../apis/pimcoreService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 
 // Breakpoint for split layout (tablet vs phone)
 const SPLIT_LAYOUT_BREAKPOINT = 768;
@@ -186,12 +186,12 @@ export default function FolderDetailScreen() {
       <View style={styles.sidebarContainer}>
         <View style={styles.sidebarHeader}>
           <LinearGradient
-            colors={['#6200ee', '#9d4edd']}
+            colors={[THEME.PRIMARY_COLOR, '#9d4edd']}
             style={styles.sidebarHeaderGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <IconButton icon="cube-outline" iconColor="#fff" size={24} />
+            <MaterialCommunityIcons name="cube-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
             <Text style={styles.sidebarHeaderText}>Klassen</Text>
           </LinearGradient>
         </View>
@@ -211,15 +211,15 @@ export default function FolderDetailScreen() {
                 ]}
               >
                 <LinearGradient
-                  colors={selectedClass?.id === classObj.id ? ['#6200ee', '#9d4edd'] : ['#e0e0e0', '#e0e0e0']}
+                  colors={selectedClass?.id === classObj.id ? [THEME.PRIMARY_COLOR, '#9d4edd'] : ['#e0e0e0', '#e0e0e0']}
                   style={styles.sidebarItemIcon}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <IconButton
-                    icon="cube"
-                    iconColor={selectedClass?.id === classObj.id ? '#fff' : '#666'}
+                  <MaterialCommunityIcons
+                    name="cube"
                     size={18}
+                    color={selectedClass?.id === classObj.id ? '#fff' : '#666'}
                   />
                 </LinearGradient>
                 <Text
@@ -232,7 +232,7 @@ export default function FolderDetailScreen() {
                   {classObj.name}
                 </Text>
                 {selectedClass?.id === classObj.id && (
-                  <IconButton icon="chevron-right" size={20} iconColor="#6200ee" />
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={THEME.PRIMARY_COLOR} />
                 )}
               </TouchableOpacity>
             ))
@@ -246,11 +246,9 @@ export default function FolderDetailScreen() {
   const renderClassSelection = () => {
     if (classes.length === 0) {
       return (
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text>Keine Klassen in diesem Ordner gefunden.</Text>
-          </Card.Content>
-        </Card>
+        <View style={styles.card}>
+          <Text style={styles.cardText}>Keine Klassen in diesem Ordner gefunden.</Text>
+        </View>
       );
     }
 
@@ -263,15 +261,15 @@ export default function FolderDetailScreen() {
             onPress={() => setMenuVisible(true)}
             style={styles.dropdownButton}
           >
-            <Surface style={styles.dropdownSurface} elevation={2}>
+            <View style={styles.dropdownSurface}>
               <View style={styles.dropdownContent}>
                 <LinearGradient
-                  colors={['#6200ee', '#9d4edd']}
+                  colors={[THEME.PRIMARY_COLOR, '#9d4edd']}
                   style={styles.dropdownIcon}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <IconButton icon="cube-outline" iconColor="#fff" size={20} />
+                  <MaterialCommunityIcons name="cube-outline" size={20} color="#fff" />
                 </LinearGradient>
                 <Text style={styles.dropdownText}>
                   {selectedClass ? selectedClass.name : 'Wählen Sie eine Klasse aus'}
@@ -282,7 +280,7 @@ export default function FolderDetailScreen() {
                   color="#666"
                 />
               </View>
-            </Surface>
+            </View>
           </Pressable>
 
           {/* Class Selection Modal */}
@@ -298,9 +296,11 @@ export default function FolderDetailScreen() {
                   <View style={styles.classSelectionModal}>
                     <View style={styles.classModalHeader}>
                       <Text style={styles.classModalTitle}>Klasse auswählen</Text>
-                      <Button onPress={() => setMenuVisible(false)}>Schließen</Button>
+                      <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.closeButton}>
+                        <Text style={styles.closeButtonText}>Schließen</Text>
+                      </TouchableOpacity>
                     </View>
-                    <Divider />
+                    <View style={styles.divider} />
                     <ScrollView style={styles.classModalList}>
                       {classes.map((classObj) => (
                         <Pressable
@@ -315,7 +315,7 @@ export default function FolderDetailScreen() {
                           ]}
                         >
                           <LinearGradient
-                            colors={selectedClass?.id === classObj.id ? ['#6200ee', '#9d4edd'] : ['#e0e0e0', '#e0e0e0']}
+                            colors={selectedClass?.id === classObj.id ? [THEME.PRIMARY_COLOR, '#9d4edd'] : ['#e0e0e0', '#e0e0e0']}
                             style={styles.classModalItemIcon}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
@@ -335,7 +335,7 @@ export default function FolderDetailScreen() {
                             {classObj.name}
                           </Text>
                           {selectedClass?.id === classObj.id && (
-                            <MaterialCommunityIcons name="check" size={20} color="#6200ee" />
+                            <MaterialCommunityIcons name="check" size={20} color={THEME.PRIMARY_COLOR} />
                           )}
                         </Pressable>
                       ))}
@@ -393,7 +393,7 @@ export default function FolderDetailScreen() {
     if (loadingGrid && (!gridData || gridData.items.length === 0)) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
           <Text style={styles.loadingText}>Lade Objekte...</Text>
         </View>
       );
@@ -405,11 +405,9 @@ export default function FolderDetailScreen() {
 
     if (items.length === 0) {
       return (
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text>Keine Objekte gefunden.</Text>
-          </Card.Content>
-        </Card>
+        <View style={styles.card}>
+          <Text style={styles.cardText}>Keine Objekte gefunden.</Text>
+        </View>
       );
     }
 
@@ -437,42 +435,45 @@ export default function FolderDetailScreen() {
                 })
               }
             >
-              <Surface style={styles.gridItem} elevation={1}>
+              <View style={styles.gridItem}>
                 <LinearGradient
                   colors={['#0084ff', '#44a3ff']}
                   style={styles.objectIcon}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <IconButton icon="cube" iconColor="#fff" size={20} />
+                  <MaterialCommunityIcons name="cube" size={20} color="#fff" />
                 </LinearGradient>
 
                 <View style={styles.objectInfo}>
                   <Text style={styles.objectName}>{displayName}</Text>
                   <View style={styles.objectMeta}>
-                    <Chip icon="key-variant" style={styles.metaChip} textStyle={styles.metaChipText}>
-                      {displayName}
-                    </Chip>
+                    <View style={styles.metaChip}>
+                      <MaterialCommunityIcons name="key-variant" size={12} color="#666" />
+                      <Text style={styles.metaChipText}>{displayName}</Text>
+                    </View>
                     <View style={[styles.statusDot, isPublished(item) ? styles.publishedDot : styles.draftDot]} />
                   </View>
                 </View>
 
-              <IconButton icon="chevron-right" size={20} />
-            </Surface>
-          </TouchableOpacity>
+                <MaterialCommunityIcons name="chevron-right" size={20} color="#666" />
+              </View>
+            </TouchableOpacity>
           );
         })}
 
         {hasMore && (
-          <Button
-            mode="outlined"
+          <TouchableOpacity
             onPress={loadMore}
-            loading={loadingGrid}
             disabled={loadingGrid}
-            style={styles.loadMoreButton}
+            style={[styles.loadMoreButton, loadingGrid && styles.loadMoreButtonDisabled]}
           >
-            Mehr laden
-          </Button>
+            {loadingGrid ? (
+              <ActivityIndicator size="small" color={THEME.PRIMARY_COLOR} />
+            ) : (
+              <Text style={styles.loadMoreButtonText}>Mehr laden</Text>
+            )}
+          </TouchableOpacity>
         )}
       </View>
     );
@@ -483,7 +484,7 @@ export default function FolderDetailScreen() {
     if (loadingGrid && (!gridData || gridData.items.length === 0)) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
           <Text style={styles.loadingText}>Lade Objekte...</Text>
         </View>
       );
@@ -492,7 +493,7 @@ export default function FolderDetailScreen() {
     if (!selectedClass) {
       return (
         <View style={styles.contentPlaceholder}>
-          <IconButton icon="cube-outline" size={64} iconColor="#ccc" />
+          <MaterialCommunityIcons name="cube-outline" size={64} color="#ccc" />
           <Text style={styles.contentPlaceholderText}>
             Wählen Sie eine Klasse aus der Liste
           </Text>
@@ -525,7 +526,7 @@ export default function FolderDetailScreen() {
           <TouchableWithoutFeedback>
             <View style={styles.menuModal}>
               <View style={styles.modalHeader}>
-                <Title style={styles.modalTitle}>Menü</Title>
+                <Text style={styles.modalTitle}>Menü</Text>
                 <TouchableOpacity
                   onPress={() => setPropertiesMenuVisible(false)}
                   style={styles.modalCloseButton}
@@ -539,7 +540,7 @@ export default function FolderDetailScreen() {
                   style={styles.menuItem}
                   onPress={handlePropertiesOpen}
                 >
-                  <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="tag-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Properties</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -548,7 +549,7 @@ export default function FolderDetailScreen() {
                   style={styles.menuItem}
                   onPress={handleNotesOpen}
                 >
-                  <MaterialCommunityIcons name="note-multiple-outline" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="note-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Notes</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -557,7 +558,7 @@ export default function FolderDetailScreen() {
                   style={styles.menuItem}
                   onPress={handleDependenciesOpen}
                 >
-                  <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="link-variant" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Dependencies</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -566,7 +567,7 @@ export default function FolderDetailScreen() {
                   style={styles.menuItem}
                   onPress={handleTagsOpen}
                 >
-                  <MaterialCommunityIcons name="tag-outline" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="tag-outline" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Tags</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -578,20 +579,30 @@ export default function FolderDetailScreen() {
     </Modal>
   );
 
+  // Set up navigation header
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: folder.key || folder.filename || 'Ordner',
+      headerRight: () => (
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={onRefresh} style={styles.headerButton}>
+            <MaterialCommunityIcons name="refresh" size={24} color="#666" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setPropertiesMenuVisible(true)} style={styles.headerButton}>
+            <MaterialCommunityIcons name="dots-vertical" size={24} color="#666" />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, folder, onRefresh]);
+
   // Split layout for tablets
   if (isSplitLayout) {
     return (
       <View style={styles.container}>
-        <Appbar.Header>
-          <Appbar.BackAction onPress={() => navigation.goBack()} />
-          <Appbar.Content title={folder.key || folder.filename || 'Ordner'} />
-          <Appbar.Action icon="refresh" onPress={onRefresh} />
-          <Appbar.Action icon="dots-vertical" onPress={() => setPropertiesMenuVisible(true)} />
-        </Appbar.Header>
-
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
             <Text style={styles.loadingText}>Lade Daten...</Text>
           </View>
         ) : (
@@ -611,13 +622,6 @@ export default function FolderDetailScreen() {
   // Stacked layout for phones
   return (
     <View style={styles.container}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={folder.key || folder.filename || 'Ordner'} />
-        <Appbar.Action icon="refresh" onPress={loadFolderData} />
-        <Appbar.Action icon="dots-vertical" onPress={() => setPropertiesMenuVisible(true)} />
-      </Appbar.Header>
-
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -626,7 +630,7 @@ export default function FolderDetailScreen() {
       >
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
             <Text style={styles.loadingText}>Lade Daten...</Text>
           </View>
         ) : (
@@ -648,6 +652,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    padding: 8,
+    marginRight: 8,
   },
   loadingContainer: {
     flex: 1,
@@ -743,13 +755,24 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   sidebarItemTextActive: {
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
     fontWeight: '600',
   },
   // Stacked layout styles (phone)
   card: {
     margin: 16,
     borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardText: {
+    fontSize: 14,
+    color: '#666',
   },
   classDropdownContainer: {
     padding: 16,
@@ -766,6 +789,11 @@ const styles = StyleSheet.create({
   dropdownSurface: {
     borderRadius: 16,
     backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   dropdownContent: {
     flexDirection: 'row',
@@ -808,6 +836,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#fff',
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   objectIcon: {
     width: 48,
@@ -832,13 +865,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   metaChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     height: 24,
     backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    gap: 4,
   },
   metaChipText: {
     fontSize: 11,
-    marginVertical: 0,
-    marginHorizontal: 8,
+    color: '#666',
   },
   statusDot: {
     width: 8,
@@ -854,6 +891,21 @@ const styles = StyleSheet.create({
   loadMoreButton: {
     marginTop: 16,
     marginBottom: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: THEME.PRIMARY_COLOR,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadMoreButtonDisabled: {
+    opacity: 0.5,
+  },
+  loadMoreButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: THEME.PRIMARY_COLOR,
   },
   // Modal Styles
   modalOverlay: {
@@ -935,6 +987,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  closeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  closeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: THEME.PRIMARY_COLOR,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
+  },
   classModalList: {
     maxHeight: 400,
   },
@@ -964,7 +1029,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   classModalItemTextSelected: {
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
     fontWeight: '600',
   },
 });

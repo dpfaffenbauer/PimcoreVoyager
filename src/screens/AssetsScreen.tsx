@@ -5,10 +5,10 @@
  */
 
 import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable, Image } from 'react-native';
-import { Text, ActivityIndicator, IconButton } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Pressable, Image, Text, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { PimcoreService } from '../apis/pimcoreService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useInstanceStore } from '../store/instanceStore';
@@ -221,11 +221,10 @@ export default function AssetsScreen() {
                 }}
                 style={styles.chevronButton}
               >
-                <IconButton
-                  icon={node.expanded ? 'chevron-down' : 'chevron-right'}
+                <MaterialCommunityIcons
+                  name={node.expanded ? 'chevron-down' : 'chevron-right'}
                   size={20}
-                  iconColor="#666"
-                  style={{ margin: 0 }}
+                  color="#666"
                 />
               </TouchableOpacity>
             )}
@@ -245,7 +244,7 @@ export default function AssetsScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <IconButton icon={icon} iconColor="#fff" size={18} style={{ margin: 0 }} />
+                <MaterialCommunityIcons name={icon} size={18} color="#fff" />
               </LinearGradient>
             )}
 
@@ -290,7 +289,7 @@ export default function AssetsScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
           <Text style={styles.loadingText}>Lade Assets...</Text>
         </View>
       </View>
@@ -307,7 +306,7 @@ export default function AssetsScreen() {
       >
         {treeData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <IconButton icon="image-off" size={64} iconColor="#ccc" />
+            <MaterialCommunityIcons name="image-off" size={64} color="#ccc" />
             <Text style={styles.emptyText}>Keine Assets gefunden</Text>
           </View>
         ) : (

@@ -4,11 +4,12 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { Text, Chip, Button, Portal, Modal, Checkbox } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Pressable, Text, Modal, TouchableOpacity } from 'react-native';
+import { Checkbox } from '@ant-design/react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../../config/constants';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
-import { FieldRendererProps, FieldOption } from './types';
+import { FieldRendererProps, FieldOption, FieldDefinition } from './types';
 
 // Predefined options for country, language, gender fields
 const COUNTRY_OPTIONS: FieldOption[] = [
@@ -82,16 +83,19 @@ export const SelectField: React.FC<FieldRendererProps> = ({
         </Pressable>
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <Portal>
-          <Modal
-            visible={modalVisible}
-            onDismiss={() => setModalVisible(false)}
-            contentContainerStyle={styles.selectModalContainer}
-          >
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <Pressable style={styles.selectModalOverlay} onPress={() => setModalVisible(false)}>
             <View style={styles.selectModal}>
               <View style={styles.selectModalHeader}>
                 <Text style={styles.selectModalTitle}>{title}</Text>
-                <Button onPress={() => setModalVisible(false)}>Schließen</Button>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text style={styles.modalCloseButton}>Schließen</Text>
+                </TouchableOpacity>
               </View>
               <ScrollView style={styles.selectModalList} bounces={false}>
                 <Pressable
@@ -116,7 +120,7 @@ export const SelectField: React.FC<FieldRendererProps> = ({
                     ]}
                   >
                     {value === opt.key && (
-                      <MaterialCommunityIcons name="check" size={20} color="#6200ee" style={{ marginRight: 12 }} />
+                      <MaterialCommunityIcons name="check" size={20} color={THEME.PRIMARY_COLOR} style={{ marginRight: 12 }} />
                     )}
                     <Text style={[
                       styles.selectModalItemText,
@@ -128,8 +132,8 @@ export const SelectField: React.FC<FieldRendererProps> = ({
                 ))}
               </ScrollView>
             </View>
-          </Modal>
-        </Portal>
+          </Pressable>
+        </Modal>
       </FieldWrapper>
     );
   }
@@ -137,7 +141,9 @@ export const SelectField: React.FC<FieldRendererProps> = ({
   // View mode
   return (
     <FieldWrapper label={title} mandatory={mandatory}>
-      <Chip style={styles.selectChip}>{selectedLabel}</Chip>
+      <View style={styles.selectChip}>
+        <Text style={styles.selectChipText}>{selectedLabel}</Text>
+      </View>
     </FieldWrapper>
   );
 };
@@ -207,16 +213,19 @@ export const MultiselectField: React.FC<FieldRendererProps> = ({
         )}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <Portal>
-          <Modal
-            visible={modalVisible}
-            onDismiss={() => setModalVisible(false)}
-            contentContainerStyle={styles.selectModalContainer}
-          >
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <Pressable style={styles.selectModalOverlay} onPress={() => setModalVisible(false)}>
             <View style={styles.multiselectModal}>
               <View style={styles.multiselectHeader}>
                 <Text style={styles.multiselectTitle}>{title}</Text>
-                <Button onPress={() => setModalVisible(false)}>Abbrechen</Button>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text style={styles.modalCloseButton}>Abbrechen</Text>
+                </TouchableOpacity>
               </View>
               <ScrollView style={styles.multiselectList} bounces={false}>
                 {options.map((opt) => (
@@ -226,22 +235,26 @@ export const MultiselectField: React.FC<FieldRendererProps> = ({
                     style={styles.multiselectItem}
                   >
                     <Checkbox
-                      status={tempSelection.includes(opt.key) ? 'checked' : 'unchecked'}
-                      onPress={() => toggleOption(opt.key)}
+                      checked={tempSelection.includes(opt.key)}
+                      onChange={() => toggleOption(opt.key)}
                     />
                     <Text style={styles.multiselectItemText}>{opt.value}</Text>
                   </Pressable>
                 ))}
               </ScrollView>
               <View style={styles.multiselectFooter}>
-                <Button onPress={() => setTempSelection([])}>Alle abwählen</Button>
-                <Button mode="contained" onPress={confirmSelection}>
-                  Übernehmen ({tempSelection.length})
-                </Button>
+                <TouchableOpacity onPress={() => setTempSelection([])}>
+                  <Text style={styles.footerButtonText}>Alle abwählen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.confirmButton} onPress={confirmSelection}>
+                  <Text style={styles.confirmButtonText}>
+                    Übernehmen ({tempSelection.length})
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </Modal>
-        </Portal>
+          </Pressable>
+        </Modal>
       </FieldWrapper>
     );
   }
@@ -254,9 +267,9 @@ export const MultiselectField: React.FC<FieldRendererProps> = ({
           currentValue.map((item, index) => {
             const label = options.find(opt => opt.key === item)?.value || item;
             return (
-              <Chip key={index} style={styles.selectChip}>
-                {label}
-              </Chip>
+              <View key={index} style={styles.selectChip}>
+                <Text style={styles.selectChipText}>{label}</Text>
+              </View>
             );
           })
         ) : (
@@ -272,7 +285,7 @@ export const CountryField: React.FC<FieldRendererProps> = (props) => {
   const fieldWithOptions = {
     ...props.field,
     options: COUNTRY_OPTIONS,
-  };
+  } as FieldDefinition;
   return <SelectField {...props} field={fieldWithOptions} />;
 };
 
@@ -281,7 +294,7 @@ export const LanguageField: React.FC<FieldRendererProps> = (props) => {
   const fieldWithOptions = {
     ...props.field,
     options: LANGUAGE_OPTIONS,
-  };
+  } as FieldDefinition;
   return <SelectField {...props} field={fieldWithOptions} />;
 };
 
@@ -290,13 +303,22 @@ export const GenderField: React.FC<FieldRendererProps> = (props) => {
   const fieldWithOptions = {
     ...props.field,
     options: GENDER_OPTIONS,
-  };
+  } as FieldDefinition;
   return <SelectField {...props} field={fieldWithOptions} />;
 };
 
 const styles = StyleSheet.create({
   selectChip: {
     alignSelf: 'flex-start',
+    backgroundColor: '#f0e7ff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  selectChipText: {
+    fontSize: 14,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
   },
   multiselectContainer: {
     flexDirection: 'row',
@@ -341,11 +363,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   // Modal styles
-  selectModalContainer: {
-    paddingTop: '15%',
-    paddingHorizontal: 20,
+  selectModalOverlay: {
     flex: 1,
-    justifyContent: 'flex-start',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  modalCloseButton: {
+    fontSize: 15,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
   },
   selectModal: {
     backgroundColor: '#fff',
@@ -386,7 +413,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   selectModalItemTextSelected: {
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
     fontWeight: '500',
   },
   selectModalItemEmpty: {
@@ -440,6 +467,22 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
     backgroundColor: '#f8f9fa',
+  },
+  footerButtonText: {
+    fontSize: 15,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
+  },
+  confirmButton: {
+    backgroundColor: THEME.PRIMARY_COLOR,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  confirmButtonText: {
+    fontSize: 15,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 

@@ -4,8 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable, Platform } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, StyleSheet, Pressable, Platform, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';

@@ -18,8 +18,9 @@ import {
   RefreshControl,
   Modal,
   TouchableWithoutFeedback,
+  Text,
+  ActivityIndicator,
 } from 'react-native';
-import { Text, ActivityIndicator, IconButton, Card, Chip, Title } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -250,7 +251,7 @@ export default function AssetDetailScreen() {
           <TouchableWithoutFeedback>
             <View style={styles.menuModal}>
               <View style={styles.modalHeader}>
-                <Title style={styles.modalTitle}>Menü</Title>
+                <Text style={styles.modalTitle}>Menü</Text>
                 <TouchableOpacity
                   onPress={() => setMenuModalVisible(false)}
                   style={styles.modalCloseButton}
@@ -264,7 +265,7 @@ export default function AssetDetailScreen() {
                   style={styles.menuItem}
                   onPress={handlePropertiesOpen}
                 >
-                  <MaterialCommunityIcons name="tag-multiple-outline" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="tag-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Properties</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -273,7 +274,7 @@ export default function AssetDetailScreen() {
                   style={styles.menuItem}
                   onPress={handleNotesOpen}
                 >
-                  <MaterialCommunityIcons name="note-multiple-outline" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="note-multiple-outline" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Notes</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -282,7 +283,7 @@ export default function AssetDetailScreen() {
                   style={styles.menuItem}
                   onPress={handleDependenciesOpen}
                 >
-                  <MaterialCommunityIcons name="link-variant" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="link-variant" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Dependencies</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -291,7 +292,7 @@ export default function AssetDetailScreen() {
                   style={styles.menuItem}
                   onPress={handleTagsOpen}
                 >
-                  <MaterialCommunityIcons name="tag-outline" size={24} color="#6200ee" />
+                  <MaterialCommunityIcons name="tag-outline" size={24} color={THEME.PRIMARY_COLOR} />
                   <Text style={styles.menuItemText}>Tags</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
@@ -374,7 +375,9 @@ export default function AssetDetailScreen() {
 
             <View style={styles.metadataRow}>
               <Text style={styles.metadataLabel}>Typ</Text>
-              <Chip compact style={styles.typeChip}>{assetDetails.type}</Chip>
+              <View style={styles.typeChip}>
+                <Text style={styles.typeChipText}>{assetDetails.type}</Text>
+              </View>
             </View>
 
             {assetDetails.mimeType && (
@@ -438,7 +441,9 @@ export default function AssetDetailScreen() {
             </LinearGradient>
 
             <Text style={styles.assetFilename}>{assetDetails.filename}</Text>
-            <Chip compact style={styles.typeChipLarge}>{assetDetails.type}</Chip>
+            <View style={styles.typeChipLarge}>
+              <Text style={styles.typeChipText}>{assetDetails.type}</Text>
+            </View>
           </View>
 
           <View style={styles.metadataContainer}>
@@ -499,7 +504,9 @@ export default function AssetDetailScreen() {
             <Text style={styles.folderName}>{assetDetails?.filename}</Text>
             <Text style={styles.folderPath}>{assetDetails?.fullPath}</Text>
           </View>
-          <Chip compact>{totalItems} Assets</Chip>
+          <View style={styles.countChip}>
+            <Text style={styles.countChipText}>{totalItems} Assets</Text>
+          </View>
         </View>
 
         {/* Assets Grid */}
@@ -522,7 +529,7 @@ export default function AssetDetailScreen() {
           }
           ListFooterComponent={
             hasMore && folderAssets.length > 0 ? (
-              <ActivityIndicator style={styles.loadingMore} />
+              <ActivityIndicator style={styles.loadingMore} color={THEME.PRIMARY_COLOR} />
             ) : null
           }
         />
@@ -534,7 +541,7 @@ export default function AssetDetailScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Asset...</Text>
       </View>
     );
@@ -703,6 +710,10 @@ const styles = StyleSheet.create({
   },
   typeChipLarge: {
     marginTop: 12,
+    backgroundColor: '#e0e0e0',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
 
   // Metadata styles
@@ -736,6 +747,26 @@ const styles = StyleSheet.create({
   },
   typeChip: {
     alignSelf: 'flex-end',
+    backgroundColor: '#e0e0e0',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  typeChipText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#333',
+  },
+  countChip: {
+    backgroundColor: '#e0e0e0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  countChipText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#333',
   },
   // Modal Styles
   modalOverlay: {

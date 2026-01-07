@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
-import { Text, Switch } from 'react-native-paper';
+import { View, StyleSheet, Pressable, Text } from 'react-native';
+import { Switch } from '@ant-design/react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps } from './types';
@@ -84,8 +84,8 @@ export const BooleanSelectField: React.FC<FieldRendererProps> = ({
             {isChecked ? 'Ja' : 'Nein'}
           </Text>
           <Switch
-            value={isChecked}
-            onValueChange={(newValue) => !isDisabled && onFieldChange?.(newValue)}
+            checked={isChecked}
+            onChange={(newValue: boolean) => { if (!isDisabled) onFieldChange?.(newValue); }}
             disabled={isDisabled}
           />
         </View>

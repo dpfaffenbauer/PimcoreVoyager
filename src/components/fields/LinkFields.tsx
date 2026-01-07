@@ -4,9 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { Text, TextInput, Button, Portal, Modal } from 'react-native-paper';
+import { View, StyleSheet, Pressable, ScrollView, Text, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../../config/constants';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps, FieldOption } from './types';
 
@@ -62,11 +62,10 @@ export const LinkField: React.FC<FieldRendererProps> = ({
             <TextInput
               value={linkText}
               onChangeText={(text) => handleFieldUpdate('text', text)}
-              mode="outlined"
-              dense
-              disabled={isDisabled}
-              style={styles.linkEditInput}
+              editable={!isDisabled}
+              style={[styles.linkEditInput, isDisabled && styles.inputDisabled]}
               placeholder="Anzeigetext"
+              placeholderTextColor="#999"
             />
           </View>
 
@@ -76,11 +75,10 @@ export const LinkField: React.FC<FieldRendererProps> = ({
             <TextInput
               value={linkPath}
               onChangeText={(text) => handleFieldUpdate('path', text)}
-              mode="outlined"
-              dense
-              disabled={isDisabled}
-              style={styles.linkEditInput}
+              editable={!isDisabled}
+              style={[styles.linkEditInput, isDisabled && styles.inputDisabled]}
               placeholder="https://... oder /pfad"
+              placeholderTextColor="#999"
               keyboardType="url"
             />
           </View>
@@ -117,11 +115,10 @@ export const LinkField: React.FC<FieldRendererProps> = ({
                 <TextInput
                   value={linkParameters}
                   onChangeText={(text) => handleFieldUpdate('parameters', text)}
-                  mode="outlined"
-                  dense
-                  disabled={isDisabled}
-                  style={styles.linkEditInput}
+                  editable={!isDisabled}
+                  style={[styles.linkEditInput, isDisabled && styles.inputDisabled]}
                   placeholder="param=value&..."
+                  placeholderTextColor="#999"
                 />
               </View>
 
@@ -131,11 +128,10 @@ export const LinkField: React.FC<FieldRendererProps> = ({
                 <TextInput
                   value={linkAnchor}
                   onChangeText={(text) => handleFieldUpdate('anchor', text)}
-                  mode="outlined"
-                  dense
-                  disabled={isDisabled}
-                  style={styles.linkEditInput}
+                  editable={!isDisabled}
+                  style={[styles.linkEditInput, isDisabled && styles.inputDisabled]}
                   placeholder="#section"
+                  placeholderTextColor="#999"
                 />
               </View>
             </>
@@ -144,16 +140,19 @@ export const LinkField: React.FC<FieldRendererProps> = ({
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <Portal>
-          <Modal
-            visible={targetModalVisible}
-            onDismiss={() => setTargetModalVisible(false)}
-            contentContainerStyle={styles.targetModalContainer}
-          >
+        <Modal
+          visible={targetModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setTargetModalVisible(false)}
+        >
+          <Pressable style={styles.targetModalOverlay} onPress={() => setTargetModalVisible(false)}>
             <View style={styles.targetModal}>
               <View style={styles.targetModalHeader}>
                 <Text style={styles.targetModalTitle}>Ziel auswählen</Text>
-                <Button onPress={() => setTargetModalVisible(false)}>Schließen</Button>
+                <TouchableOpacity onPress={() => setTargetModalVisible(false)}>
+                  <Text style={styles.modalCloseButton}>Schließen</Text>
+                </TouchableOpacity>
               </View>
               <ScrollView style={styles.targetModalList} bounces={false}>
                 {TARGET_OPTIONS.map((opt) => (
@@ -169,7 +168,7 @@ export const LinkField: React.FC<FieldRendererProps> = ({
                     ]}
                   >
                     {linkTarget === opt.key && (
-                      <MaterialCommunityIcons name="check" size={20} color="#6200ee" style={{ marginRight: 12 }} />
+                      <MaterialCommunityIcons name="check" size={20} color={THEME.PRIMARY_COLOR} style={{ marginRight: 12 }} />
                     )}
                     <Text style={[
                       styles.targetModalItemText,
@@ -181,8 +180,8 @@ export const LinkField: React.FC<FieldRendererProps> = ({
                 ))}
               </ScrollView>
             </View>
-          </Modal>
-        </Portal>
+          </Pressable>
+        </Modal>
       </FieldWrapper>
     );
   }
@@ -258,6 +257,17 @@ const styles = StyleSheet.create({
   },
   linkEditInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
+  },
+  inputDisabled: {
+    backgroundColor: '#f5f5f5',
+    color: THEME.TEXT_DISABLED,
   },
   linkExpandButton: {
     flexDirection: 'row',
@@ -294,11 +304,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   // Target modal styles
-  targetModalContainer: {
-    paddingTop: '20%',
-    paddingHorizontal: 20,
+  targetModalOverlay: {
     flex: 1,
-    justifyContent: 'flex-start',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  modalCloseButton: {
+    fontSize: 15,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
   },
   targetModal: {
     backgroundColor: '#fff',
@@ -339,7 +354,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   targetModalItemTextSelected: {
-    color: '#6200ee',
+    color: THEME.PRIMARY_COLOR,
     fontWeight: '500',
   },
 });

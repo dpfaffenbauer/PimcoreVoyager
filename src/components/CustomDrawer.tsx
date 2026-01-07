@@ -13,8 +13,8 @@ import {
   Dimensions,
   SafeAreaView,
   Image,
+  Text,
 } from 'react-native';
-import { Text, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { THEME } from '../config/constants';
 
@@ -91,7 +91,7 @@ export function CustomDrawer({ isOpen, onClose, items, header }: CustomDrawerPro
             </View>
           )}
 
-          <Divider />
+          <View style={styles.divider} />
 
           {/* Menu Items */}
           <View style={styles.menuContainer}>
@@ -159,6 +159,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: '#333',
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
   },
   menuContainer: {
     paddingTop: 8,

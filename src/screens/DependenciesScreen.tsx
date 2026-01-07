@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
-import { Text, ActivityIndicator, Button } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, RefreshControl, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { DependenciesService, Dependency, DependencyElementType, DependencyMode } from '../apis/dependenciesService';
 
@@ -169,7 +169,7 @@ export default function DependenciesScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Dependencies...</Text>
       </View>
     );
@@ -296,15 +296,17 @@ export default function DependenciesScreen() {
 
             {/* Load More Button */}
             {displayedItems.length < displayedTotal && (
-              <Button
-                mode="outlined"
+              <TouchableOpacity
                 onPress={loadMore}
-                loading={loadingMore}
                 disabled={loadingMore}
-                style={styles.loadMoreButton}
+                style={[styles.loadMoreButton, loadingMore && styles.loadMoreButtonDisabled]}
               >
-                Mehr laden
-              </Button>
+                {loadingMore ? (
+                  <ActivityIndicator size="small" color={THEME.PRIMARY_COLOR} />
+                ) : (
+                  <Text style={styles.loadMoreButtonText}>Mehr laden</Text>
+                )}
+              </TouchableOpacity>
             )}
           </View>
         )}
@@ -451,5 +453,19 @@ const styles = StyleSheet.create({
   },
   loadMoreButton: {
     marginTop: 8,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: THEME.PRIMARY_COLOR,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadMoreButtonDisabled: {
+    opacity: 0.5,
+  },
+  loadMoreButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: THEME.PRIMARY_COLOR,
   },
 });

@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl, Modal, TouchableWithoutFeedback, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, ActivityIndicator, Button, Title } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, RefreshControl, Modal, TouchableWithoutFeedback, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Text, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NotesService, Note, NoteElementType, CreateNoteRequest } from '../apis/notesService';
 
@@ -198,7 +198,7 @@ export default function NotesScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Notes...</Text>
       </View>
     );
@@ -314,15 +314,17 @@ export default function NotesScreen() {
 
             {/* Load More Button */}
             {notes.length < totalItems && (
-              <Button
-                mode="outlined"
+              <TouchableOpacity
                 onPress={loadMore}
-                loading={loadingMore}
                 disabled={loadingMore}
-                style={styles.loadMoreButton}
+                style={[styles.loadMoreButton, loadingMore && styles.buttonDisabled]}
               >
-                Mehr laden
-              </Button>
+                {loadingMore ? (
+                  <ActivityIndicator size="small" color={THEME.PRIMARY_COLOR} />
+                ) : (
+                  <Text style={styles.loadMoreButtonText}>Mehr laden</Text>
+                )}
+              </TouchableOpacity>
             )}
           </View>
         )}
@@ -345,7 +347,7 @@ export default function NotesScreen() {
                 <View style={styles.createModal}>
                   {/* Modal Header */}
                   <View style={styles.modalHeader}>
-                    <Title style={styles.modalTitle}>Neue Note</Title>
+                    <Text style={styles.modalTitle}>Neue Note</Text>
                     <TouchableOpacity
                       onPress={() => setCreateModalVisible(false)}
                       style={styles.modalCloseButton}
@@ -410,22 +412,23 @@ export default function NotesScreen() {
 
                   {/* Actions */}
                   <View style={styles.modalActions}>
-                    <Button
-                      mode="outlined"
+                    <TouchableOpacity
                       onPress={() => setCreateModalVisible(false)}
                       style={styles.cancelButton}
                     >
-                      Abbrechen
-                    </Button>
-                    <Button
-                      mode="contained"
+                      <Text style={styles.cancelButtonText}>Abbrechen</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                       onPress={handleCreateNote}
-                      loading={creating}
                       disabled={creating || !newNoteTitle.trim()}
-                      style={styles.createButton}
+                      style={[styles.createButton, (creating || !newNoteTitle.trim()) && styles.buttonDisabled]}
                     >
-                      Erstellen
-                    </Button>
+                      {creating ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={styles.createButtonText}>Erstellen</Text>
+                      )}
+                    </TouchableOpacity>
                   </View>
                 </View>
               </TouchableWithoutFeedback>
@@ -453,23 +456,23 @@ export default function NotesScreen() {
                   "{noteToDelete?.title || 'Ohne Titel'}" wird unwiderruflich gelöscht.
                 </Text>
                 <View style={styles.deleteModalActions}>
-                  <Button
-                    mode="outlined"
+                  <TouchableOpacity
                     onPress={() => setDeleteModalVisible(false)}
                     style={styles.cancelButton}
                   >
-                    Abbrechen
-                  </Button>
-                  <Button
-                    mode="contained"
+                    <Text style={styles.cancelButtonText}>Abbrechen</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     onPress={handleDeleteNote}
-                    loading={deleting}
                     disabled={deleting}
-                    buttonColor="#f44336"
-                    style={styles.deleteConfirmButton}
+                    style={[styles.deleteConfirmButton, deleting && styles.buttonDisabled]}
                   >
-                    Löschen
-                  </Button>
+                    {deleting ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.deleteConfirmButtonText}>Löschen</Text>
+                    )}
+                  </TouchableOpacity>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -727,6 +730,20 @@ const styles = StyleSheet.create({
   loadMoreButton: {
     marginTop: 16,
     marginBottom: 8,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: THEME.PRIMARY_COLOR,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadMoreButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: THEME.PRIMARY_COLOR,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   // Modal styles
   modalOverlay: {
@@ -831,10 +848,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   cancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
     borderColor: '#999',
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
   },
   createButton: {
-    backgroundColor: '#6200ee',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: THEME.PRIMARY_COLOR,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#fff',
   },
   // Delete button on note card
   deleteButton: {
@@ -871,6 +909,17 @@ const styles = StyleSheet.create({
   },
   deleteConfirmButton: {
     minWidth: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f44336',
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteConfirmButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#fff',
   },
   // Note title row with data indicator
   noteTitleRow: {

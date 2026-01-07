@@ -13,19 +13,16 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Platform,
-} from 'react-native';
-import {
   Text,
   TextInput,
-  Button,
-  Checkbox,
   ActivityIndicator,
-  IconButton,
-  Menu,
-  Surface,
-} from 'react-native-paper';
+  Pressable,
+} from 'react-native';
+import { Checkbox } from '@ant-design/react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { THEME } from '../config/constants';
+import { Surface } from './ui';
 import {
   WorkflowNotes,
   WorkflowAdditionalField,
@@ -158,11 +155,10 @@ export function WorkflowActionDialog({
               {field.required && <Text style={styles.required}> *</Text>}
             </Text>
             <TextInput
-              mode="outlined"
               value={value || ''}
               onChangeText={(text) => updateFieldValue(field.name, text)}
-              error={!!error}
-              style={styles.textInput}
+              style={[styles.textInput, error && styles.textInputError]}
+              placeholderTextColor="#999"
             />
             {error && <Text style={styles.errorText}>{error}</Text>}
           </View>
@@ -176,15 +172,14 @@ export function WorkflowActionDialog({
               {field.required && <Text style={styles.required}> *</Text>}
             </Text>
             <TextInput
-              mode="outlined"
               value={value?.toString() || ''}
               onChangeText={(text) => {
                 const numValue = text.replace(/[^0-9.-]/g, '');
                 updateFieldValue(field.name, numValue);
               }}
               keyboardType="numeric"
-              error={!!error}
-              style={styles.textInput}
+              style={[styles.textInput, error && styles.textInputError]}
+              placeholderTextColor="#999"
             />
             {error && <Text style={styles.errorText}>{error}</Text>}
           </View>
@@ -198,13 +193,13 @@ export function WorkflowActionDialog({
               {field.required && <Text style={styles.required}> *</Text>}
             </Text>
             <TextInput
-              mode="outlined"
               value={value || ''}
               onChangeText={(text) => updateFieldValue(field.name, text)}
               multiline
               numberOfLines={4}
-              error={!!error}
-              style={[styles.textInput, styles.textArea]}
+              style={[styles.textInput, styles.textArea, error && styles.textInputError]}
+              placeholderTextColor="#999"
+              textAlignVertical="top"
             />
             {error && <Text style={styles.errorText}>{error}</Text>}
           </View>
@@ -219,32 +214,42 @@ export function WorkflowActionDialog({
               {field.title}
               {field.required && <Text style={styles.required}> *</Text>}
             </Text>
-            <Menu
-              visible={selectMenuField === field.name}
-              onDismiss={() => setSelectMenuField(null)}
-              anchor={
-                <TouchableOpacity
-                  onPress={() => setSelectMenuField(field.name)}
-                  style={[styles.selectButton, error && styles.selectButtonError]}
-                >
-                  <Text style={selectedOption ? styles.selectText : styles.selectPlaceholder}>
-                    {selectedOption?.value || 'Bitte auswählen...'}
-                  </Text>
-                  <MaterialCommunityIcons name="chevron-down" size={24} color="#666" />
-                </TouchableOpacity>
-              }
+            <TouchableOpacity
+              onPress={() => setSelectMenuField(field.name)}
+              style={[styles.selectButton, error && styles.selectButtonError]}
             >
-              {options.map((option) => (
-                <Menu.Item
-                  key={option.key}
-                  title={option.value}
-                  onPress={() => {
-                    updateFieldValue(field.name, option.key);
-                    setSelectMenuField(null);
-                  }}
-                />
-              ))}
-            </Menu>
+              <Text style={selectedOption ? styles.selectText : styles.selectPlaceholder}>
+                {selectedOption?.value || 'Bitte auswählen...'}
+              </Text>
+              <MaterialCommunityIcons name="chevron-down" size={24} color="#666" />
+            </TouchableOpacity>
+            {selectMenuField === field.name && (
+              <Modal
+                visible={true}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setSelectMenuField(null)}
+              >
+                <Pressable style={styles.selectModalOverlay} onPress={() => setSelectMenuField(null)}>
+                  <View style={styles.selectModal}>
+                    <ScrollView bounces={false}>
+                      {options.map((option) => (
+                        <TouchableOpacity
+                          key={option.key}
+                          style={styles.selectModalItem}
+                          onPress={() => {
+                            updateFieldValue(field.name, option.key);
+                            setSelectMenuField(null);
+                          }}
+                        >
+                          <Text style={styles.selectModalItemText}>{option.value}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </Pressable>
+              </Modal>
+            )}
             {error && <Text style={styles.errorText}>{error}</Text>}
           </View>
         );
@@ -256,7 +261,10 @@ export function WorkflowActionDialog({
               style={styles.checkboxRow}
               onPress={() => updateFieldValue(field.name, !value)}
             >
-              <Checkbox status={value ? 'checked' : 'unchecked'} />
+              <Checkbox
+                checked={value}
+                onChange={() => updateFieldValue(field.name, !value)}
+              />
               <Text style={styles.checkboxLabel}>
                 {field.title}
                 {field.required && <Text style={styles.required}> *</Text>}
@@ -282,17 +290,18 @@ export function WorkflowActionDialog({
               <MaterialCommunityIcons
                 name={isDateTime ? 'calendar-clock' : 'calendar'}
                 size={20}
-                color="#6200ee"
+                color={THEME.PRIMARY_COLOR}
               />
               <Text style={value ? styles.dateText : styles.datePlaceholder}>
                 {value ? formatDate(value, isDateTime) : 'Datum auswählen...'}
               </Text>
               {value && (
-                <IconButton
-                  icon="close"
-                  size={18}
+                <TouchableOpacity
                   onPress={() => updateFieldValue(field.name, null)}
-                />
+                  style={styles.clearButton}
+                >
+                  <MaterialCommunityIcons name="close" size={18} color="#666" />
+                </TouchableOpacity>
               )}
             </TouchableOpacity>
             {datePickerField === field.name && (
@@ -320,16 +329,17 @@ export function WorkflowActionDialog({
               {field.title}
               {field.required && <Text style={styles.required}> *</Text>}
             </Text>
-            <TextInput
-              mode="outlined"
-              value={value || ''}
-              onChangeText={(text) => updateFieldValue(field.name, text)}
-              placeholder="User ID eingeben..."
-              keyboardType="numeric"
-              error={!!error}
-              style={styles.textInput}
-              left={<TextInput.Icon icon="account" />}
-            />
+            <View style={[styles.userInputContainer, error && styles.textInputError]}>
+              <MaterialCommunityIcons name="account" size={20} color="#666" style={styles.userIcon} />
+              <TextInput
+                value={value || ''}
+                onChangeText={(text) => updateFieldValue(field.name, text)}
+                placeholder="User ID eingeben..."
+                placeholderTextColor="#999"
+                keyboardType="numeric"
+                style={styles.userTextInput}
+              />
+            </View>
             {error && <Text style={styles.errorText}>{error}</Text>}
           </View>
         );
@@ -360,12 +370,12 @@ export function WorkflowActionDialog({
                 <Text style={styles.headerTitle} numberOfLines={1}>
                   {title}
                 </Text>
-                <IconButton
-                  icon="close"
-                  size={24}
+                <TouchableOpacity
                   onPress={onCancel}
                   style={styles.closeButton}
-                />
+                >
+                  <MaterialCommunityIcons name="close" size={24} color="#666" />
+                </TouchableOpacity>
               </View>
 
               {/* Content */}
@@ -384,14 +394,14 @@ export function WorkflowActionDialog({
                           {notes.commentRequired && <Text style={styles.required}> *</Text>}
                         </Text>
                         <TextInput
-                          mode="outlined"
                           value={comment}
                           onChangeText={setComment}
                           multiline
                           numberOfLines={4}
                           placeholder="Kommentar eingeben..."
-                          error={!!errors['_comment']}
-                          style={[styles.textInput, styles.textArea]}
+                          placeholderTextColor="#999"
+                          style={[styles.textInput, styles.textArea, errors['_comment'] && styles.textInputError]}
+                          textAlignVertical="top"
                         />
                         {errors['_comment'] && (
                           <Text style={styles.errorText}>{errors['_comment']}</Text>
@@ -407,24 +417,27 @@ export function WorkflowActionDialog({
 
               {/* Actions */}
               <View style={styles.actions}>
-                <Button
-                  mode="outlined"
+                <TouchableOpacity
                   onPress={onCancel}
                   disabled={loading}
-                  style={styles.cancelButton}
+                  style={[styles.cancelButton, loading && styles.buttonDisabled]}
                 >
-                  Abbrechen
-                </Button>
-                <Button
-                  mode="contained"
+                  <Text style={styles.cancelButtonText}>Abbrechen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
                   onPress={handleSubmit}
-                  loading={loading}
                   disabled={loading}
-                  style={styles.submitButton}
-                  icon="check"
+                  style={[styles.submitButton, loading && styles.buttonDisabled]}
                 >
-                  Ausführen
-                </Button>
+                  {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <>
+                      <MaterialCommunityIcons name="check" size={18} color="#fff" />
+                      <Text style={styles.submitButtonText}>Ausführen</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
               </View>
             </Surface>
           </TouchableWithoutFeedback>
@@ -502,6 +515,16 @@ const styles = StyleSheet.create({
   },
   textInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#79747E',
+    borderRadius: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  textInputError: {
+    borderColor: '#f44336',
   },
   textArea: {
     minHeight: 100,
@@ -573,8 +596,81 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     minWidth: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: THEME.PRIMARY_COLOR,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: THEME.PRIMARY_COLOR,
   },
   submitButton: {
     minWidth: 120,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: THEME.PRIMARY_COLOR,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  submitButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#fff',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  selectModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  selectModal: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    minWidth: 250,
+    maxHeight: 300,
+    overflow: 'hidden',
+  },
+  selectModalItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e0e0e0',
+  },
+  selectModalItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  clearButton: {
+    padding: 4,
+  },
+  userInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#79747E',
+    borderRadius: 4,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+  },
+  userIcon: {
+    marginRight: 8,
+  },
+  userTextInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
   },
 });

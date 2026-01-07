@@ -3,8 +3,7 @@
  */
 
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, Text } from 'react-native';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps } from './types';
 

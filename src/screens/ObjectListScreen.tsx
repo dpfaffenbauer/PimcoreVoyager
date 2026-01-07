@@ -4,8 +4,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Card, Title, Paragraph, ActivityIndicator, Chip, IconButton, Text } from 'react-native-paper';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { PimcoreService } from '../apis/pimcoreService';
 import { PimcoreDataObject, PimcoreClassDefinition } from '../types/pimcore';
 
@@ -95,11 +96,10 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
                 styles.iconWrapper,
                 isFolder ? styles.folderIconWrapper : styles.objectIconWrapper
               ]}>
-                <IconButton
-                  icon={isFolder ? 'folder' : 'file-document-outline'}
+                <MaterialCommunityIcons
+                  name={isFolder ? 'folder' : 'file-document-outline'}
                   size={20}
-                  iconColor={isFolder ? '#FFA726' : '#42A5F5'}
-                  style={styles.icon}
+                  color={isFolder ? '#FFA726' : '#42A5F5'}
                 />
               </View>
               
@@ -118,17 +118,14 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
             
             {/* Status Chip */}
             {!isFolder && (
-              <Chip
-                mode="flat"
-                compact
-                style={[
-                  styles.chip,
-                  item.published ? styles.publishedChip : styles.draftChip
-                ]}
-                textStyle={styles.chipText}
-              >
-                {item.published ? 'Published' : 'Draft'}
-              </Chip>
+              <View style={[
+                styles.chip,
+                item.published ? styles.publishedChip : styles.draftChip
+              ]}>
+                <Text style={styles.chipText}>
+                  {item.published ? 'Published' : 'Draft'}
+                </Text>
+              </View>
             )}
           </View>
           
@@ -146,10 +143,10 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
           {/* Folder Hint */}
           {isFolder && (
             <View style={[styles.folderHintContainer, { paddingLeft: 40 + (depth > 0 ? 20 : 0) }]}>
-              <IconButton
-                icon="chevron-right"
+              <MaterialCommunityIcons
+                name="chevron-right"
                 size={16}
-                iconColor="#2196F3"
+                color="#2196F3"
                 style={styles.chevronIcon}
               />
               <Text style={styles.folderHint}>
@@ -168,10 +165,10 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
   if (loading && objects.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" />
-        <Paragraph style={styles.loadingText}>
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
+        <Text style={styles.loadingText}>
           Loading {classDefinition.name} objects...
-        </Paragraph>
+        </Text>
       </View>
     );
   }
@@ -180,10 +177,11 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
     <View style={styles.container}>
       {depth > 0 && (
         <View style={styles.breadcrumbContainer}>
-          <IconButton
-            icon="folder-open"
+          <MaterialCommunityIcons
+            name="folder-open"
             size={16}
-            iconColor="#666"
+            color="#666"
+            style={styles.breadcrumbIcon}
           />
           <Text style={styles.breadcrumb}>{currentPath}</Text>
         </View>
@@ -195,8 +193,8 @@ export default function ObjectListScreen({ route, navigation }: ObjectListScreen
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <IconButton icon="folder-open-outline" size={48} iconColor="#ccc" />
-            <Paragraph style={styles.emptyText}>No items found in this location</Paragraph>
+            <MaterialCommunityIcons name="folder-open-outline" size={48} color="#ccc" />
+            <Text style={styles.emptyText}>No items found in this location</Text>
           </View>
         }
       />
@@ -230,6 +228,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     flex: 1,
+    marginLeft: 8,
+  },
+  breadcrumbIcon: {
+    marginLeft: 8,
   },
   itemContainer: {
     backgroundColor: '#fff',
@@ -274,9 +276,6 @@ const styles = StyleSheet.create({
   objectIconWrapper: {
     backgroundColor: '#E3F2FD',
   },
-  icon: {
-    margin: 0,
-  },
   textContainer: {
     flex: 1,
   },
@@ -297,6 +296,10 @@ const styles = StyleSheet.create({
   chip: {
     height: 24,
     marginLeft: 8,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   publishedChip: {
     backgroundColor: '#E8F5E9',
@@ -306,7 +309,8 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 10,
-    marginVertical: 0,
+    fontWeight: '500',
+    color: '#333',
   },
   metaRow: {
     marginTop: 6,
@@ -326,8 +330,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   chevronIcon: {
-    margin: 0,
-    marginLeft: -8,
+    marginRight: 4,
   },
   folderHint: {
     fontSize: 11,
@@ -341,6 +344,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
+    fontSize: 14,
+    color: '#666',
   },
   emptyContainer: {
     padding: 48,

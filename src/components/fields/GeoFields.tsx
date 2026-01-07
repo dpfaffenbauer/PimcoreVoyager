@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import { View, StyleSheet, Text, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../../config/constants';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
 import { FieldRendererProps } from './types';
 
@@ -51,12 +51,11 @@ export const GeopointField: React.FC<FieldRendererProps> = ({
               <TextInput
                 value={lat !== '' && lat !== null ? String(lat) : ''}
                 onChangeText={handleLatChange}
-                mode="outlined"
-                dense
                 keyboardType="decimal-pad"
-                disabled={isDisabled}
-                style={styles.geoEditInput}
+                editable={!isDisabled}
+                style={[styles.geoEditInput, isDisabled && styles.inputDisabled]}
                 placeholder="z.B. 48.137154"
+                placeholderTextColor="#999"
               />
             </View>
             <View style={styles.geoEditField}>
@@ -64,12 +63,11 @@ export const GeopointField: React.FC<FieldRendererProps> = ({
               <TextInput
                 value={lng !== '' && lng !== null ? String(lng) : ''}
                 onChangeText={handleLngChange}
-                mode="outlined"
-                dense
                 keyboardType="decimal-pad"
-                disabled={isDisabled}
-                style={styles.geoEditInput}
+                editable={!isDisabled}
+                style={[styles.geoEditInput, isDisabled && styles.inputDisabled]}
                 placeholder="z.B. 11.576124"
+                placeholderTextColor="#999"
               />
             </View>
           </View>
@@ -139,24 +137,22 @@ export const GeoboundsField: React.FC<FieldRendererProps> = ({
               <TextInput
                 value={ne.latitude !== undefined ? String(ne.latitude) : ''}
                 onChangeText={(text) => handleCoordChange('northEast', 'latitude', text)}
-                mode="outlined"
-                dense
                 keyboardType="decimal-pad"
-                disabled={isDisabled}
-                style={styles.geoEditInput}
+                editable={!isDisabled}
+                style={[styles.geoEditInput, isDisabled && styles.inputDisabled]}
                 placeholder="Lat"
+                placeholderTextColor="#999"
               />
             </View>
             <View style={styles.geoEditField}>
               <TextInput
                 value={ne.longitude !== undefined ? String(ne.longitude) : ''}
                 onChangeText={(text) => handleCoordChange('northEast', 'longitude', text)}
-                mode="outlined"
-                dense
                 keyboardType="decimal-pad"
-                disabled={isDisabled}
-                style={styles.geoEditInput}
+                editable={!isDisabled}
+                style={[styles.geoEditInput, isDisabled && styles.inputDisabled]}
                 placeholder="Lng"
+                placeholderTextColor="#999"
               />
             </View>
           </View>
@@ -167,24 +163,22 @@ export const GeoboundsField: React.FC<FieldRendererProps> = ({
               <TextInput
                 value={sw.latitude !== undefined ? String(sw.latitude) : ''}
                 onChangeText={(text) => handleCoordChange('southWest', 'latitude', text)}
-                mode="outlined"
-                dense
                 keyboardType="decimal-pad"
-                disabled={isDisabled}
-                style={styles.geoEditInput}
+                editable={!isDisabled}
+                style={[styles.geoEditInput, isDisabled && styles.inputDisabled]}
                 placeholder="Lat"
+                placeholderTextColor="#999"
               />
             </View>
             <View style={styles.geoEditField}>
               <TextInput
                 value={sw.longitude !== undefined ? String(sw.longitude) : ''}
                 onChangeText={(text) => handleCoordChange('southWest', 'longitude', text)}
-                mode="outlined"
-                dense
                 keyboardType="decimal-pad"
-                disabled={isDisabled}
-                style={styles.geoEditInput}
+                editable={!isDisabled}
+                style={[styles.geoEditInput, isDisabled && styles.inputDisabled]}
                 placeholder="Lng"
+                placeholderTextColor="#999"
               />
             </View>
           </View>
@@ -265,12 +259,13 @@ export const GeopolygonField: React.FC<FieldRendererProps> = ({
           <TextInput
             value={jsonValue}
             onChangeText={handleJsonChange}
-            mode="outlined"
             multiline
             numberOfLines={6}
-            disabled={isDisabled}
-            style={styles.polygonEditInput}
+            editable={!isDisabled}
+            style={[styles.polygonEditInput, isDisabled && styles.inputDisabled]}
             placeholder='[{"latitude": 0, "longitude": 0}]'
+            placeholderTextColor="#999"
+            textAlignVertical="top"
           />
           <Text style={styles.polygonEditNote}>
             JSON-Format: [{`{"latitude": 48.1, "longitude": 11.5}, ...`}]
@@ -357,6 +352,17 @@ const styles = StyleSheet.create({
   },
   geoEditInput: {
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: THEME.TEXT_PRIMARY,
+  },
+  inputDisabled: {
+    backgroundColor: '#f5f5f5',
+    color: THEME.TEXT_DISABLED,
   },
   errorText: {
     fontSize: 12,
@@ -384,6 +390,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontFamily: 'monospace',
     fontSize: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: THEME.TEXT_PRIMARY,
+    minHeight: 120,
   },
   polygonEditNote: {
     fontSize: 11,

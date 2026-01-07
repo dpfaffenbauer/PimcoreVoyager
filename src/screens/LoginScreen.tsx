@@ -4,8 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
-import { TextInput, Button, Title, Paragraph, Card, IconButton, Chip, Checkbox } from 'react-native-paper';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Image, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Checkbox } from '@ant-design/react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 
 const AppLogo = require('../../assets/logo.png');
 import { useAuthStore } from '../store/authStore';
@@ -89,85 +91,93 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <View style={styles.logoContainer}>
-              <Image source={AppLogo} style={styles.logo} resizeMode="contain" />
-            </View>
-            <Title style={styles.title}>Pimcore Voyager</Title>
-            <Paragraph style={styles.subtitle}>
-              Sign in to access your Pimcore data
-            </Paragraph>
+        <View style={styles.card}>
+          <View style={styles.logoContainer}>
+            <Image source={AppLogo} style={styles.logo} resizeMode="contain" />
+          </View>
+          <Text style={styles.title}>Pimcore Voyager</Text>
+          <Text style={styles.subtitle}>
+            Sign in to access your Pimcore data
+          </Text>
 
-            {activeInstance && (
-              <View style={styles.instanceInfo}>
-                <View style={styles.instanceHeader}>
-                  <Chip icon="server" mode="outlined" compact>
-                    {activeInstance.name}
-                  </Chip>
-                  <IconButton
-                    icon="swap-horizontal"
-                    size={20}
-                    onPress={handleChangeInstance}
-                  />
+          {activeInstance && (
+            <View style={styles.instanceInfo}>
+              <View style={styles.instanceHeader}>
+                <View style={styles.instanceChip}>
+                  <MaterialCommunityIcons name="server" size={16} color={THEME.PRIMARY_COLOR} />
+                  <Text style={styles.instanceChipText}>{activeInstance.name}</Text>
                 </View>
-                <Paragraph style={styles.instanceUrl}>{activeInstance.url}</Paragraph>
+                <TouchableOpacity
+                  onPress={handleChangeInstance}
+                  style={styles.swapButton}
+                >
+                  <MaterialCommunityIcons name="swap-horizontal" size={20} color="#666" />
+                </TouchableOpacity>
               </View>
-            )}
+              <Text style={styles.instanceUrl}>{activeInstance.url}</Text>
+            </View>
+          )}
 
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Username</Text>
             <TextInput
-              label="Username"
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
               style={styles.input}
-              mode="outlined"
+              placeholder="Enter username"
+              placeholderTextColor="#999"
               testID="username-input"
               accessibilityLabel="username-input"
             />
+          </View>
 
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Password</Text>
             <TextInput
-              label="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               style={styles.input}
-              mode="outlined"
+              placeholder="Enter password"
+              placeholderTextColor="#999"
               testID="password-input"
               accessibilityLabel="password-input"
             />
+          </View>
 
-            <View style={styles.checkboxRow}>
-              <Checkbox
-                status={rememberMe ? 'checked' : 'unchecked'}
-                onPress={() => setRememberMe(!rememberMe)}
-              />
-              <Paragraph style={styles.checkboxLabel} onPress={() => setRememberMe(!rememberMe)}>
-                Remember my credentials
-              </Paragraph>
-            </View>
+          <TouchableOpacity style={styles.checkboxRow} onPress={() => setRememberMe(!rememberMe)}>
+            <Checkbox
+              checked={rememberMe}
+              onChange={() => setRememberMe(!rememberMe)}
+            />
+            <Text style={styles.checkboxLabel}>
+              Remember my credentials
+            </Text>
+          </TouchableOpacity>
 
-            {error ? (
-              <Paragraph style={styles.error}>{error}</Paragraph>
-            ) : null}
+          {error ? (
+            <Text style={styles.error}>{error}</Text>
+          ) : null}
 
-            <Button
-              mode="contained"
-              onPress={handleLogin}
-              loading={loading}
-              disabled={loading}
-              style={styles.button}
-              testID="login-button"
-              accessibilityLabel="login-button"
-            >
-              Sign In
-            </Button>
+          <TouchableOpacity
+            onPress={handleLogin}
+            disabled={loading}
+            style={[styles.button, loading && styles.buttonDisabled]}
+            testID="login-button"
+            accessibilityLabel="login-button"
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
 
-            <Paragraph style={styles.hint}>
-              Session-based authentication via Pimcore Studio API. Credentials are stored securely on your device.
-            </Paragraph>
-          </Card.Content>
-        </Card>
+          <Text style={styles.hint}>
+            Session-based authentication via Pimcore Studio API. Credentials are stored securely on your device.
+          </Text>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -184,6 +194,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
     elevation: 4,
   },
   logoContainer: {
@@ -199,11 +216,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
   },
   subtitle: {
     textAlign: 'center',
     marginBottom: 16,
     color: '#666',
+    fontSize: 14,
   },
   instanceInfo: {
     marginBottom: 24,
@@ -217,13 +236,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
+  instanceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e8e0f0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  instanceChipText: {
+    fontSize: 14,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
+  },
+  swapButton: {
+    padding: 8,
+  },
   instanceUrl: {
     fontSize: 12,
     color: '#666',
     marginTop: 4,
   },
-  input: {
+  inputContainer: {
     marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#79747E',
+    borderRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
+    backgroundColor: '#fff',
   },
   checkboxRow: {
     flexDirection: 'row',
@@ -233,20 +285,36 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     flex: 1,
     marginLeft: 8,
+    fontSize: 14,
+    color: '#333',
   },
   button: {
     marginTop: 8,
-    paddingVertical: 6,
+    paddingVertical: 14,
+    backgroundColor: THEME.PRIMARY_COLOR,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   error: {
     color: '#d32f2f',
     marginBottom: 8,
     textAlign: 'center',
+    fontSize: 14,
   },
   hint: {
     marginTop: 16,
     textAlign: 'center',
     fontSize: 12,
     color: '#999',
+    lineHeight: 18,
   },
 });

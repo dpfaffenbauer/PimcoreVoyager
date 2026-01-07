@@ -5,9 +5,9 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
-import { Text, ActivityIndicator, Chip, Divider, Searchbar } from 'react-native-paper';
+import { View, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Text, ActivityIndicator, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../config/constants';
 import { TagsService, Tag, ElementType } from '../apis/tagsService';
 
 interface TagsScreenProps {
@@ -256,7 +256,7 @@ export default function TagsScreen({ route, navigation }: TagsScreenProps) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200ee" />
+        <ActivityIndicator size="large" color={THEME.PRIMARY_COLOR} />
         <Text style={styles.loadingText}>Lade Tags...</Text>
       </View>
     );
@@ -275,32 +275,43 @@ export default function TagsScreen({ route, navigation }: TagsScreenProps) {
         ) : (
           <View style={styles.chipsContainer}>
             {assignedTags.map((tag) => (
-              <Chip
-                key={tag.id}
-                icon="tag"
-                onClose={() => handleRemoveTag(tag.id)}
-                style={styles.chip}
-                disabled={actionLoading === tag.id}
-              >
-                {tag.text}
-              </Chip>
+              <View key={tag.id} style={[styles.chip, actionLoading === tag.id && styles.chipDisabled]}>
+                <MaterialCommunityIcons name="tag" size={16} color={THEME.PRIMARY_COLOR} />
+                <Text style={styles.chipText}>{tag.text}</Text>
+                <TouchableOpacity
+                  onPress={() => handleRemoveTag(tag.id)}
+                  disabled={actionLoading === tag.id}
+                  style={styles.chipCloseButton}
+                >
+                  <MaterialCommunityIcons name="close" size={16} color="#666" />
+                </TouchableOpacity>
+              </View>
             ))}
           </View>
         )}
       </View>
 
-      <Divider style={styles.divider} />
+      <View style={styles.divider} />
 
       {/* All Tags Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Verfügbare Tags</Text>
 
-        <Searchbar
-          placeholder="Tags suchen..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-        />
+        <View style={styles.searchbar}>
+          <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+          <TextInput
+            placeholder="Tags suchen..."
+            placeholderTextColor="#999"
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchInput}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <MaterialCommunityIcons name="close" size={20} color="#666" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {filteredTags.length === 0 ? (
           <Text style={styles.emptyText}>
@@ -361,14 +372,52 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e8e0f0',
+    paddingLeft: 10,
+    paddingRight: 4,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
     marginBottom: 4,
   },
+  chipText: {
+    fontSize: 14,
+    color: THEME.PRIMARY_COLOR,
+    fontWeight: '500',
+  },
+  chipCloseButton: {
+    padding: 4,
+  },
+  chipDisabled: {
+    opacity: 0.5,
+  },
   divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
     marginVertical: 8,
   },
   searchbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 1,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 4,
   },
   tagTree: {
     backgroundColor: '#fff',

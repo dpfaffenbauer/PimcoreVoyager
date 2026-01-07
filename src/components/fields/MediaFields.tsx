@@ -4,8 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Image, ScrollView, StyleSheet, Pressable } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, Image, ScrollView, StyleSheet, Pressable, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useInstanceStore } from '../../store/instanceStore';
 import { FieldWrapper, styles as wrapperStyles } from './FieldWrapper';
