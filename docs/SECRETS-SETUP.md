@@ -1,59 +1,59 @@
-# Schnellstart: GitHub Secrets konfigurieren
+# Quickstart: Configure GitHub Secrets
 
-Diese Anleitung hilft dir, alle erforderlichen GitHub Secrets für die CI/CD-Pipeline einzurichten.
+This guide helps you set up all required GitHub Secrets for the CI/CD pipeline.
 
-## GitHub Secrets hinzufügen
+## Add GitHub Secrets
 
-Navigiere zu deinem Repository:
+Navigate to your repository:
 ```
 Settings → Secrets and variables → Actions → New repository secret
 ```
 
-## Erforderliche Secrets
+## Required Secrets
 
-### 1. EXPO_TOKEN (Pflicht)
+### 1. EXPO_TOKEN (Required)
 
-**Was ist das?**
-Der Access Token für Expo Application Services (EAS).
+**What is this?**
+The access token for Expo Application Services (EAS).
 
-**Wie bekomme ich den Token?**
-1. Gehe zu [expo.dev](https://expo.dev) und melde dich an
-2. Navigiere zu [expo.dev/accounts/[username]/settings/access-tokens](https://expo.dev/accounts)
-3. Klicke auf "Create Token"
+**How do I get the token?**
+1. Go to [expo.dev](https://expo.dev) and sign in
+2. Navigate to [expo.dev/accounts/[username]/settings/access-tokens](https://expo.dev/accounts)
+3. Click "Create Token"
 4. Name: `GitHub Actions`
-5. Kopiere den generierten Token
+5. Copy the generated token
 
-**GitHub Secret erstellen:**
+**Create the GitHub Secret:**
 - Name: `EXPO_TOKEN`
-- Value: `[dein-expo-token]`
+- Value: `[your-expo-token]`
 
 ---
 
-## Optionale Secrets (für erweiterte Features)
+## Optional Secrets (for advanced features)
 
-### 2. EXPO_APPLE_ID (Optional - für TestFlight)
+### 2. EXPO_APPLE_ID (Optional - for TestFlight)
 
-**Was ist das?**
-Deine Apple ID für TestFlight Upload.
+**What is this?**
+Your Apple ID for TestFlight upload.
 
-**GitHub Secret erstellen:**
+**Create the GitHub Secret:**
 - Name: `EXPO_APPLE_ID`
-- Value: `deine-email@example.com`
+- Value: `your-email@example.com`
 
-### 3. EXPO_APPLE_APP_SPECIFIC_PASSWORD (Optional - für TestFlight)
+### 3. EXPO_APPLE_APP_SPECIFIC_PASSWORD (Optional - for TestFlight)
 
-**Was ist das?**
-Ein App-spezifisches Passwort für deinen Apple Account.
+**What is this?**
+An app-specific password for your Apple account.
 
-**Wie generiere ich das?**
-1. Gehe zu [appleid.apple.com](https://appleid.apple.com)
-2. Anmelden
-3. Im Bereich "Sicherheit" → "App-spezifische Passwörter"
-4. Klicke auf "+" zum Generieren
+**How do I generate it?**
+1. Go to [appleid.apple.com](https://appleid.apple.com)
+2. Sign in
+3. In the "Security" section → "App-Specific Passwords"
+4. Click "+" to generate
 5. Label: `EAS Build`
-6. Kopiere das generierte Passwort (Format: xxxx-xxxx-xxxx-xxxx)
+6. Copy the generated password (format: xxxx-xxxx-xxxx-xxxx)
 
-**GitHub Secret erstellen:**
+**Create the GitHub Secret:**
 - Name: `EXPO_APPLE_APP_SPECIFIC_PASSWORD`
 - Value: `xxxx-xxxx-xxxx-xxxx`
 
@@ -63,7 +63,7 @@ Ein App-spezifisches Passwort für deinen Apple Account.
 
 ### ENABLE_TESTFLIGHT_DEPLOY
 
-Um automatisches TestFlight-Deployment zu aktivieren:
+To enable automatic TestFlight deployment:
 
 ```
 Settings → Secrets and variables → Actions → Variables → New repository variable
@@ -74,45 +74,45 @@ Settings → Secrets and variables → Actions → Variables → New repository 
 
 ---
 
-## Validierung
+## Validation
 
-Nach dem Einrichten der Secrets:
+After setting up the secrets:
 
-1. Gehe zu `Actions` Tab in deinem Repository
-2. Wähle "Build and Deploy" Workflow
-3. Klicke auf "Run workflow"
-4. Wähle Platform: `android`
-5. Wähle Profile: `preview`
-6. Klicke auf "Run workflow"
+1. Go to the `Actions` tab in your repository
+2. Select the "Build and Deploy" workflow
+3. Click "Run workflow"
+4. Select platform: `android`
+5. Select profile: `preview`
+6. Click "Run workflow"
 
-Wenn der Workflow erfolgreich startet, sind deine Secrets korrekt konfiguriert! 🎉
+If the workflow starts successfully, your secrets are configured correctly! 🎉
 
 ---
 
-## Zusammenfassung
+## Summary
 
-**Minimum-Konfiguration (nur Android/iOS Builds):**
+**Minimum configuration (Android/iOS builds only):**
 - ✅ `EXPO_TOKEN`
 
-**Vollständige Konfiguration (mit TestFlight):**
+**Full configuration (with TestFlight):**
 - ✅ `EXPO_TOKEN`
 - ✅ `EXPO_APPLE_ID`
 - ✅ `EXPO_APPLE_APP_SPECIFIC_PASSWORD`
-- ✅ `ENABLE_TESTFLIGHT_DEPLOY` (Variable)
+- ✅ `ENABLE_TESTFLIGHT_DEPLOY` (variable)
 
 ---
 
-## Nächste Schritte
+## Next Steps
 
-Nach der Secret-Konfiguration:
+After configuring the secrets:
 
-1. ✅ Lies [CI-CD-SETUP.md](./CI-CD-SETUP.md) für vollständige Dokumentation
-2. ✅ Konfiguriere Android/iOS Signierung mit `eas credentials`
-3. ✅ Teste den ersten Build mit GitHub Actions
-4. ✅ Richte TestFlight/Play Store Deployment ein (optional)
+1. ✅ Read [CI-CD-SETUP.md](./CI-CD-SETUP.md) for the complete documentation
+2. ✅ Configure Android/iOS signing with `eas credentials`
+3. ✅ Test the first build with GitHub Actions
+4. ✅ Set up TestFlight/Play Store deployment (optional)
 
 ---
 
-## Probleme?
+## Problems?
 
-Siehe [Troubleshooting](./CI-CD-SETUP.md#troubleshooting) Sektion in der Hauptdokumentation.
+See the [Troubleshooting](./CI-CD-SETUP.md#troubleshooting) section in the main documentation.

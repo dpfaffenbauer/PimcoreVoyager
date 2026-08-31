@@ -1,39 +1,39 @@
-# Pimcore Voyager - Architektur
+# Pimcore Voyager - Architecture
 
-## Übersicht
+## Overview
 
-Pimcore Voyager ist eine React Native/Expo Mobile App, die als generische Companion App für Pimcore dient. Die App ermöglicht das Anzeigen und Bearbeiten von Pimcore Data Objects auf mobilen Geräten.
+Pimcore Voyager is a React Native/Expo mobile app that serves as a generic companion app for Pimcore. The app makes it possible to view and edit Pimcore Data Objects on mobile devices.
 
-## Technologie-Stack
+## Technology Stack
 
 ### Frontend
-- **React Native** - Cross-platform Mobile Framework
-- **Expo** - Build- und Development-Tooling
-- **TypeScript** - Type Safety
+- **React Native** - Cross-platform mobile framework
+- **Expo** - Build and development tooling
+- **TypeScript** - Type safety
 - **React Navigation** - Navigation
-- **React Hook Form** - Formular-Management
-- **React Query** - Server State Management
-- **Zustand/Redux** - Client State Management
+- **React Hook Form** - Form management
+- **React Query** - Server state management
+- **Zustand/Redux** - Client state management
 
 ### Backend Integration
-- **Pimcore REST API** - Datenabruf und -manipulation
-- **Pimcore GraphQL API** - Flexible Datenabfragen
-- **OAuth2/JWT** - Authentifizierung
+- **Pimcore REST API** - Data retrieval and manipulation
+- **Pimcore GraphQL API** - Flexible data queries
+- **OAuth2/JWT** - Authentication
 
-## Architektur-Prinzipien
+## Architecture Principles
 
 ### 1. Dynamic Type System
 
-Die App nutzt ein dynamisches Typsystem, das Pimcore Class Definitions zur Laufzeit interpretiert:
+The app uses a dynamic type system that interprets Pimcore class definitions at runtime:
 
 ```
 Pimcore Class Definition → Type Registry → Component Rendering
 ```
 
-**Vorteile:**
-- Keine Code-Änderungen bei Pimcore-Schema-Updates
-- Automatische UI-Generierung
-- Konsistenz mit Pimcore-Backend
+**Benefits:**
+- No code changes required for Pimcore schema updates
+- Automatic UI generation
+- Consistency with the Pimcore backend
 
 ### 2. Component-Based Architecture
 
@@ -66,11 +66,11 @@ Screen
 └─────────────────────────────────┘
 ```
 
-## Core Komponenten
+## Core Components
 
 ### Data Type Registry
 
-Zentrale Registry für alle Pimcore Data Object Types:
+Central registry for all Pimcore Data Object types:
 
 ```typescript
 interface DataTypeDefinition {
@@ -87,13 +87,13 @@ const registry: Record<string, DataTypeDefinition> = {
   'input': { ... },
   'textarea': { ... },
   'numeric': { ... },
-  // ... 69+ weitere Typen
+  // ... 69+ more types
 };
 ```
 
 ### Dynamic Form Renderer
 
-Generiert Formulare basierend auf Class Definitions:
+Generates forms based on class definitions:
 
 ```typescript
 interface ClassDefinition {
@@ -102,14 +102,14 @@ interface ClassDefinition {
 }
 
 function DynamicForm({ classDefinition, data, onSubmit }) {
-  // Rendert Formular basierend auf Definition
-  // Nutzt Registry für Type-spezifische Components
+  // Renders the form based on the definition
+  // Uses the registry for type-specific components
 }
 ```
 
 ### API Client
 
-Abstrahiert Pimcore API Zugriffe:
+Abstracts Pimcore API access:
 
 ```typescript
 class PimcoreClient {
@@ -133,39 +133,39 @@ class PimcoreClient {
 ## State Management
 
 ### Server State (React Query)
-- API-Daten (Data Objects, Class Definitions)
-- Caching und Invalidierung
-- Optimistic Updates
-- Offline Queue
+- API data (Data Objects, class definitions)
+- Caching and invalidation
+- Optimistic updates
+- Offline queue
 
 ### Client State (Zustand/Redux)
-- Authentifizierung Status
-- UI State (Navigation, Modal, etc.)
-- Form State (Draft, Unsaved Changes)
-- User Preferences
+- Authentication status
+- UI state (navigation, modals, etc.)
+- Form state (drafts, unsaved changes)
+- User preferences
 
 ## Data Flow
 
-### Anzeigen eines Data Objects
+### Displaying a Data Object
 
 ```
-1. User navigiert zu Object Detail
-2. Screen lädt Class Definition (cached)
-3. Screen lädt Object Daten via API
-4. DynamicForm rendert basierend auf Class Def
-5. Für jedes Feld: Registry lookup → Component render
+1. User navigates to Object Detail
+2. Screen loads the class definition (cached)
+3. Screen loads the object data via API
+4. DynamicForm renders based on the class definition
+5. For each field: registry lookup → component render
 ```
 
-### Bearbeiten eines Data Objects
+### Editing a Data Object
 
 ```
-1. User öffnet Edit Mode
-2. Form wird mit aktuellen Werten initialisiert
-3. User ändert Felder → Local State Update
-4. Validation läuft bei jedem Change
-5. User speichert → API Call mit transformierten Daten
-6. Success → Cache Invalidierung & Navigation
-7. Error → Error Anzeige & Retry Option
+1. User opens edit mode
+2. Form is initialized with the current values
+3. User changes fields → local state update
+4. Validation runs on every change
+5. User saves → API call with transformed data
+6. Success → cache invalidation & navigation
+7. Error → error display & retry option
 ```
 
 ## Offline Support
@@ -182,67 +182,67 @@ class PimcoreClient {
                       └─ Background Sync when online
 ```
 
-**Implementierung:**
-- Local Storage für Änderungs-Queue
-- Background Sync bei Reconnect
-- Conflict Resolution bei Dateninkonsistenz
-- Optimistic UI Updates
+**Implementation:**
+- Local storage for the change queue
+- Background sync on reconnect
+- Conflict resolution for data inconsistencies
+- Optimistic UI updates
 
 ## Security
 
-### Authentifizierung
-- OAuth2 / JWT Token-based Auth
-- Secure Token Storage (Keychain/Keystore)
-- Auto Token Refresh
-- Biometric Auth Option
+### Authentication
+- OAuth2 / JWT token-based auth
+- Secure token storage (Keychain/Keystore)
+- Auto token refresh
+- Biometric auth option
 
-### Autorisierung
-- Field-Level Permissions aus Pimcore
-- Read-Only Mode für eingeschränkte User
-- Sensitive Data Handling
+### Authorization
+- Field-level permissions from Pimcore
+- Read-only mode for restricted users
+- Sensitive data handling
 
 ### Data Security
-- HTTPS für alle API Calls
-- No Logging of Sensitive Data
-- Encryption for Local Storage
+- HTTPS for all API calls
+- No logging of sensitive data
+- Encryption for local storage
 
-## Performance Optimierungen
+## Performance Optimizations
 
 ### Rendering
-- React.memo für statische Components
-- Virtualized Lists für lange Listen
-- Lazy Loading für Images
-- Code Splitting für Data Types
+- React.memo for static components
+- Virtualized lists for long lists
+- Lazy loading for images
+- Code splitting for data types
 
-### Netzwerk
-- Request Deduplication
-- Aggressive Caching
-- Batch Requests wo möglich
-- Image Optimization/Thumbnails
+### Network
+- Request deduplication
+- Aggressive caching
+- Batch requests where possible
+- Image optimization/thumbnails
 
 ### Startup
-- Lazy Component Loading
-- Progressive Data Loading
-- Skeleton Screens
+- Lazy component loading
+- Progressive data loading
+- Skeleton screens
 
 ## Testing Strategy
 
 ### Unit Tests
-- Data Type Components (Display/Edit)
+- Data type components (display/edit)
 - Validators
 - Transformers
 - Utils
 
 ### Integration Tests
-- Form Rendering
-- API Client
-- State Management
+- Form rendering
+- API client
+- State management
 
 ### E2E Tests
-- Login Flow
-- Object List → Detail → Edit → Save
-- Offline → Online Sync
-- Error Handling
+- Login flow
+- Object list → detail → edit → save
+- Offline → online sync
+- Error handling
 
 ## Build & Deployment
 
@@ -263,24 +263,24 @@ eas build --platform ios --profile production
 ```
 
 ### Distribution
-- **Android**: APK via GitHub Releases oder Google Play
-- **iOS**: TestFlight oder App Store
-- **OTA Updates**: Expo Updates für schnelle Patches
+- **Android**: APK via GitHub Releases or Google Play
+- **iOS**: TestFlight or App Store
+- **OTA Updates**: Expo Updates for fast patches
 
 ## Monitoring & Analytics
 
-- Crash Reporting (Sentry)
-- Performance Monitoring
-- User Analytics (opt-in)
-- API Error Tracking
+- Crash reporting (Sentry)
+- Performance monitoring
+- User analytics (opt-in)
+- API error tracking
 
-## Zukünftige Erweiterungen
+## Future Enhancements
 
-- Push Notifications
-- Asset Preview & Editing
-- Workflow Integration
-- Multi-Language Support
-- Dark Mode
-- Advanced Search/Filtering
-- Batch Operations
-- Export Funktionen
+- Push notifications
+- Asset preview & editing
+- Workflow integration
+- Multi-language support
+- Dark mode
+- Advanced search/filtering
+- Batch operations
+- Export functions

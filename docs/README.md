@@ -1,49 +1,49 @@
-# Dokumentation: CI/CD Build Pipeline
+# Documentation: CI/CD Build Pipeline
 
-Diese Dokumentation beschreibt die vollständige CI/CD-Pipeline für Pimcore Voyager.
+This documentation describes the complete CI/CD pipeline for Pimcore Voyager.
 
-## 📚 Dokumentationsübersicht
+## 📚 Documentation Overview
 
-### Für Einsteiger
+### For Beginners
 
-1. **[SECRETS-SETUP.md](./SECRETS-SETUP.md)** - ⭐ **START HIER**
-   - Schnellstart-Anleitung für GitHub Secrets
-   - Schritt-für-Schritt Konfiguration
-   - Minimale Einrichtung in 10 Minuten
+1. **[SECRETS-SETUP.md](./SECRETS-SETUP.md)** - ⭐ **START HERE**
+   - Quick-start guide for GitHub Secrets
+   - Step-by-step configuration
+   - Minimal setup in 10 minutes
 
-### Vollständige Dokumentation
+### Complete Documentation
 
-2. **[CI-CD-SETUP.md](./CI-CD-SETUP.md)** - 📖 **Hauptdokumentation**
-   - Vollständige Pipeline-Einrichtung
-   - EAS-Konfiguration
-   - Workflow-Erklärungen
-   - Troubleshooting-Guide
+2. **[CI-CD-SETUP.md](./CI-CD-SETUP.md)** - 📖 **Main documentation**
+   - Complete pipeline setup
+   - EAS configuration
+   - Workflow explanations
+   - Troubleshooting guide
 
-3. **[BUILD-PROCESS.md](./BUILD-PROCESS.md)** - 🔧 **Build-Details**
-   - Build-Architektur
-   - Build-Profile (development, preview, production)
-   - EAS-Commands
-   - Performance-Optimierung
+3. **[BUILD-PROCESS.md](./BUILD-PROCESS.md)** - 🔧 **Build details**
+   - Build architecture
+   - Build profiles (development, preview, production)
+   - EAS commands
+   - Performance optimization
 
-4. **[SIGNING.md](./SIGNING.md)** - 🔐 **Signierung & Zertifikate**
-   - Android Keystore-Setup
-   - iOS Certificate/Provisioning
-   - Credential-Management
-   - Store-Konfiguration
+4. **[SIGNING.md](./SIGNING.md)** - 🔐 **Signing & certificates**
+   - Android keystore setup
+   - iOS certificate/provisioning
+   - Credential management
+   - Store configuration
 
 ## 🚀 Quickstart
 
-### 1. GitHub Secrets einrichten (5 Min)
+### 1. Set Up GitHub Secrets (5 min)
 
 ```bash
-# 1. Erstelle Expo Account bei expo.dev
-# 2. Generiere Access Token
-# 3. Füge als GitHub Secret hinzu: EXPO_TOKEN
+# 1. Create an Expo account at expo.dev
+# 2. Generate an access token
+# 3. Add it as a GitHub Secret: EXPO_TOKEN
 ```
 
-→ Detaillierte Anleitung: [SECRETS-SETUP.md](./SECRETS-SETUP.md)
+→ Detailed guide: [SECRETS-SETUP.md](./SECRETS-SETUP.md)
 
-### 2. App mit EAS initialisieren (5 Min)
+### 2. Initialize the App with EAS (5 min)
 
 ```bash
 npm install -g eas-cli
@@ -51,89 +51,89 @@ eas login
 eas init
 ```
 
-### 3. Ersten Build starten
+### 3. Start the First Build
 
 **Via GitHub Actions:**
-1. Gehe zu `Actions` Tab
-2. Wähle "Build and Deploy"
-3. Klicke "Run workflow"
+1. Go to the `Actions` tab
+2. Select "Build and Deploy"
+3. Click "Run workflow"
 4. Platform: `android`, Profile: `preview`
-5. Starte Workflow
+5. Start the workflow
 
 **Via CLI:**
 ```bash
 eas build --platform android --profile preview
 ```
 
-## 📋 Checkliste: Vollständige Einrichtung
+## 📋 Checklist: Complete Setup
 
-### Basis-Setup (erforderlich)
+### Basic Setup (required)
 
-- [ ] Expo Account erstellt
-- [ ] EAS CLI installiert (`npm install -g eas-cli`)
-- [ ] Projekt mit EAS initialisiert (`eas init`)
-- [ ] `EXPO_TOKEN` als GitHub Secret hinzugefügt
-- [ ] Erster Test-Build erfolgreich
+- [ ] Expo account created
+- [ ] EAS CLI installed (`npm install -g eas-cli`)
+- [ ] Project initialized with EAS (`eas init`)
+- [ ] `EXPO_TOKEN` added as a GitHub Secret
+- [ ] First test build successful
 
-### Android-Signierung
+### Android Signing
 
-- [ ] Keystore generiert oder EAS Managed gewählt
-- [ ] Keystore in EAS hochgeladen (`eas credentials`)
-- [ ] Play Console App erstellt (optional)
-- [ ] Google Play Service Account konfiguriert (optional)
+- [ ] Keystore generated or EAS Managed selected
+- [ ] Keystore uploaded to EAS (`eas credentials`)
+- [ ] Play Console app created (optional)
+- [ ] Google Play service account configured (optional)
 
-### iOS-Signierung
+### iOS Signing
 
-- [ ] Apple Developer Account vorhanden
-- [ ] Bundle ID registriert (`com.pimcore.voyager`)
-- [ ] Distribution Certificate erstellt
-- [ ] Provisioning Profile erstellt
-- [ ] Certificates in EAS hochgeladen
-- [ ] App in App Store Connect erstellt
+- [ ] Apple Developer account available
+- [ ] Bundle ID registered (`com.pimcore.voyager`)
+- [ ] Distribution certificate created
+- [ ] Provisioning profile created
+- [ ] Certificates uploaded to EAS
+- [ ] App created in App Store Connect
 
 ### TestFlight (Optional)
 
-- [ ] `EXPO_APPLE_ID` Secret hinzugefügt
-- [ ] `EXPO_APPLE_APP_SPECIFIC_PASSWORD` Secret hinzugefügt
-- [ ] `ENABLE_TESTFLIGHT_DEPLOY` Variable gesetzt
-- [ ] TestFlight-Upload getestet
+- [ ] `EXPO_APPLE_ID` secret added
+- [ ] `EXPO_APPLE_APP_SPECIFIC_PASSWORD` secret added
+- [ ] `ENABLE_TESTFLIGHT_DEPLOY` variable set
+- [ ] TestFlight upload tested
 
-## 🔄 Workflows Übersicht
+## 🔄 Workflows Overview
 
 ### `build.yml` - Standard Build
 
 **Trigger:**
-- Push auf `main`/`develop`
-- Pull Requests
-- Manuell
+- Push to `main`/`develop`
+- Pull requests
+- Manual
 
-**Dauer:** ~5-10 Minuten (ohne Warten auf EAS)
+**Duration:** ~5-10 minutes (without waiting for EAS)
 
-**Output:** Build-Link zum EAS Dashboard
+**Output:** Build link to the EAS dashboard
 
-### `build-artifacts.yml` - Build mit Downloads
+### `build-artifacts.yml` - Build with Downloads
 
 **Trigger:**
-- Manuell
+- Manual
 - GitHub Release
 
-**Dauer:** ~20-60 Minuten (wartet auf Build)
+**Duration:** ~20-60 minutes (waits for the build)
 
-**Output:** APK/IPA als GitHub Artifacts
+**Output:** APK/IPA as GitHub artifacts
 
-## 🎯 Typische Workflows
+## 🎯 Typical Workflows
 
-### Entwicklung
+### Development
 
 ```bash
-# Lokaler Development Build
+# Local development build
 eas build --platform android --profile development --local
 ```
 
 ### Testing
 
 ```bash
-# CI Build via GitHub Actions
+# CI build via GitHub Actions
 # → Actions → "Build and Deploy" → Run workflow
 # Platform: all, Profile: preview
 ```
@@ -141,19 +141,19 @@ eas build --platform android --profile development --local
 ### Release
 
 ```bash
-# 1. Tag erstellen
+# 1. Create a tag
 git tag v1.0.0
 git push origin v1.0.0
 
-# 2. GitHub Release erstellen
-# → Triggers build-artifacts.yml automatisch
+# 2. Create a GitHub Release
+# → Triggers build-artifacts.yml automatically
 
-# 3. APK/IPA von Release herunterladen
+# 3. Download APK/IPA from the release
 ```
 
-## 🛠️ Häufige Aufgaben
+## 🛠️ Common Tasks
 
-### Build-Status prüfen
+### Check Build Status
 
 ```bash
 # Via EAS Dashboard
@@ -163,7 +163,7 @@ https://expo.dev/accounts/[username]/projects/pimcore-voyager/builds
 eas build:list
 ```
 
-### Credentials verwalten
+### Manage Credentials
 
 ```bash
 # Android
@@ -173,7 +173,7 @@ eas credentials --platform android
 eas credentials --platform ios
 ```
 
-### Build herunterladen
+### Download a Build
 
 ```bash
 # Via CLI
@@ -183,9 +183,9 @@ eas build:view [BUILD_ID]
 https://expo.dev → Project → Builds → Download
 ```
 
-## 📖 Weiterführende Dokumentation
+## 📖 Further Documentation
 
-### Externe Ressourcen
+### External Resources
 
 - [Expo Documentation](https://docs.expo.dev/)
 - [EAS Build Docs](https://docs.expo.dev/build/introduction/)
@@ -194,19 +194,19 @@ https://expo.dev → Project → Builds → Download
 
 ### Pimcore Voyager
 
-- [README.md](../README.md) - Projekt-Übersicht
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - Entwicklungs-Guide
+- [README.md](../README.md) - Project overview
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Development guide
 
 ## 🆘 Support
 
-### Probleme mit Builds?
+### Problems with Builds?
 
-1. ✅ Prüfe [Troubleshooting](./CI-CD-SETUP.md#troubleshooting)
-2. ✅ Schaue in [Build Logs](#build-status-prüfen)
-3. ✅ Suche in [Expo Forums](https://forums.expo.dev/)
-4. ✅ Erstelle Issue in diesem Repo
+1. ✅ Check [Troubleshooting](./CI-CD-SETUP.md#troubleshooting)
+2. ✅ Look at the [Build Logs](#check-build-status)
+3. ✅ Search the [Expo Forums](https://forums.expo.dev/)
+4. ✅ Create an issue in this repo
 
-### Fragen?
+### Questions?
 
 - GitHub Issues: [PimcoreVoyager Issues](https://github.com/dpfaffenbauer/PimcoreVoyager/issues)
 - Expo Community: [Expo Forums](https://forums.expo.dev/)
@@ -215,13 +215,13 @@ https://expo.dev → Project → Builds → Download
 ## 📝 Changelog
 
 ### 2025-12-27 - Initial Setup
-- ✅ Basis-Workflows erstellt
-- ✅ EAS-Integration
-- ✅ Android/iOS Build-Support
-- ✅ Artifact-Upload
-- ✅ TestFlight-Integration (optional)
-- ✅ Vollständige Dokumentation
+- ✅ Basic workflows created
+- ✅ EAS integration
+- ✅ Android/iOS build support
+- ✅ Artifact upload
+- ✅ TestFlight integration (optional)
+- ✅ Complete documentation
 
 ---
 
-**Nächste Schritte:** Starte mit [SECRETS-SETUP.md](./SECRETS-SETUP.md) 🚀
+**Next steps:** Start with [SECRETS-SETUP.md](./SECRETS-SETUP.md) 🚀

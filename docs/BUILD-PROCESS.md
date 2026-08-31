@@ -1,8 +1,8 @@
-# Build-Prozess Dokumentation
+# Build Process Documentation
 
-Dieses Dokument erklärt den detaillierten Build-Prozess für Android und iOS mit EAS Build.
+This document explains the detailed build process for Android and iOS with EAS Build.
 
-## Build-Architektur
+## Build Architecture
 
 ```
 ┌─────────────────┐
@@ -51,46 +51,46 @@ Dieses Dokument erklärt den detaillierten Build-Prozess für Android und iOS mi
 └─────────────────┘
 ```
 
-## Build-Typen
+## Build Types
 
 ### 1. Standard Build (`build.yml`)
 
-**Zweck:** Schnelle Builds ohne Warten auf Completion
+**Purpose:** Fast builds without waiting for completion
 
 **Workflow:**
 1. Code checkout
-2. Dependencies installieren
-3. EAS Build starten
-4. Build-ID in Logs ausgeben
-5. Workflow beenden (nicht warten)
+2. Install dependencies
+3. Start EAS build
+4. Output the build ID in the logs
+5. Finish the workflow (no waiting)
 
-**Verwendung:**
-- Entwicklung
-- CI-Checks
-- Schnelle Iterationen
+**Use for:**
+- Development
+- CI checks
+- Fast iterations
 
-**Build-Download:**
-Builds müssen manuell vom [EAS Dashboard](https://expo.dev) heruntergeladen werden.
+**Build download:**
+Builds must be downloaded manually from the [EAS Dashboard](https://expo.dev).
 
 ### 2. Artifact Build (`build-artifacts.yml`)
 
-**Zweck:** Vollständiger Build mit Artifact-Upload
+**Purpose:** Full build with artifact upload
 
 **Workflow:**
 1. Code checkout
-2. Dependencies installieren
-3. EAS Build starten
-4. **Warten auf Build-Completion (bis 60 Min)**
-5. Build-Artifact herunterladen
-6. Als GitHub Artifact hochladen
-7. Optional: An GitHub Release anhängen
+2. Install dependencies
+3. Start EAS build
+4. **Wait for build completion (up to 60 min)**
+5. Download the build artifact
+6. Upload it as a GitHub artifact
+7. Optional: attach it to a GitHub Release
 
-**Verwendung:**
+**Use for:**
 - Releases
 - Distribution
-- TestFlight/Play Store Vorbereitung
+- TestFlight/Play Store preparation
 
-## Build-Profile im Detail
+## Build Profiles in Detail
 
 ### Development Profile
 
@@ -107,11 +107,11 @@ Builds müssen manuell vom [EAS Dashboard](https://expo.dev) heruntergeladen wer
 }
 ```
 
-**Merkmale:**
-- Debug-Symbole enthalten
-- Schnellere Builds
-- Expo Development Client aktiviert
-- Nur für interne Tests
+**Characteristics:**
+- Includes debug symbols
+- Faster builds
+- Expo Development Client enabled
+- For internal testing only
 
 ### Preview Profile
 
@@ -128,11 +128,11 @@ Builds müssen manuell vom [EAS Dashboard](https://expo.dev) heruntergeladen wer
 }
 ```
 
-**Merkmale:**
-- Release-Build
-- Optimierter Code
-- Für interne Verteilung (AdHoc iOS, APK Android)
-- TestFlight-fähig
+**Characteristics:**
+- Release build
+- Optimized code
+- For internal distribution (Ad Hoc iOS, APK Android)
+- TestFlight-ready
 
 ### Production Profile
 
@@ -147,25 +147,25 @@ Builds müssen manuell vom [EAS Dashboard](https://expo.dev) heruntergeladen wer
 }
 ```
 
-**Merkmale:**
-- Vollständig optimiert
+**Characteristics:**
+- Fully optimized
 - Store-ready
-- App Store / Play Store Deployment
+- App Store / Play Store deployment
 
-## Umgebungsvariablen
+## Environment Variables
 
-### In GitHub Actions verfügbar
+### Available in GitHub Actions
 
-| Variable | Beschreibung | Beispiel |
+| Variable | Description | Example |
 |----------|--------------|----------|
-| `EXPO_TOKEN` | Expo Access Token | `xxx-xxx-xxx` |
-| `GITHUB_REF` | Git Reference | `refs/heads/main` |
+| `EXPO_TOKEN` | Expo access token | `xxx-xxx-xxx` |
+| `GITHUB_REF` | Git reference | `refs/heads/main` |
 | `GITHUB_SHA` | Commit SHA | `abc123...` |
-| `GITHUB_RUN_ID` | Workflow Run ID | `123456` |
+| `GITHUB_RUN_ID` | Workflow run ID | `123456` |
 
-### In eas.json verwendbar
+### Usable in eas.json
 
-Umgebungsvariablen können in Build-Profilen gesetzt werden:
+Environment variables can be set in build profiles:
 
 ```json
 {
@@ -182,132 +182,132 @@ Umgebungsvariablen können in Build-Profilen gesetzt werden:
 
 ## EAS Build Commands
 
-### Wichtigste Befehle
+### Most Important Commands
 
 ```bash
-# Build starten
+# Start a build
 eas build --platform android --profile preview
 
-# Build-Status prüfen
+# Check build status
 eas build:view [BUILD_ID]
 
-# Build-Liste anzeigen
+# Show list of builds
 eas build:list
 
-# Credentials verwalten
+# Manage credentials
 eas credentials
 
-# Credentials anzeigen
+# Show credentials
 eas credentials -p android
 eas credentials -p ios
 ```
 
 ### Flags
 
-| Flag | Beschreibung |
+| Flag | Description |
 |------|--------------|
-| `--platform` | android, ios, oder all |
-| `--profile` | Build-Profil aus eas.json |
-| `--non-interactive` | Keine interaktiven Prompts |
-| `--no-wait` | Nicht auf Build-Completion warten |
-| `--json` | JSON-Ausgabe |
-| `--local` | Lokaler Build (ohne EAS Server) |
+| `--platform` | android, ios, or all |
+| `--profile` | Build profile from eas.json |
+| `--non-interactive` | No interactive prompts |
+| `--no-wait` | Do not wait for build completion |
+| `--json` | JSON output |
+| `--local` | Local build (without EAS servers) |
 
-## Build-Zeiten
+## Build Times
 
-Typische Dauern (auf EAS Servern):
+Typical durations (on EAS servers):
 
-| Platform | Profile | Ungefähre Dauer |
+| Platform | Profile | Approximate Duration |
 |----------|---------|-----------------|
-| Android | Development | 8-12 Min |
-| Android | Preview/Production | 10-15 Min |
-| iOS | Development | 12-18 Min |
-| iOS | Preview/Production | 15-25 Min |
+| Android | Development | 8-12 min |
+| Android | Preview/Production | 10-15 min |
+| iOS | Development | 12-18 min |
+| iOS | Preview/Production | 15-25 min |
 
-**Faktoren die Build-Zeit beeinflussen:**
-- Anzahl Dependencies
-- Native Modules
-- Asset-Größe
-- EAS Server-Last
+**Factors affecting build time:**
+- Number of dependencies
+- Native modules
+- Asset size
+- EAS server load
 
 ## Debugging
 
-### Build Logs abrufen
+### Retrieving Build Logs
 
-1. **Aus GitHub Actions:**
-   - Gehe zu Actions Tab
-   - Wähle Workflow Run
-   - Klicke auf Job
-   - Scrolle zu "Build with EAS" Step
+1. **From GitHub Actions:**
+   - Go to the Actions tab
+   - Select the workflow run
+   - Click the job
+   - Scroll to the "Build with EAS" step
 
-2. **Aus EAS Dashboard:**
-   - Gehe zu [expo.dev](https://expo.dev)
-   - Navigiere zu deinem Projekt
-   - Klicke auf "Builds"
-   - Wähle Build aus
-   - Volle Logs anzeigen
+2. **From the EAS Dashboard:**
+   - Go to [expo.dev](https://expo.dev)
+   - Navigate to your project
+   - Click "Builds"
+   - Select the build
+   - View the full logs
 
-### Häufige Build-Fehler
+### Common Build Errors
 
 #### 1. "EXPO_TOKEN not set"
 
-**Ursache:** GitHub Secret fehlt
+**Cause:** GitHub Secret is missing
 
-**Lösung:**
+**Solution:**
 ```bash
-# Generiere Token bei expo.dev
-# Füge als GitHub Secret hinzu
+# Generate a token at expo.dev
+# Add it as a GitHub Secret
 ```
 
 #### 2. "No valid credentials found"
 
-**Ursache:** Signierung nicht konfiguriert
+**Cause:** Signing is not configured
 
-**Lösung:**
+**Solution:**
 ```bash
 eas credentials
-# Folge Anweisungen
+# Follow the instructions
 ```
 
 #### 3. "Build timed out"
 
-**Ursache:** Build dauert zu lange
+**Cause:** Build takes too long
 
-**Lösung:**
-- Nutze `build.yml` statt `build-artifacts.yml`
-- Download Artifacts manuell vom EAS Dashboard
+**Solution:**
+- Use `build.yml` instead of `build-artifacts.yml`
+- Download artifacts manually from the EAS Dashboard
 
 #### 4. "Provisioning profile expired" (iOS)
 
-**Ursache:** Abgelaufenes iOS Provisioning Profile
+**Cause:** Expired iOS provisioning profile
 
-**Lösung:**
+**Solution:**
 ```bash
 eas credentials --platform ios
-# Generiere neues Profil oder upload neues
+# Generate a new profile or upload a new one
 ```
 
-## Performance-Optimierung
+## Performance Optimization
 
 ### 1. Dependency Caching
 
-GitHub Actions cached automatisch `node_modules`:
+GitHub Actions automatically caches `node_modules`:
 
 ```yaml
 - uses: actions/setup-node@v4
   with:
-    cache: 'npm'  # Automatisches Caching
+    cache: 'npm'  # Automatic caching
 ```
 
-### 2. Build-Profile wählen
+### 2. Choosing Build Profiles
 
-- **Development:** Für schnelle Iterationen
-- **Preview:** Für Testing
-- **Production:** Nur für finale Releases
+- **Development:** For fast iterations
+- **Preview:** For testing
+- **Production:** Only for final releases
 
-### 3. Parallele Builds
+### 3. Parallel Builds
 
-Nutze Matrix-Strategie für Android + iOS gleichzeitig:
+Use a matrix strategy for Android + iOS at the same time:
 
 ```yaml
 strategy:
@@ -315,14 +315,14 @@ strategy:
     platform: [android, ios]
 ```
 
-## Nächste Schritte
+## Next Steps
 
-1. ✅ Verstehe Build-Prozess
-2. ✅ Konfiguriere Signierung
-3. ✅ Teste ersten Build
-4. ✅ Automatisiere Deployment
+1. ✅ Understand the build process
+2. ✅ Configure signing
+3. ✅ Test the first build
+4. ✅ Automate deployment
 
-## Weitere Ressourcen
+## Further Resources
 
 - [EAS Build Deep Dive](https://docs.expo.dev/build/introduction/)
 - [EAS Build Configuration](https://docs.expo.dev/build/eas-json/)

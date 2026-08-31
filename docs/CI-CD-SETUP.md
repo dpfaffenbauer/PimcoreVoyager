@@ -1,79 +1,79 @@
-# CI/CD Setup und Konfiguration
+# CI/CD Setup and Configuration
 
-Dieses Dokument beschreibt die vollständige Einrichtung der CI/CD-Pipeline für Pimcore Voyager mit GitHub Actions und Expo Application Services (EAS).
+This document describes the complete setup of the CI/CD pipeline for Pimcore Voyager with GitHub Actions and Expo Application Services (EAS).
 
-## Inhaltsverzeichnis
+## Table of Contents
 
-1. [Übersicht](#übersicht)
-2. [Voraussetzungen](#voraussetzungen)
-3. [EAS-Konfiguration](#eas-konfiguration)
-4. [GitHub Secrets einrichten](#github-secrets-einrichten)
-5. [Build-Profile](#build-profile)
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [EAS Configuration](#eas-configuration)
+4. [Setting Up GitHub Secrets](#setting-up-github-secrets)
+5. [Build Profiles](#build-profiles)
 6. [Workflows](#workflows)
-7. [Android-Signierung](#android-signierung)
-8. [iOS-Signierung](#ios-signierung)
+7. [Android Signing](#android-signing)
+8. [iOS Signing](#ios-signing)
 9. [Troubleshooting](#troubleshooting)
 
-## Übersicht
+## Overview
 
-Die CI/CD-Pipeline automatisiert den Build- und Deployment-Prozess für Android und iOS mit folgenden Features:
+The CI/CD pipeline automates the build and deployment process for Android and iOS with the following features:
 
-- ✅ Automatische Builds bei Push/Merge auf Hauptbranches
-- ✅ Manuelle Builds über GitHub Actions UI
-- ✅ EAS Build Integration für Android (APK/AAB) und iOS (IPA)
-- ✅ Artifact-Upload zu GitHub Actions
-- ✅ Optional: TestFlight Deployment
-- ✅ Optional: Release-Automation
+- ✅ Automatic builds on push/merge to main branches
+- ✅ Manual builds via the GitHub Actions UI
+- ✅ EAS Build integration for Android (APK/AAB) and iOS (IPA)
+- ✅ Artifact upload to GitHub Actions
+- ✅ Optional: TestFlight deployment
+- ✅ Optional: Release automation
 
-## Voraussetzungen
+## Prerequisites
 
-### 1. Expo Account erstellen
+### 1. Create an Expo Account
 
-1. Registrierung unter [expo.dev](https://expo.dev)
-2. Ein neues Projekt erstellen oder bestehendes verknüpfen
-3. Access Token generieren:
-   - Gehe zu [expo.dev/accounts/[username]/settings/access-tokens](https://expo.dev/accounts)
-   - Erstelle einen neuen Token mit Namen "GitHub Actions"
-   - Token sicher speichern (wird als GitHub Secret benötigt)
+1. Sign up at [expo.dev](https://expo.dev)
+2. Create a new project or link an existing one
+3. Generate an access token:
+   - Go to [expo.dev/accounts/[username]/settings/access-tokens](https://expo.dev/accounts)
+   - Create a new token named "GitHub Actions"
+   - Store the token securely (it will be needed as a GitHub Secret)
 
-### 2. EAS CLI installieren (lokal)
+### 2. Install the EAS CLI (locally)
 
 ```bash
 npm install -g eas-cli
 eas login
 ```
 
-### 3. Projekt mit EAS initialisieren
+### 3. Initialize the Project with EAS
 
 ```bash
-cd /pfad/zu/PimcoreVoyager
+cd /path/to/PimcoreVoyager
 eas init
 ```
 
-Dies aktualisiert die `app.json` mit der Projekt-ID.
+This updates `app.json` with the project ID.
 
-## EAS-Konfiguration
+## EAS Configuration
 
-Die Datei `eas.json` definiert verschiedene Build-Profile:
+The `eas.json` file defines the various build profiles:
 
-### Build-Profile
+### Build Profiles
 
 #### `development`
-- Entwicklungs-Builds mit Debug-Konfiguration
+- Development builds with debug configuration
 - Android: APK
-- iOS: Debug-Build
+- iOS: debug build
 
 #### `preview`
-- Test-Builds für interne Verteilung
+- Test builds for internal distribution
 - Android: APK
-- iOS: Release-Build ohne App Store
+- iOS: release build without the App Store
 
 #### `production`
-- Production-Builds für Store-Verteilung
-- Android: APK (oder AAB mit `production-aab` Profil)
-- iOS: Release-Build für App Store/TestFlight
+- Production builds for store distribution
+- Android: APK (or AAB with the `production-aab` profile)
+- iOS: release build for the App Store/TestFlight
 
-### Beispiel `eas.json`
+### Example `eas.json`
 
 ```json
 {
@@ -99,73 +99,73 @@ Die Datei `eas.json` definiert verschiedene Build-Profile:
 }
 ```
 
-## GitHub Secrets einrichten
+## Setting Up GitHub Secrets
 
-Navigiere zu: `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
+Navigate to: `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
 
-### Erforderliche Secrets
+### Required Secrets
 
-#### 1. `EXPO_TOKEN` (Pflicht)
+#### 1. `EXPO_TOKEN` (required)
 
-Der Expo Access Token für EAS Build.
+The Expo access token for EAS Build.
 
 ```
-Wert: [dein-expo-access-token]
+Value: [your-expo-access-token]
 ```
 
-#### 2. Android Signierung (Optional für signierte Builds)
+#### 2. Android Signing (optional for signed builds)
 
-Wenn du Android-Builds signieren möchtest, lade den Keystore in EAS hoch:
+If you want to sign your Android builds, upload the keystore to EAS:
 
 ```bash
 eas credentials
 ```
 
-Folge den Anweisungen zum Hochladen deines Keystores.
+Follow the instructions to upload your keystore.
 
-Alternativ kannst du die Signierung automatisch von EAS verwalten lassen.
+Alternatively, you can let EAS manage the signing automatically.
 
-#### 3. iOS Signierung (Optional für iOS Builds)
+#### 3. iOS Signing (optional for iOS builds)
 
-Für iOS-Builds benötigst du:
+For iOS builds you need:
 
-- Apple Developer Account
-- Distribution Certificate (.p12)
-- Provisioning Profile (.mobileprovision)
+- Apple Developer account
+- Distribution certificate (.p12)
+- Provisioning profile (.mobileprovision)
 
-**Option A: EAS Credentials Manager (empfohlen)**
+**Option A: EAS Credentials Manager (recommended)**
 
 ```bash
 eas credentials
 ```
 
-EAS kann Zertifikate automatisch generieren und verwalten.
+EAS can generate and manage certificates automatically.
 
-**Option B: Manuelle Upload**
+**Option B: Manual upload**
 
 ```bash
 eas credentials --platform ios
 ```
 
-Folge den Anweisungen zum Hochladen deiner Zertifikate.
+Follow the instructions to upload your certificates.
 
-#### 4. TestFlight Secrets (Optional)
+#### 4. TestFlight Secrets (optional)
 
-Für automatisches TestFlight-Deployment:
+For automatic TestFlight deployment:
 
-- `EXPO_APPLE_ID`: Deine Apple ID
-- `EXPO_APPLE_APP_SPECIFIC_PASSWORD`: App-spezifisches Passwort
+- `EXPO_APPLE_ID`: Your Apple ID
+- `EXPO_APPLE_APP_SPECIFIC_PASSWORD`: App-specific password
 
-App-spezifisches Passwort generieren:
-1. Gehe zu [appleid.apple.com](https://appleid.apple.com)
-2. Anmelden → Sicherheit → App-spezifische Passwörter
-3. Passwort generieren und als Secret speichern
+To generate an app-specific password:
+1. Go to [appleid.apple.com](https://appleid.apple.com)
+2. Sign in → Security → App-Specific Passwords
+3. Generate a password and store it as a secret
 
-### Optionale Variablen
+### Optional Variables
 
 #### `ENABLE_TESTFLIGHT_DEPLOY`
 
-Um TestFlight-Deployment zu aktivieren, erstelle eine Repository-Variable:
+To enable TestFlight deployment, create a repository variable:
 
 `Settings` → `Secrets and variables` → `Actions` → `Variables` → `New repository variable`
 
@@ -178,53 +178,53 @@ Value: true
 
 ### 1. `build.yml` - Standard Build Workflow
 
-Triggert automatisch bei:
-- Push auf `main` oder `develop` Branch
-- Pull Requests auf `main` oder `develop`
-- Manueller Trigger über Actions UI
+Triggers automatically on:
+- Push to the `main` or `develop` branch
+- Pull requests targeting `main` or `develop`
+- Manual trigger via the Actions UI
 
-**Manuelle Ausführung:**
+**Manual execution:**
 
-1. Gehe zu `Actions` → `Build and Deploy`
-2. Klicke auf `Run workflow`
-3. Wähle Platform (`android`, `ios`, oder `all`)
-4. Wähle Build-Profil (`development`, `preview`, oder `production`)
-5. Klicke auf `Run workflow`
-
-**Features:**
-- Parallele Builds für Android und iOS
-- EAS Build Integration
-- Build-Status Kommentare auf PRs
-
-### 2. `build-artifacts.yml` - Build mit Artifact-Download
-
-Triggert bei:
-- Manueller Trigger über Actions UI
-- GitHub Release erstellt
+1. Go to `Actions` → `Build and Deploy`
+2. Click `Run workflow`
+3. Select the platform (`android`, `ios`, or `all`)
+4. Select the build profile (`development`, `preview`, or `production`)
+5. Click `Run workflow`
 
 **Features:**
-- Wartet auf Build-Completion
-- Downloaded fertige APK/IPA Dateien
-- Uploaded Artifacts zu GitHub Actions (30 Tage Retention)
-- Attached Artifacts an GitHub Releases
+- Parallel builds for Android and iOS
+- EAS Build integration
+- Build status comments on PRs
 
-**Hinweis:** Dieser Workflow dauert länger (bis zu 60 Minuten), da er auf den EAS-Build wartet.
+### 2. `build-artifacts.yml` - Build with Artifact Download
 
-## Android-Signierung
+Triggers on:
+- Manual trigger via the Actions UI
+- GitHub Release created
 
-### Option 1: EAS Managed Credentials (Empfohlen)
+**Features:**
+- Waits for build completion
+- Downloads the finished APK/IPA files
+- Uploads artifacts to GitHub Actions (30-day retention)
+- Attaches artifacts to GitHub Releases
 
-EAS generiert und verwaltet automatisch einen Keystore:
+**Note:** This workflow takes longer (up to 60 minutes) because it waits for the EAS build.
+
+## Android Signing
+
+### Option 1: EAS Managed Credentials (recommended)
+
+EAS automatically generates and manages a keystore:
 
 ```bash
 eas credentials
 ```
 
-Wähle "Set up new Android Keystore" und folge den Anweisungen.
+Select "Set up new Android Keystore" and follow the instructions.
 
-### Option 2: Eigener Keystore
+### Option 2: Your Own Keystore
 
-#### Keystore generieren
+#### Generate a keystore
 
 ```bash
 keytool -genkeypair -v -storetype PKCS12 \
@@ -234,122 +234,122 @@ keytool -genkeypair -v -storetype PKCS12 \
   -validity 10000
 ```
 
-#### Keystore in EAS hochladen
+#### Upload the keystore to EAS
 
 ```bash
 eas credentials
 ```
 
-Wähle "Set up new Android Keystore" → "Upload existing keystore".
+Select "Set up new Android Keystore" → "Upload existing keystore".
 
-**Wichtig:** Speichere Keystore-Passwörter sicher! Verlust führt dazu, dass App-Updates nicht mehr möglich sind.
+**Important:** Store the keystore passwords securely! Losing them means you can no longer publish app updates.
 
-## iOS-Signierung
+## iOS Signing
 
-### Voraussetzungen
+### Prerequisites
 
-- Apple Developer Account ($99/Jahr)
-- Xcode auf macOS (für lokale Entwicklung)
+- Apple Developer account ($99/year)
+- Xcode on macOS (for local development)
 
-### Option 1: EAS Managed Credentials (Empfohlen)
-
-```bash
-eas credentials --platform ios
-```
-
-EAS kann automatisch:
-- Distribution Certificate generieren
-- Provisioning Profiles erstellen
-- Push Notification Keys verwalten
-
-### Option 2: Manuelle Zertifikate
-
-#### 1. Distribution Certificate erstellen
-
-1. Öffne [developer.apple.com/account/resources/certificates](https://developer.apple.com/account/resources/certificates)
-2. Erstelle "iOS Distribution Certificate"
-3. Download als `.cer`, konvertiere zu `.p12`:
-
-```bash
-# Auf macOS mit Keychain Access
-# Exportiere als .p12 mit Passwort
-```
-
-#### 2. Provisioning Profile erstellen
-
-1. Öffne [developer.apple.com/account/resources/profiles](https://developer.apple.com/account/resources/profiles)
-2. Erstelle "App Store" oder "Ad Hoc" Profil
-3. Download als `.mobileprovision`
-
-#### 3. Upload zu EAS
+### Option 1: EAS Managed Credentials (recommended)
 
 ```bash
 eas credentials --platform ios
 ```
 
-Folge den Anweisungen zum Upload.
+EAS can automatically:
+- Generate a distribution certificate
+- Create provisioning profiles
+- Manage push notification keys
 
-### App Store Connect konfigurieren
+### Option 2: Manual Certificates
 
-Für TestFlight/App Store Deployment:
+#### 1. Create a distribution certificate
 
-1. Erstelle App in [App Store Connect](https://appstoreconnect.apple.com)
-2. Bundle Identifier muss mit `app.json` übereinstimmen: `com.pimcore.voyager`
-3. Fülle alle erforderlichen App-Informationen aus
+1. Open [developer.apple.com/account/resources/certificates](https://developer.apple.com/account/resources/certificates)
+2. Create an "iOS Distribution Certificate"
+3. Download it as `.cer`, convert it to `.p12`:
+
+```bash
+# On macOS with Keychain Access
+# Export as .p12 with a password
+```
+
+#### 2. Create a provisioning profile
+
+1. Open [developer.apple.com/account/resources/profiles](https://developer.apple.com/account/resources/profiles)
+2. Create an "App Store" or "Ad Hoc" profile
+3. Download it as `.mobileprovision`
+
+#### 3. Upload to EAS
+
+```bash
+eas credentials --platform ios
+```
+
+Follow the instructions to upload.
+
+### Configure App Store Connect
+
+For TestFlight/App Store deployment:
+
+1. Create the app in [App Store Connect](https://appstoreconnect.apple.com)
+2. The bundle identifier must match `app.json`: `com.pimcore.voyager`
+3. Fill in all required app information
 
 ## Troubleshooting
 
-### Build schlägt fehl: "Invalid credentials"
+### Build fails: "Invalid credentials"
 
-**Lösung:**
-1. Überprüfe `EXPO_TOKEN` Secret
-2. Generiere neuen Token bei [expo.dev](https://expo.dev)
-3. Update GitHub Secret
+**Solution:**
+1. Check the `EXPO_TOKEN` secret
+2. Generate a new token at [expo.dev](https://expo.dev)
+3. Update the GitHub Secret
 
-### Android Build Error: "Keystore not found"
+### Android build error: "Keystore not found"
 
-**Lösung:**
+**Solution:**
 ```bash
 eas credentials --platform android
 ```
 
-Richte Keystore ein oder lasse EAS einen generieren.
+Set up a keystore or let EAS generate one.
 
-### iOS Build Error: "Provisioning profile expired"
+### iOS build error: "Provisioning profile expired"
 
-**Lösung:**
-1. Generiere neues Provisioning Profile bei [developer.apple.com](https://developer.apple.com)
-2. Upload mit `eas credentials --platform ios`
+**Solution:**
+1. Generate a new provisioning profile at [developer.apple.com](https://developer.apple.com)
+2. Upload it with `eas credentials --platform ios`
 
-### Build dauert sehr lange
+### Build takes a very long time
 
-EAS Builds können 10-30 Minuten dauern. Dies ist normal.
+EAS builds can take 10-30 minutes. This is normal.
 
-**Beschleunigung:**
-- Nutze `--non-interactive` Flag
-- Verwende `preview` Profil für schnellere Test-Builds
+**To speed things up:**
+- Use the `--non-interactive` flag
+- Use the `preview` profile for faster test builds
 
-### TestFlight Upload schlägt fehl
+### TestFlight upload fails
 
-**Häufige Ursachen:**
-- App-spezifisches Passwort falsch
-- App nicht in App Store Connect erstellt
-- Bundle Identifier stimmt nicht überein
+**Common causes:**
+- App-specific password is wrong
+- App has not been created in App Store Connect
+- Bundle identifier does not match
 
-**Lösung:**
-1. Überprüfe `EXPO_APPLE_ID` und `EXPO_APPLE_APP_SPECIFIC_PASSWORD` Secrets
-2. Stelle sicher, dass App in App Store Connect existiert
-3. Überprüfe Bundle Identifier in `app.json`
+**Solution:**
+1. Check the `EXPO_APPLE_ID` and `EXPO_APPLE_APP_SPECIFIC_PASSWORD` secrets
+2. Make sure the app exists in App Store Connect
+3. Check the bundle identifier in `app.json`
 
-### Workflow findet Artifact nicht
+### Workflow cannot find the artifact
 
-Der `build-artifacts.yml` Workflow wartet auf Build-Completion. Bei Timeout (60 Min):
+The `build-artifacts.yml` workflow waits for build completion. On timeout (60 min):
 
-**Lösung:**
-- Erhöhe `TIMEOUT` Variable im Workflow
-- Nutze einfachen `build.yml` Workflow und download Artifacts manuell vom EAS Dashboard
+**Solution:**
+- Increase the `TIMEOUT` variable in the workflow
+- Use the simple `build.yml` workflow and download artifacts manually from the EAS Dashboard
 
-## Weitere Ressourcen
+## Further Resources
 
 - [Expo Documentation](https://docs.expo.dev/)
 - [EAS Build Documentation](https://docs.expo.dev/build/introduction/)
@@ -359,7 +359,7 @@ Der `build-artifacts.yml` Workflow wartet auf Build-Completion. Bei Timeout (60 
 
 ## Support
 
-Bei Fragen oder Problemen:
-1. Prüfe die [Expo Forums](https://forums.expo.dev/)
-2. Erstelle ein Issue in diesem Repository
-3. Kontaktiere das Pimcore Voyager Team
+For questions or problems:
+1. Check the [Expo Forums](https://forums.expo.dev/)
+2. Create an issue in this repository
+3. Contact the Pimcore Voyager team

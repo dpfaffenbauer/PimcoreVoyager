@@ -1,16 +1,16 @@
 # Pimcore Voyager - Developer Documentation
 
-> **Letzte Aktualisierung:** Januar 2025
+> **Last updated:** January 2025
 > **Version:** 1.0.0
 
 ---
 
-## Inhaltsverzeichnis
+## Table of Contents
 
-1. [Überblick](#überblick)
-2. [Schnellstart](#schnellstart)
-3. [Projektstruktur](#projektstruktur)
-4. [Architektur](#architektur)
+1. [Overview](#overview)
+2. [Quick Start](#quick-start)
+3. [Project Structure](#project-structure)
+4. [Architecture](#architecture)
 5. [API Services](#api-services)
 6. [Screens](#screens)
 7. [Components](#components)
@@ -24,23 +24,23 @@
 
 ---
 
-## Überblick
+## Overview
 
-Pimcore Voyager ist eine React Native/Expo Mobile App für die Verwaltung von Pimcore-Inhalten. Die App kommuniziert mit der Pimcore Studio API und unterstützt:
+Pimcore Voyager is a React Native/Expo mobile app for managing Pimcore content. The app communicates with the Pimcore Studio API and supports:
 
-- **Datenobjekte**: Browsen, Anzeigen, Workflow-Management
-- **Assets**: Medienbibliothek durchsuchen und anzeigen
-- **Dokumente**: Dokumentbaum und Details
-- **Suche**: Globale Suche über alle Inhaltstypen
-- **Multi-Instanz**: Mehrere Pimcore-Server verwalten
+- **Data Objects**: Browse, view, workflow management
+- **Assets**: Browse and view the media library
+- **Documents**: Document tree and details
+- **Search**: Global search across all content types
+- **Multi-Instance**: Manage multiple Pimcore servers
 
 ### Tech Stack
 
-| Technologie | Version | Verwendung |
+| Technology | Version | Purpose |
 |-------------|---------|------------|
 | React Native | 0.81.5 | Mobile Framework |
 | Expo | 54.x | Build & Dev Toolchain |
-| TypeScript | 5.9.x | Typsicherheit |
+| TypeScript | 5.9.x | Type Safety |
 | React Navigation | 7.x | Navigation |
 | React Native Paper | 5.x | UI Components |
 | Zustand | 5.x | State Management |
@@ -48,75 +48,75 @@ Pimcore Voyager ist eine React Native/Expo Mobile App für die Verwaltung von Pi
 
 ---
 
-## Schnellstart
+## Quick Start
 
-### Voraussetzungen
+### Prerequisites
 
-- Node.js 20.x oder höher
-- npm oder yarn
-- Xcode 15+ (für iOS)
-- Android Studio (für Android)
-- Pimcore 11.x mit Studio UI Bundle
+- Node.js 20.x or higher
+- npm or yarn
+- Xcode 15+ (for iOS)
+- Android Studio (for Android)
+- Pimcore 11.x with Studio UI Bundle
 
 ### Installation
 
 ```bash
-# Repository klonen
+# Clone the repository
 git clone https://github.com/cors-gmbh/pimcore-voyager.git
 cd pimcore-voyager
 
-# Dependencies installieren
+# Install dependencies
 npm install
 
-# iOS Pods installieren (bei CocoaPods-Problemen)
+# Install iOS pods (in case of CocoaPods issues)
 cd ios && pod install && cd ..
 
-# Development Server starten
+# Start the development server
 npm start
 ```
 
 ### Development Build
 
 ```bash
-# iOS Device (mit Dev Client)
+# iOS device (with dev client)
 npx expo run:ios --device
 
-# iOS Simulator
+# iOS simulator
 npx expo run:ios
 
 # Android
 npx expo run:android
 
-# Release Build für iOS
+# Release build for iOS
 npx expo run:ios --device --configuration Release
 ```
 
 ---
 
-## Projektstruktur
+## Project Structure
 
 ```
 pimcore-voyager/
 ├── src/
-│   ├── apis/                      # API Layer
-│   │   ├── apiClient.ts           # Axios Konfiguration
-│   │   ├── authService.ts         # Authentifizierung
-│   │   ├── pimcoreService.ts      # Facade (re-exportiert alle Services)
-│   │   ├── dataObjectService.ts   # Datenobjekt-Operationen
-│   │   ├── assetService.ts        # Asset-Operationen
-│   │   ├── documentService.ts     # Dokument-Operationen
-│   │   ├── classService.ts        # Klassendefinitionen
-│   │   ├── workflowService.ts     # Workflow-Operationen
-│   │   └── searchService.ts       # Such-Funktionalität
+│   ├── apis/                      # API layer
+│   │   ├── apiClient.ts           # Axios configuration
+│   │   ├── authService.ts         # Authentication
+│   │   ├── pimcoreService.ts      # Facade (re-exports all services)
+│   │   ├── dataObjectService.ts   # Data object operations
+│   │   ├── assetService.ts        # Asset operations
+│   │   ├── documentService.ts     # Document operations
+│   │   ├── classService.ts        # Class definitions
+│   │   ├── workflowService.ts     # Workflow operations
+│   │   └── searchService.ts       # Search functionality
 │   │
-│   ├── components/                # Wiederverwendbare Komponenten
-│   │   ├── FieldRenderer.tsx      # Dynamisches Feld-Rendering
-│   │   ├── WorkflowSection.tsx    # Workflow Status Anzeige
-│   │   ├── WorkflowActionDialog.tsx # Workflow Aktions-Dialog
-│   │   ├── CustomDrawer.tsx       # Navigation Drawer
-│   │   └── FloatingActionMenu.tsx # FAB Menü
+│   ├── components/                # Reusable components
+│   │   ├── FieldRenderer.tsx      # Dynamic field rendering
+│   │   ├── WorkflowSection.tsx    # Workflow status display
+│   │   ├── WorkflowActionDialog.tsx # Workflow action dialog
+│   │   ├── CustomDrawer.tsx       # Navigation drawer
+│   │   └── FloatingActionMenu.tsx # FAB menu
 │   │
-│   ├── screens/                   # Screen Komponenten
+│   ├── screens/                   # Screen components
 │   │   ├── LoginScreen.tsx
 │   │   ├── InstanceSelectionScreen.tsx
 │   │   ├── AddEditInstanceScreen.tsx
@@ -131,48 +131,48 @@ pimcore-voyager/
 │   │   ├── SearchScreen.tsx
 │   │   └── SettingsScreen.tsx
 │   │
-│   ├── navigation/                # Navigation Konfiguration
+│   ├── navigation/                # Navigation configuration
 │   │   └── AppNavigation.tsx
 │   │
-│   ├── store/                     # Zustand Stores
-│   │   ├── authStore.ts           # Auth State
-│   │   ├── appStore.ts            # App State
-│   │   └── instanceStore.ts       # Multi-Instanz State
+│   ├── store/                     # Zustand stores
+│   │   ├── authStore.ts           # Auth state
+│   │   ├── appStore.ts            # App state
+│   │   └── instanceStore.ts       # Multi-instance state
 │   │
-│   ├── types/                     # TypeScript Definitionen
-│   │   ├── pimcore.ts             # Pimcore Typen
-│   │   ├── auth.ts                # Auth Typen
-│   │   └── instance.ts            # Instanz Typen
+│   ├── types/                     # TypeScript definitions
+│   │   ├── pimcore.ts             # Pimcore types
+│   │   ├── auth.ts                # Auth types
+│   │   └── instance.ts            # Instance types
 │   │
-│   └── config/                    # Konfiguration
+│   └── config/                    # Configuration
 │       ├── env.ts                 # Environment
-│       └── constants.ts           # Konstanten
+│       └── constants.ts           # Constants
 │
-├── assets/                        # Statische Assets
+├── assets/                        # Static assets
 │   └── logo.png
 │
-├── ios/                           # Native iOS Projekt
-├── android/                       # Native Android Projekt
+├── ios/                           # Native iOS project
+├── android/                       # Native Android project
 │
 ├── .github/
 │   └── workflows/
-│       └── cla-check.yml          # CLA Bot
+│       └── cla-check.yml          # CLA bot
 │
-├── App.tsx                        # Root Component
-├── app.json                       # Expo Config
-├── eas.json                       # EAS Build Config
+├── App.tsx                        # Root component
+├── app.json                       # Expo config
+├── eas.json                       # EAS build config
 ├── package.json
 ├── tsconfig.json
-├── LICENSE.md                     # PVL Lizenz
+├── LICENSE.md                     # PVL license
 ├── CLA.md                         # Contributor License Agreement
 └── README.md
 ```
 
 ---
 
-## Architektur
+## Architecture
 
-### Schichtenarchitektur
+### Layered Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -180,7 +180,7 @@ pimcore-voyager/
 │  (UI Layer - React Native Components)               │
 ├─────────────────────────────────────────────────────┤
 │                   Components                        │
-│  (Wiederverwendbare UI-Bausteine)                   │
+│  (Reusable UI building blocks)                      │
 ├─────────────────────────────────────────────────────┤
 │                 State Management                    │
 │  (Zustand Stores - authStore, appStore, etc.)       │
@@ -189,14 +189,14 @@ pimcore-voyager/
 │  (DataObjectService, AssetService, etc.)            │
 ├─────────────────────────────────────────────────────┤
 │                   API Client                        │
-│  (Axios mit Interceptors)                           │
+│  (Axios with interceptors)                          │
 ├─────────────────────────────────────────────────────┤
 │              Pimcore Studio API                     │
 │  (Backend)                                          │
 └─────────────────────────────────────────────────────┘
 ```
 
-### Datenfluss
+### Data Flow
 
 ```
 User Action → Screen → Store Action → API Service → Backend
@@ -208,50 +208,50 @@ User Action → Screen → Store Action → API Service → Backend
 
 ## API Services
 
-Die API-Layer ist modular aufgebaut. Jeder Service ist für einen Bereich zuständig.
+The API layer is built in a modular fashion. Each service is responsible for one area.
 
-### Service-Übersicht
+### Service Overview
 
-| Service | Datei | Beschreibung |
+| Service | File | Description |
 |---------|-------|--------------|
-| `PimcoreService` | `pimcoreService.ts` | Facade - re-exportiert alle Services |
-| `DataObjectService` | `dataObjectService.ts` | Datenobjekt CRUD |
-| `AssetService` | `assetService.ts` | Asset-Operationen |
-| `DocumentService` | `documentService.ts` | Dokument-Operationen |
-| `ClassService` | `classService.ts` | Klassendefinitionen & Layouts |
-| `WorkflowService` | `workflowService.ts` | Workflow Status & Aktionen |
-| `SearchService` | `searchService.ts` | Globale Suche |
-| `AuthService` | `authService.ts` | Login/Logout |
+| `PimcoreService` | `pimcoreService.ts` | Facade - re-exports all services |
+| `DataObjectService` | `dataObjectService.ts` | Data object CRUD |
+| `AssetService` | `assetService.ts` | Asset operations |
+| `DocumentService` | `documentService.ts` | Document operations |
+| `ClassService` | `classService.ts` | Class definitions & layouts |
+| `WorkflowService` | `workflowService.ts` | Workflow status & actions |
+| `SearchService` | `searchService.ts` | Global search |
+| `AuthService` | `authService.ts` | Login/logout |
 
 ### DataObjectService
 
 ```typescript
-// Datenobjekte laden
+// Load data objects
 DataObjectService.getDataObjects(classId?, page?, limit?, parentId?)
 
-// Einzelnes Objekt laden
+// Load a single object
 DataObjectService.getDataObject(id)
 
-// Objekt mit allen Felddaten laden
+// Load an object with all field data
 DataObjectService.getDataObjectFull(id)
 
-// Layout/Feldstruktur laden
+// Load the layout/field structure
 DataObjectService.getDataObjectLayout(id)
 
-// Baumstruktur laden
+// Load the tree structure
 DataObjectService.getTreeLevel(parentId)
 
-// Grid-Daten für Ordner
+// Grid data for folders
 DataObjectService.getGridConfiguration(folderId, classId, page, limit)
 ```
 
 ### WorkflowService
 
 ```typescript
-// Workflow-Details laden (Status, Transitions, Global Actions)
+// Load workflow details (status, transitions, global actions)
 WorkflowService.getWorkflowDetails(elementId, elementType)
 
-// Workflow-Aktion ausführen
+// Execute a workflow action
 WorkflowService.triggerWorkflowAction({
   actionType: 'transition' | 'global',
   elementId,
@@ -266,29 +266,29 @@ WorkflowService.triggerWorkflowAction({
 ### ClassService
 
 ```typescript
-// Alle Klassendefinitionen
+// All class definitions
 ClassService.getClassDefinitions()
 
-// Einzelne Klassendefinition
+// A single class definition
 ClassService.getClassDefinition(classId)
 
-// Klassen in einem Ordner
+// Classes in a folder
 ClassService.getFolderClasses(folderId)
 
-// Field Collection Layouts
+// Field collection layouts
 ClassService.getFieldCollectionLayouts(objectId)
 
-// Object Brick Layouts
+// Object brick layouts
 ClassService.getObjectBrickLayouts(objectId)
 ```
 
-### Verwendung
+### Usage
 
 ```typescript
-// Option 1: Einzelne Services importieren
+// Option 1: Import individual services
 import { DataObjectService, WorkflowService } from '../apis/pimcoreService';
 
-// Option 2: Facade verwenden (rückwärtskompatibel)
+// Option 2: Use the facade (backwards compatible)
 import { PimcoreService } from '../apis/pimcoreService';
 PimcoreService.getDataObject(123);
 ```
@@ -297,51 +297,51 @@ PimcoreService.getDataObject(123);
 
 ## Screens
 
-### Screen-Übersicht
+### Screen Overview
 
-| Screen | Datei | Beschreibung |
+| Screen | File | Description |
 |--------|-------|--------------|
-| `LoginScreen` | `LoginScreen.tsx` | Benutzeranmeldung |
-| `InstanceSelectionScreen` | `InstanceSelectionScreen.tsx` | Pimcore-Instanz auswählen |
-| `AddEditInstanceScreen` | `AddEditInstanceScreen.tsx` | Instanz hinzufügen/bearbeiten |
-| `DataObjectsScreen` | `DataObjectsScreen.tsx` | Datenobjekt-Baumstruktur |
-| `ObjectListScreen` | `ObjectListScreen.tsx` | Objektliste einer Klasse |
-| `ObjectDetailScreen` | `ObjectDetailScreen.tsx` | Objektdetails mit Feldern |
-| `FolderDetailScreen` | `FolderDetailScreen.tsx` | Ordnerinhalt mit Grid |
-| `AssetsScreen` | `AssetsScreen.tsx` | Asset-Baumstruktur |
-| `AssetDetailScreen` | `AssetDetailScreen.tsx` | Asset-Details |
-| `DocumentsScreen` | `DocumentsScreen.tsx` | Dokument-Baumstruktur |
-| `DocumentDetailScreen` | `DocumentDetailScreen.tsx` | Dokument-Details |
-| `SearchScreen` | `SearchScreen.tsx` | Globale Suche |
-| `SettingsScreen` | `SettingsScreen.tsx` | App-Einstellungen |
+| `LoginScreen` | `LoginScreen.tsx` | User login |
+| `InstanceSelectionScreen` | `InstanceSelectionScreen.tsx` | Select a Pimcore instance |
+| `AddEditInstanceScreen` | `AddEditInstanceScreen.tsx` | Add/edit an instance |
+| `DataObjectsScreen` | `DataObjectsScreen.tsx` | Data object tree |
+| `ObjectListScreen` | `ObjectListScreen.tsx` | Object list for a class |
+| `ObjectDetailScreen` | `ObjectDetailScreen.tsx` | Object details with fields |
+| `FolderDetailScreen` | `FolderDetailScreen.tsx` | Folder contents with grid |
+| `AssetsScreen` | `AssetsScreen.tsx` | Asset tree |
+| `AssetDetailScreen` | `AssetDetailScreen.tsx` | Asset details |
+| `DocumentsScreen` | `DocumentsScreen.tsx` | Document tree |
+| `DocumentDetailScreen` | `DocumentDetailScreen.tsx` | Document details |
+| `SearchScreen` | `SearchScreen.tsx` | Global search |
+| `SettingsScreen` | `SettingsScreen.tsx` | App settings |
 
 ### ObjectDetailScreen Features
 
-- Header mit Objekt-Metadaten
-- Tab-Navigation für Layout-Panels
-- Dynamisches Feld-Rendering via `FieldRenderer`
-- Workflow-Status Anzeige
-- Menü mit:
-  - Workflow-Aktionen (Transitions, Global Actions)
-  - Objektinformationen
-  - Berechtigungen
-- Pull-to-Refresh
+- Header with object metadata
+- Tab navigation for layout panels
+- Dynamic field rendering via `FieldRenderer`
+- Workflow status display
+- Menu with:
+  - Workflow actions (transitions, global actions)
+  - Object information
+  - Permissions
+- Pull-to-refresh
 
 ### FolderDetailScreen Features
 
-- **Responsives Split-Layout**: Automatische Anpassung basierend auf Bildschirmbreite
-  - **Tablet (> 768px)**: Side-by-side Layout mit Klassen-Sidebar links und Objektliste rechts
-  - **Phone (≤ 768px)**: Gestapeltes Layout mit Dropdown-Klassenauswahl
-- Klassen-Auswahl pro Ordner
-- Grid-Ansicht der Objekte
-- Paginierung mit "Mehr laden"
-- Pull-to-Refresh
+- **Responsive split layout**: Adapts automatically based on screen width
+  - **Tablet (> 768px)**: Side-by-side layout with the class sidebar on the left and the object list on the right
+  - **Phone (≤ 768px)**: Stacked layout with a dropdown class selector
+- Class selection per folder
+- Grid view of the objects
+- Pagination with "Load more"
+- Pull-to-refresh
 
 ```typescript
-// Breakpoint Konstante
+// Breakpoint constant
 const SPLIT_LAYOUT_BREAKPOINT = 768;
 
-// Hook für responsive Erkennung
+// Hook for responsive detection
 const { width } = useWindowDimensions();
 const isSplitLayout = width > SPLIT_LAYOUT_BREAKPOINT;
 ```
@@ -352,23 +352,23 @@ const isSplitLayout = width > SPLIT_LAYOUT_BREAKPOINT;
 
 ### FieldRenderer
 
-Dynamisches Rendering aller Pimcore-Feldtypen.
+Dynamic rendering of all Pimcore field types.
 
-**Unterstützte Feldtypen:**
+**Supported field types:**
 
-| Kategorie | Feldtypen |
+| Category | Field types |
 |-----------|-----------|
 | Text | input, textarea, wysiwyg, password |
-| Numerisch | numeric, slider, quantityValue |
-| Auswahl | select, multiselect, booleanSelect |
-| Datum/Zeit | date, datetime, time, dateRange |
-| Relationen | manyToOneRelation, manyToManyRelation, manyToManyObjectRelation |
-| Strukturiert | fieldcollections, objectbricks, block, classificationstore |
+| Numeric | numeric, slider, quantityValue |
+| Selection | select, multiselect, booleanSelect |
+| Date/Time | date, datetime, time, dateRange |
+| Relations | manyToOneRelation, manyToManyRelation, manyToManyObjectRelation |
+| Structured | fieldcollections, objectbricks, block, classificationstore |
 | Geo | geopoint, geobounds, geopolygon, geopolyline |
 | Media | image, video, hotspotimage, imageGallery |
-| Sonstige | link, table, structuredTable, checkbox, rgbaColor |
+| Other | link, table, structuredTable, checkbox, rgbaColor |
 
-**Verwendung:**
+**Usage:**
 
 ```tsx
 import { LayoutNodeRenderer } from '../components/FieldRenderer';
@@ -384,7 +384,7 @@ import { LayoutNodeRenderer } from '../components/FieldRenderer';
 
 ### WorkflowSection
 
-Zeigt Workflow-Status-Badges für Objekte an.
+Displays workflow status badges for objects.
 
 ```tsx
 import { WorkflowSection } from '../components/WorkflowSection';
@@ -393,11 +393,11 @@ import { WorkflowSection } from '../components/WorkflowSection';
 ```
 
 **Props:**
-- `workflows: WorkflowItem[]` - Array von Workflow-Items
+- `workflows: WorkflowItem[]` - Array of workflow items
 
 ### WorkflowActionDialog
 
-Modal-Dialog für Workflow-Aktionen mit Unterstützung für Kommentare und zusätzliche Felder.
+Modal dialog for workflow actions with support for comments and additional fields.
 
 ```tsx
 import { WorkflowActionDialog, WorkflowActionData } from '../components/WorkflowActionDialog';
@@ -413,27 +413,27 @@ import { WorkflowActionDialog, WorkflowActionData } from '../components/Workflow
 ```
 
 **Props:**
-- `visible: boolean` - Dialog sichtbar/versteckt
-- `title: string` - Titel des Dialogs
-- `notes: WorkflowNotes` - Konfiguration für Kommentar und zusätzliche Felder
-- `loading?: boolean` - Ladezustand während Ausführung
-- `onCancel: () => void` - Callback bei Abbruch
-- `onSubmit: (data: WorkflowActionData) => void` - Callback bei Absenden
+- `visible: boolean` - Dialog shown/hidden
+- `title: string` - Title of the dialog
+- `notes: WorkflowNotes` - Configuration for the comment and additional fields
+- `loading?: boolean` - Loading state during execution
+- `onCancel: () => void` - Callback on cancel
+- `onSubmit: (data: WorkflowActionData) => void` - Callback on submit
 
-**Unterstützte Feldtypen:**
+**Supported field types:**
 
-| Typ | Beschreibung |
+| Type | Description |
 |-----|--------------|
-| `input` | Einzeiliges Textfeld |
-| `numeric` | Numerische Eingabe |
-| `textarea` | Mehrzeiliges Textfeld |
-| `select` | Dropdown-Auswahl |
+| `input` | Single-line text field |
+| `numeric` | Numeric input |
+| `textarea` | Multi-line text field |
+| `select` | Dropdown selection |
 | `checkbox` | Checkbox |
-| `date` | Datumsauswahl |
-| `datetime` | Datum + Uhrzeit |
-| `user` | Benutzer-ID Eingabe |
+| `date` | Date picker |
+| `datetime` | Date + time |
+| `user` | User ID input |
 
-**Beispiel API Payload:**
+**Example API payload:**
 ```json
 {
   "actionType": "global",
@@ -501,7 +501,7 @@ interface AppState {
 loadClassDefinitions()
 ```
 
-### Verwendung
+### Usage
 
 ```typescript
 import { useAuthStore } from '../store/authStore';
@@ -517,24 +517,24 @@ function MyComponent() {
 
 ## Navigation
 
-### Navigationsstruktur
+### Navigation Structure
 
 ```
 Root Navigator (Stack)
-├── InstanceSelection (wenn keine Instanz ausgewählt)
-├── Login (wenn nicht authentifiziert)
+├── InstanceSelection (when no instance is selected)
+├── Login (when not authenticated)
 └── Main Navigator (Drawer)
     ├── Data Objects Stack
-    │   ├── DataObjectsScreen (Baumansicht)
-    │   ├── ObjectListScreen (Objektliste)
-    │   ├── ObjectDetailScreen (Objektdetails)
-    │   └── FolderDetailScreen (Ordnerinhalt)
+    │   ├── DataObjectsScreen (tree view)
+    │   ├── ObjectListScreen (object list)
+    │   ├── ObjectDetailScreen (object details)
+    │   └── FolderDetailScreen (folder contents)
     ├── Assets Stack
-    │   ├── AssetsScreen (Baumansicht)
-    │   └── AssetDetailScreen (Asset-Details)
+    │   ├── AssetsScreen (tree view)
+    │   └── AssetDetailScreen (asset details)
     ├── Documents Stack
-    │   ├── DocumentsScreen (Baumansicht)
-    │   └── DocumentDetailScreen (Dokument-Details)
+    │   ├── DocumentsScreen (tree view)
+    │   └── DocumentDetailScreen (document details)
     ├── Search Stack
     │   └── SearchScreen
     └── Settings Stack
@@ -545,7 +545,7 @@ Root Navigator (Stack)
 ### Navigation Types
 
 ```typescript
-// In navigation/AppNavigation.tsx definiert
+// Defined in navigation/AppNavigation.tsx
 type RootStackParamList = {
   InstanceSelection: undefined;
   Login: undefined;
@@ -564,15 +564,15 @@ type DataObjectsStackParamList = {
 
 ## Pimcore Studio API
 
-### Basis-URL
+### Base URL
 
 ```
 https://your-pimcore.com/pimcore-studio/api
 ```
 
-### Authentifizierung
+### Authentication
 
-Session-basiert mit Cookies:
+Session-based with cookies:
 
 ```typescript
 // Login
@@ -583,29 +583,29 @@ Body: { username, password }
 POST /pimcore-studio/api/logout
 ```
 
-### Wichtige Endpoints
+### Important Endpoints
 
 #### Data Objects
 
 ```
-GET  /data-objects/tree?parentId={id}      # Baumstruktur
-GET  /data-objects/{id}                     # Einzelnes Objekt
-GET  /data-objects/{id}/layout              # Layout/Feldstruktur
-POST /data-objects/grid/{classId}           # Grid-Daten
+GET  /data-objects/tree?parentId={id}      # Tree structure
+GET  /data-objects/{id}                     # Single object
+GET  /data-objects/{id}/layout              # Layout/field structure
+POST /data-objects/grid/{classId}           # Grid data
 ```
 
 #### Assets
 
 ```
-GET  /assets/tree?parentId={id}             # Baumstruktur
-GET  /assets/{id}                           # Einzelnes Asset
+GET  /assets/tree?parentId={id}             # Tree structure
+GET  /assets/{id}                           # Single asset
 ```
 
 #### Documents
 
 ```
-GET  /documents/tree?parentId={id}          # Baumstruktur
-GET  /documents/{id}                        # Einzelnes Dokument
+GET  /documents/tree?parentId={id}          # Tree structure
+GET  /documents/{id}                        # Single document
 ```
 
 #### Workflows
@@ -618,9 +618,9 @@ POST /workflows/action
 #### Classes
 
 ```
-GET  /class/collection                      # Alle Klassen
-GET  /class/definition/{classId}            # Einzelne Klasse
-GET  /class/folder/{folderId}               # Klassen in Ordner
+GET  /class/collection                      # All classes
+GET  /class/definition/{classId}            # Single class
+GET  /class/folder/{folderId}               # Classes in a folder
 GET  /class/field-collection/{objectId}/object/layout
 GET  /class/object-brick/{objectId}/object/layout
 ```
@@ -638,17 +638,17 @@ GET  /search?query={q}&type={type}
 ### Development Build
 
 ```bash
-# iOS mit Dev Client
+# iOS with dev client
 npx expo run:ios --device
 
 # Android
 npx expo run:android --device
 ```
 
-### Release Build (Lokal)
+### Release Build (Local)
 
 ```bash
-# iOS Release
+# iOS release
 npx expo run:ios --device --configuration Release
 ```
 
@@ -658,7 +658,7 @@ npx expo run:ios --device --configuration Release
 # Development
 eas build --profile development --platform ios
 
-# Preview (Internal Testing)
+# Preview (internal testing)
 eas build --profile preview --platform ios
 
 # Production
@@ -667,7 +667,7 @@ eas build --profile production --platform ios
 
 ### TestFlight Upload
 
-1. Xcode öffnen:
+1. Open Xcode:
    ```bash
    open ios/PimcoreVoyager.xcworkspace
    ```
@@ -685,13 +685,13 @@ eas build --profile production --platform ios
 eas submit --platform ios
 ```
 
-### Build-Profile (eas.json)
+### Build Profiles (eas.json)
 
-| Profil | Verwendung |
+| Profile | Purpose |
 |--------|------------|
-| `development` | Dev Client mit Debug-Features |
-| `preview` | Internal Testing (APK/IPA) |
-| `production` | App Store Release |
+| `development` | Dev client with debug features |
+| `preview` | Internal testing (APK/IPA) |
+| `production` | App Store release |
 
 ---
 
@@ -709,7 +709,7 @@ npx tsc --noEmit
 npm run lint
 ```
 
-### Unit Tests (wenn eingerichtet)
+### Unit Tests (if set up)
 
 ```bash
 npm test
@@ -719,20 +719,20 @@ npm test
 
 ## Troubleshooting
 
-### CocoaPods Probleme
+### CocoaPods Issues
 
 ```bash
-# Bei RVM/Ruby Konflikten
+# In case of RVM/Ruby conflicts
 env -u GEM_PATH -u GEM_HOME /opt/homebrew/bin/pod install
 
-# Pods neu installieren
+# Reinstall pods
 cd ios && rm -rf Pods Podfile.lock && pod install
 ```
 
-### iOS Build Fehler
+### iOS Build Errors
 
 ```bash
-# Clean Build
+# Clean build
 cd ios && xcodebuild clean && cd ..
 npx expo prebuild --clean
 ```
@@ -745,16 +745,16 @@ npx expo start --clear
 
 ### Xcode Signing
 
-1. Xcode öffnen
-2. Target "PimcoreVoyager" auswählen
+1. Open Xcode
+2. Select the "PimcoreVoyager" target
 3. Signing & Capabilities
-4. Team auswählen
-5. "Automatically manage signing" aktivieren
+4. Select a team
+5. Enable "Automatically manage signing"
 
-### iOS Simulator nicht gefunden
+### iOS Simulator Not Found
 
 ```bash
-# Verfügbare Simulatoren anzeigen
+# List available simulators
 xcrun simctl list devices available
 ```
 
@@ -762,27 +762,27 @@ xcrun simctl list devices available
 
 ## Customization
 
-Dieser Abschnitt beschreibt, wie die App für spezifische Use-Cases angepasst werden kann.
+This section describes how the app can be adapted for specific use cases.
 
-> **Hinweis:** Für angepasste/geforkte Versionen ist eine kommerzielle Lizenz erforderlich. Siehe [LICENSE.md](LICENSE.md).
+> **Note:** Customized/forked versions require a commercial license. See [LICENSE.md](LICENSE.md).
 
-### Übersicht der Anpassungsmöglichkeiten
+### Overview of Customization Options
 
-| Anpassung | Schwierigkeit | Beschreibung |
+| Customization | Difficulty | Description |
 |-----------|---------------|--------------|
-| Custom Detail Layouts | Mittel | Eigene Layouts für bestimmte Klassen |
-| Custom Field Renderer | Mittel | Eigene Renderer für spezielle Feldtypen |
-| Custom Screens | Fortgeschritten | Komplett eigene Screens für Klassen |
-| Custom Create Forms | Fortgeschritten | Eigene Formulare zum Anlegen (geplant) |
-| Theming | Einfach | Farben, Fonts, Branding |
+| Custom Detail Layouts | Medium | Custom layouts for specific classes |
+| Custom Field Renderer | Medium | Custom renderers for special field types |
+| Custom Screens | Advanced | Completely custom screens for classes |
+| Custom Create Forms | Advanced | Custom forms for creating objects (planned) |
+| Theming | Easy | Colors, fonts, branding |
 
 ---
 
-### Custom Detail Layouts für Klassen
+### Custom Detail Layouts for Classes
 
-Du kannst für bestimmte Pimcore-Klassen eigene Detail-Layouts erstellen.
+You can create custom detail layouts for specific Pimcore classes.
 
-#### Schritt 1: Custom Layout Component erstellen
+#### Step 1: Create a Custom Layout Component
 
 ```tsx
 // src/components/custom-layouts/ProductDetailLayout.tsx
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-#### Schritt 2: Layout Registry erstellen
+#### Step 2: Create a Layout Registry
 
 ```tsx
 // src/config/customLayouts.ts
@@ -874,34 +874,34 @@ const styles = StyleSheet.create({
 import { ProductDetailLayout } from '../components/custom-layouts/ProductDetailLayout';
 import { CustomerDetailLayout } from '../components/custom-layouts/CustomerDetailLayout';
 
-// Registry für Custom Layouts nach Klassenname
+// Registry for custom layouts by class name
 export const customDetailLayouts: Record<string, React.ComponentType<any>> = {
   'Product': ProductDetailLayout,
   'Customer': CustomerDetailLayout,
-  // Weitere Klassen hier hinzufügen
+  // Add more classes here
 };
 
-// Helper-Funktion
+// Helper function
 export function getCustomLayout(className: string) {
   return customDetailLayouts[className] || null;
 }
 ```
 
-#### Schritt 3: In ObjectDetailScreen integrieren
+#### Step 3: Integrate into ObjectDetailScreen
 
 ```tsx
 // In src/screens/ObjectDetailScreen.tsx
 
 import { getCustomLayout } from '../config/customLayouts';
 
-// Im Component:
+// In the component:
 const CustomLayout = getCustomLayout(object.className);
 
-// Im Render:
+// In the render:
 {CustomLayout ? (
   <CustomLayout objectData={objectData.objectData} object={object} />
 ) : (
-  // Standard FieldRenderer Layout
+  // Default FieldRenderer layout
   <LayoutNodeRenderer ... />
 )}
 ```
@@ -910,9 +910,9 @@ const CustomLayout = getCustomLayout(object.className);
 
 ### Custom Field Renderer
 
-Für spezielle Feldtypen oder Pimcore-Plugins kannst du eigene Renderer erstellen.
+For special field types or Pimcore plugins you can create your own renderers.
 
-#### Schritt 1: Custom Renderer erstellen
+#### Step 1: Create a Custom Renderer
 
 ```tsx
 // src/components/custom-renderers/ColorSwatchRenderer.tsx
@@ -922,7 +922,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 
 interface ColorSwatchRendererProps {
-  value: string; // HEX Color
+  value: string; // HEX color
   fieldName: string;
   title?: string;
 }
@@ -950,7 +950,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-#### Schritt 2: Renderer Registry erweitern
+#### Step 2: Extend the Renderer Registry
 
 ```tsx
 // src/config/customRenderers.ts
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
 import { ColorSwatchRenderer } from '../components/custom-renderers/ColorSwatchRenderer';
 import { RatingRenderer } from '../components/custom-renderers/RatingRenderer';
 
-// Registry für Custom Renderer nach Feldtyp
+// Registry for custom renderers by field type
 export const customFieldRenderers: Record<string, React.ComponentType<any>> = {
   'colorPicker': ColorSwatchRenderer,
   'rating': RatingRenderer,
@@ -970,29 +970,29 @@ export function getCustomRenderer(fieldType: string) {
 }
 ```
 
-#### Schritt 3: In FieldRenderer integrieren
+#### Step 3: Integrate into FieldRenderer
 
 ```tsx
-// In src/components/FieldRenderer.tsx, in der renderField Funktion:
+// In src/components/FieldRenderer.tsx, in the renderField function:
 
 import { getCustomRenderer } from '../config/customRenderers';
 
-// Am Anfang von renderField:
+// At the beginning of renderField:
 const CustomRenderer = getCustomRenderer(fieldDefinition.fieldtype);
 if (CustomRenderer) {
   return <CustomRenderer value={value} fieldName={fieldName} title={fieldDefinition.title} />;
 }
 
-// Danach Standard-Rendering...
+// Then the default rendering...
 ```
 
 ---
 
-### Custom Screens für Klassen
+### Custom Screens for Classes
 
-Für komplexe Use-Cases kannst du komplett eigene Screens erstellen.
+For complex use cases you can create completely custom screens.
 
-#### Schritt 1: Custom Screen erstellen
+#### Step 1: Create a Custom Screen
 
 ```tsx
 // src/screens/custom/OrderDetailScreen.tsx
@@ -1074,7 +1074,7 @@ export function OrderDetailScreen({ route, navigation }) {
 }
 ```
 
-#### Schritt 2: Screen Registry erstellen
+#### Step 2: Create a Screen Registry
 
 ```tsx
 // src/config/customScreens.ts
@@ -1082,7 +1082,7 @@ export function OrderDetailScreen({ route, navigation }) {
 import { OrderDetailScreen } from '../screens/custom/OrderDetailScreen';
 import { CustomerDetailScreen } from '../screens/custom/CustomerDetailScreen';
 
-// Registry für Custom Screens nach Klassenname
+// Registry for custom screens by class name
 export const customDetailScreens: Record<string, React.ComponentType<any>> = {
   'Order': OrderDetailScreen,
   'Customer': CustomerDetailScreen,
@@ -1093,14 +1093,14 @@ export function getCustomScreen(className: string) {
 }
 ```
 
-#### Schritt 3: Navigation anpassen
+#### Step 3: Adjust the Navigation
 
 ```tsx
 // In src/navigation/AppNavigation.tsx
 
 import { getCustomScreen } from '../config/customScreens';
 
-// In DataObjectsStack, dynamisch Custom Screens registrieren:
+// In DataObjectsStack, register custom screens dynamically:
 {Object.entries(customDetailScreens).map(([className, Screen]) => (
   <Stack.Screen
     key={className}
@@ -1115,7 +1115,7 @@ import { getCustomScreen } from '../config/customScreens';
 
 ### Theming & Branding
 
-#### App-weite Farben anpassen
+#### Customize App-Wide Colors
 
 ```tsx
 // src/config/theme.ts
@@ -1145,20 +1145,20 @@ export const theme = {
 
 #### Logo & Branding
 
-1. Logo ersetzen: `assets/logo.png`
-2. Splash Screen: `app.json` → `splash` Konfiguration
-3. App Icon: `app.json` → `icon` Konfiguration
+1. Replace the logo: `assets/logo.png`
+2. Splash screen: `app.json` → `splash` configuration
+3. App icon: `app.json` → `icon` configuration
 
 ---
 
-### Custom Create Forms (Geplant)
+### Custom Create Forms (Planned)
 
-> **Status:** In Entwicklung
+> **Status:** In development
 
-Zukünftig wird es möglich sein, eigene Formulare zum Anlegen von Objekten zu definieren:
+In the future it will be possible to define custom forms for creating objects:
 
 ```tsx
-// Geplante API (Beispiel)
+// Planned API (example)
 // src/config/customForms.ts
 
 export const customCreateForms: Record<string, FormConfig> = {
@@ -1184,7 +1184,7 @@ export const customCreateForms: Record<string, FormConfig> = {
       price: { required: true, min: 0 },
     },
     onSubmit: async (data) => {
-      // Custom Submit-Logik
+      // Custom submit logic
     },
   },
 };
@@ -1192,14 +1192,14 @@ export const customCreateForms: Record<string, FormConfig> = {
 
 ---
 
-### Best Practices für Customization
+### Best Practices for Customization
 
-1. **Separation of Concerns**: Custom Code in eigene Ordner (`custom-layouts/`, `custom-renderers/`)
-2. **Registry Pattern**: Zentrale Registries für einfache Erweiterbarkeit
-3. **TypeScript nutzen**: Props-Interfaces für alle Custom Components
-4. **Fallback-Logik**: Immer Standard-Verhalten als Fallback
-5. **Testing**: Custom Components separat testen
-6. **Dokumentation**: Eigene Anpassungen dokumentieren
+1. **Separation of concerns**: Put custom code in dedicated folders (`custom-layouts/`, `custom-renderers/`)
+2. **Registry pattern**: Central registries for easy extensibility
+3. **Use TypeScript**: Props interfaces for all custom components
+4. **Fallback logic**: Always keep the default behavior as a fallback
+5. **Testing**: Test custom components separately
+6. **Documentation**: Document your own customizations
 
 ---
 
@@ -1207,35 +1207,35 @@ export const customCreateForms: Record<string, FormConfig> = {
 
 ### Workflow
 
-1. Fork erstellen
-2. Feature Branch: `git checkout -b feature/my-feature`
-3. Änderungen committen
+1. Create a fork
+2. Feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes
 4. Push: `git push origin feature/my-feature`
-5. Pull Request erstellen
+5. Create a pull request
 
 ### CLA
 
-Alle Contributor müssen die [CLA](CLA.md) akzeptieren. Der GitHub Bot prüft dies automatisch bei jedem PR.
+All contributors must accept the [CLA](CLA.md). The GitHub bot checks this automatically on every PR.
 
 ### Code Style
 
-- TypeScript verwenden
-- Funktionale Komponenten mit Hooks
-- Aussagekräftige Variablen- und Funktionsnamen
-- Komponenten in eigene Dateien auslagern
+- Use TypeScript
+- Functional components with hooks
+- Meaningful variable and function names
+- Extract components into their own files
 
 ---
 
-## Lizenz
+## License
 
 **Pimcore Voyager License (PVL)**
 
-| Nutzung | Lizenz |
+| Usage | License |
 |---------|--------|
-| Offizielle App aus App Store / Google Play | **Kostenlos** |
-| Geforkte oder angepasste Versionen | **Kostenpflichtig** via [store.pimcore.com](https://store.pimcore.com) |
+| Official app from the App Store / Google Play | **Free** |
+| Forked or customized versions | **Paid** via [store.pimcore.com](https://store.pimcore.com) |
 
-Siehe [LICENSE.md](LICENSE.md) für vollständige Lizenzbedingungen.
+See [LICENSE.md](LICENSE.md) for the full license terms.
 
 ---
 
@@ -1243,4 +1243,4 @@ Siehe [LICENSE.md](LICENSE.md) für vollständige Lizenzbedingungen.
 Zeileisstraße 6, 4600 Wels, Austria
 https://www.cors.gmbh
 
-© 2025 CORS GmbH. Alle Rechte vorbehalten.
+© 2025 CORS GmbH. All rights reserved.

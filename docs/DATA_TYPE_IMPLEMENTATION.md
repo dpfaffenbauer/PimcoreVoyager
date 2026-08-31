@@ -1,20 +1,20 @@
 # Data Type Implementation Guide
 
-Dieser Leitfaden beschreibt, wie Pimcore Data Object Types in der Pimcore Voyager App implementiert werden.
+This guide describes how Pimcore Data Object Types are implemented in the Pimcore Voyager app.
 
-## Übersicht
+## Overview
 
-Pimcore unterstützt über 70 verschiedene Data Object Types. Jeder Type benötigt:
-1. **Display Component** - Zeigt den Wert an (Read-Only)
-2. **Edit Component** - Ermöglicht Bearbeitung
-3. **Validator** - Validiert Eingaben
-4. **Transformer** - Konvertiert zwischen API und UI Format
+Pimcore supports over 70 different Data Object Types. Each type requires:
+1. **Display Component** - Displays the value (read-only)
+2. **Edit Component** - Enables editing
+3. **Validator** - Validates input
+4. **Transformer** - Converts between API and UI format
 
-## Implementierungs-Template
+## Implementation Template
 
-### 1. Type Definition erstellen
+### 1. Create Type Definition
 
-Erstelle eine neue Datei für deinen Type:
+Create a new file for your type:
 
 ```
 src/
@@ -26,7 +26,7 @@ src/
         ├── [TypeName]Edit.tsx          # Edit Component
         ├── [TypeName].validator.ts     # Validation Logic
         ├── [TypeName].transformer.ts   # Data Transformation
-        ├── [TypeName].types.ts         # TypeScript Definitionen
+        ├── [TypeName].types.ts         # TypeScript definitions
         └── [TypeName].test.tsx         # Tests
 ```
 
@@ -243,71 +243,71 @@ export const dataTypeRegistry = {
     validator: validateInput,
     transformer: InputTransformer,
   },
-  // ... weitere Typen
+  // ... more types
 };
 ```
 
-## Type-spezifische Guidelines
+## Type-Specific Guidelines
 
 ### Text/Numeric Types
 - Input, Textarea, Numeric, Password, Email
-- **Display**: Einfache Text-Anzeige
-- **Edit**: TextInput mit entsprechendem Keyboard
+- **Display**: Simple text display
+- **Edit**: TextInput with the appropriate keyboard
 - **Validation**: Pattern, Length, Required
 
 ### Boolean/Selection Types
 - Checkbox, Select, Multiselect
-- **Display**: Label + ausgewählte Werte
-- **Edit**: Native Picker oder Custom Dropdown
-- **Mobile**: Touch-optimierte Auswahl
+- **Display**: Label + selected values
+- **Edit**: Native picker or custom dropdown
+- **Mobile**: Touch-optimized selection
 
 ### Date/Time Types
 - Date, DateTime, Time
-- **Display**: Formatiertes Datum/Zeit
-- **Edit**: Native DatePicker (iOS/Android unterschiedlich!)
-- **Timezone**: UTC speichern, local anzeigen
+- **Display**: Formatted date/time
+- **Edit**: Native DatePicker (differs between iOS and Android!)
+- **Timezone**: Store in UTC, display in local time
 
 ### Geographic Types
 - Geopoint, Geobounds, Geopolygon
-- **Display**: Karte mit Marker/Shape (react-native-maps)
-- **Edit**: Interaktive Karte mit Touch-Controls
-- **Performance**: Lazy Load für Maps
+- **Display**: Map with marker/shape (react-native-maps)
+- **Edit**: Interactive map with touch controls
+- **Performance**: Lazy load for maps
 
 ### Media Types
 - Image, Video, Image Gallery
-- **Display**: Thumbnail mit Preview-Option
-- **Edit**: Upload-Button + Gallery Picker
-- **Performance**: Progressive Loading, Compression
+- **Display**: Thumbnail with preview option
+- **Edit**: Upload button + gallery picker
+- **Performance**: Progressive loading, compression
 
 ### Relation Types
 - Many-to-One, Many-to-Many, etc.
-- **Display**: Liste verknüpfter Objekte
-- **Edit**: Searchable Picker mit Autocomplete
-- **Performance**: Lazy Loading, Pagination
+- **Display**: List of linked objects
+- **Edit**: Searchable picker with autocomplete
+- **Performance**: Lazy loading, pagination
 
 ### Structured Types
 - Table, Fieldcollections, Block
-- **Display**: Nested Components
+- **Display**: Nested components
 - **Edit**: Add/Remove/Reorder UI
-- **Challenge**: Komplexe UI auf kleinem Screen
+- **Challenge**: Complex UI on a small screen
 
 ## Testing Checklist
 
-Für jeden implementierten Type:
+For each implemented type:
 
-- [ ] Display zeigt Wert korrekt an
-- [ ] Edit erlaubt Eingabe/Änderung
-- [ ] Validation funktioniert
-- [ ] API Transform funktioniert (fromAPI/toAPI)
-- [ ] Readonly Mode funktioniert
-- [ ] Error States werden angezeigt
-- [ ] Touch-Interaktionen sind flüssig
-- [ ] Keyboard-Handling ist korrekt (iOS/Android)
-- [ ] Performance ist akzeptabel
-- [ ] Accessibility ist berücksichtigt
-- [ ] Tests sind geschrieben
+- [ ] Display shows the value correctly
+- [ ] Edit allows input/changes
+- [ ] Validation works
+- [ ] API transform works (fromAPI/toAPI)
+- [ ] Readonly mode works
+- [ ] Error states are displayed
+- [ ] Touch interactions are smooth
+- [ ] Keyboard handling is correct (iOS/Android)
+- [ ] Performance is acceptable
+- [ ] Accessibility is taken into account
+- [ ] Tests are written
 
-## Beispiel Test
+## Example Test
 
 ```typescript
 // src/components/dataTypes/Input/Input.test.tsx
@@ -375,32 +375,32 @@ describe('Input DataType', () => {
 });
 ```
 
-## Referenzen
+## References
 
-Für jeden Data Type gibt es eine Referenz-Implementierung im Pimcore Studio UI:
+For each data type there is a reference implementation in the Pimcore Studio UI:
 
 **Base URL**: `https://github.com/pimcore/studio-ui-bundle/blob/1.x/assets/js/src/core/modules/element/dynamic-types/definitions/objects/data-related/types/`
 
-**Beispiele**:
+**Examples**:
 - Input: `dynamic-type-object-data-input.tsx`
 - Select: `dynamic-type-object-data-select.tsx`
 - Date: `dynamic-type-object-data-date.tsx`
 
 ## Best Practices
 
-1. **Mobile First**: Immer mit Touch-Interaktion im Kopf entwickeln
-2. **Performance**: Lazy Loading, Memoization, Virtualization
-3. **Accessibility**: Labels, Hints, Screen Reader Support
-4. **Error Handling**: Klare Error Messages, Recovery Options
-5. **Offline**: Optimistic Updates, Queue Changes
-6. **Testing**: Unit + Integration Tests
-7. **Documentation**: JSDoc Comments, README updates
+1. **Mobile First**: Always develop with touch interaction in mind
+2. **Performance**: Lazy loading, memoization, virtualization
+3. **Accessibility**: Labels, hints, screen reader support
+4. **Error Handling**: Clear error messages, recovery options
+5. **Offline**: Optimistic updates, queue changes
+6. **Testing**: Unit + integration tests
+7. **Documentation**: JSDoc comments, README updates
 
-## Häufige Fallstricke
+## Common Pitfalls
 
-- **iOS vs Android**: Native Components unterscheiden sich
-- **Keyboard**: Auto-Focus und Dismiss handling
+- **iOS vs Android**: Native components differ
+- **Keyboard**: Auto-focus and dismiss handling
 - **Layout**: SafeArea, Keyboard Avoiding View
 - **State**: Don't mutate props, use controlled components
-- **Performance**: Re-renders vermeiden mit React.memo
-- **Validation**: Client-side ist nicht genug, Server validiert final
+- **Performance**: Avoid re-renders with React.memo
+- **Validation**: Client-side is not enough, the server validates finally

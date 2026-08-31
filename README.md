@@ -1,92 +1,92 @@
 # Pimcore Voyager
 
-**Pimcore Voyager** ist eine generische Mobile Companion App (React Native, Expo) für Pimcore – das Enterprise Open Source Daten- und Experience Management System.
+**Pimcore Voyager** is a generic mobile companion app (React Native, Expo) for Pimcore – the enterprise open source data and experience management system.
 
-## 🎯 Ziel
+## 🎯 Goal
 
-Die App ermöglicht den schnellen und einfachen Zugriff auf beliebige Pimcore Datenobjekte über mobile Endgeräte (iOS/Android). Sie dient als „Außenposten" für das Bearbeiten, Durchsuchen und Verwalten strukturierter Pimcore-Daten, auch offline.
+The app provides fast and easy access to any Pimcore data objects from mobile devices (iOS/Android). It serves as an "outpost" for editing, browsing, and managing structured Pimcore data, even offline.
 
-## ✨ Hauptfunktionen
+## ✨ Key Features
 
-- **Dynamische Datenobjektverwaltung:** Automatisches Auslesen der Pimcore Class Definitions, Listen- und Detail-Ansichten für beliebige Objektklassen.
-- **Suche & Filter:** Übergreifende Objektsuche und Filteroptionen nach Objektklassen und Feldern.
-- **Bearbeitung & Validierung:** Bearbeiten von Datenobjekten, Validierung nach den Vorgaben der Pimcore Class Definitions.
-- **Offline-Unterstützung:** Daten können mobil bearbeitet und werden bei erneuter Verbindung synchronisiert.
-- **Sichere Authentifizierung:** Integration der Pimcore Studio API Authentifizierung.
-- **Plattformübergreifend:** Entwicklung mit React Native, basiert auf Expo.
-- **70+ Data Object Types:** Unterstützung für alle Pimcore Data Object Typen (in Entwicklung).
+- **Dynamic Data Object Management:** Automatic reading of the Pimcore class definitions, list and detail views for any object classes.
+- **Search & Filter:** Cross-object search and filter options by object classes and fields.
+- **Editing & Validation:** Editing of data objects, validation according to the rules of the Pimcore class definitions.
+- **Offline Support:** Data can be edited on the go and is synchronized once the connection is restored.
+- **Secure Authentication:** Integration of the Pimcore Studio API authentication.
+- **Cross-Platform:** Built with React Native, based on Expo.
+- **70+ Data Object Types:** Support for all Pimcore data object types (in development).
 
-## 👥 Für wen?
+## 👥 Who Is It For?
 
-- Pimcore-Redakteure, Außendienst, Content Teams & Admins, die unterwegs Datenobjekte pflegen oder abrufen wollen.
+- Pimcore editors, field staff, content teams & admins who want to maintain or access data objects on the go.
 
-## 🏗️ Wie funktioniert es?
+## 🏗️ How Does It Work?
 
-Die App kommuniziert mit der **Pimcore Studio API** und generiert Interfaces dynamisch anhand der im Backend gepflegten Datenklassen. Struktur, Felder und Validierungen werden somit automatisch übernommen, bei Änderungen im Backend sind keine App-Updates nötig.
+The app communicates with the **Pimcore Studio API** and generates interfaces dynamically based on the data classes maintained in the backend. Structure, fields, and validations are thus adopted automatically – no app updates are required when the backend changes.
 
-### Technische Details
+### Technical Details
 
-- **API-Integration**: Nutzt die native Pimcore Studio API (`/studio/api`)
-- **Authentifizierung**: Verwendet die eingebaute Pimcore-Authentifizierung
-- **Datenmodell**: Kompatibel mit Pimcore Studio API Datenstrukturen
-- **SDK-Kompatibilität**: Implementierung folgt denselben Patterns wie `@pimcore/studio-ui-bundle` (für React Native adaptiert)
+- **API Integration**: Uses the native Pimcore Studio API (`/studio/api`)
+- **Authentication**: Uses the built-in Pimcore authentication
+- **Data Model**: Compatible with Pimcore Studio API data structures
+- **SDK Compatibility**: Implementation follows the same patterns as `@pimcore/studio-ui-bundle` (adapted for React Native)
 
 ## 🚀 Quick Start
 
 \`\`\`bash
-# Repository klonen
+# Clone the repository
 git clone https://github.com/dpfaffenbauer/PimcoreVoyager.git
 cd PimcoreVoyager
 
-# Dependencies installieren
+# Install dependencies
 npm install
 
-# Development Server starten
+# Start the development server
 npm start
 
-# Auf iOS starten (benötigt Xcode)
+# Run on iOS (requires Xcode)
 npm run ios
 
-# Auf Android starten (benötigt Android Studio)
+# Run on Android (requires Android Studio)
 npm run android
 \`\`\`
 
-## 📋 Voraussetzungen
+## 📋 Prerequisites
 
-- Node.js (v18 oder höher)
-- npm oder yarn
+- Node.js (v18 or higher)
+- npm or yarn
 - Expo CLI
-- Für iOS: Xcode (nur macOS)
-- Für Android: Android Studio
+- For iOS: Xcode (macOS only)
+- For Android: Android Studio
 
-## 📚 Dokumentation
+## 📚 Documentation
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Entwicklungs-Leitfaden
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architektur-Übersicht
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Development guide
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture overview
 - [docs/DATA_TYPE_IMPLEMENTATION.md](docs/DATA_TYPE_IMPLEMENTATION.md) - Data Type Implementation Guide
-- [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) - Projektstruktur
-- [docs/ROADMAP.md](docs/ROADMAP.md) - Entwicklungs-Roadmap
+- [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) - Project structure
+- [docs/ROADMAP.md](docs/ROADMAP.md) - Development roadmap
 
 ## 🎯 Status & Roadmap
 
 **Current Status**: Phase 1 - Foundation ✅
 
-Das Projekt befindet sich in der initialen Entwicklungsphase. Die Grundstruktur ist aufgesetzt, und die Implementierung der Data Object Types beginnt in Kürze.
+The project is in its initial development phase. The basic structure is in place, and the implementation of the data object types will begin shortly.
 
-Siehe [ROADMAP.md](docs/ROADMAP.md) für detaillierte Phasenplanung.
+See [ROADMAP.md](docs/ROADMAP.md) for detailed phase planning.
 
-### Implementierte Features
-- ✅ Projekt Setup & Konfiguration
-- ✅ Basis-Dokumentation
-- ✅ Projektstruktur
+### Implemented Features
+- ✅ Project setup & configuration
+- ✅ Basic documentation
+- ✅ Project structure
 
-### In Entwicklung
+### In Development
 - 🔄 Core Architecture (Type Registry, Base Components)
 - ⏳ Authentication System
 - ⏳ Pimcore API Integration
 
-### Geplant
-- Data Object Types (70+ Typen)
+### Planned
+- Data Object Types (70+ types)
 - List & Detail Views
 - Edit Functionality
 - Offline Support
@@ -94,31 +94,31 @@ Siehe [ROADMAP.md](docs/ROADMAP.md) für detaillierte Phasenplanung.
 
 ## 🏗️ Build & Release
 
-Builds werden automatisiert per CI/CD-Workflows erstellt (Android/iOS/Expo). Releases erfolgen als OTA-Updates, via TestFlight oder direkte APK-Bereitstellung.
+Builds are created automatically via CI/CD workflows (Android/iOS/Expo). Releases are delivered as OTA updates, via TestFlight, or as direct APK downloads.
 
 \`\`\`bash
-# Production Build für Android
+# Production build for Android
 eas build --platform android --profile production
 
-# Production Build für iOS
+# Production build for iOS
 eas build --platform ios --profile production
 \`\`\`
 
 ## 🤝 Contributing
 
-Beiträge sind willkommen! Siehe [CONTRIBUTING.md](CONTRIBUTING.md) für Details zum Entwicklungsprozess.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details on the development process.
 
 ### Data Type Implementation
 
-Das Projekt benötigt Implementierungen für 70+ Pimcore Data Object Typen. Jeder Type benötigt:
-- Display Component (Anzeige)
-- Edit Component (Bearbeitung)
-- Validator (Validierung)
-- Transformer (API ↔ UI Konvertierung)
+The project needs implementations for 70+ Pimcore data object types. Each type requires:
+- Display Component (display)
+- Edit Component (editing)
+- Validator (validation)
+- Transformer (API ↔ UI conversion)
 
-Siehe [DATA_TYPE_IMPLEMENTATION.md](docs/DATA_TYPE_IMPLEMENTATION.md) für einen detaillierten Implementierungs-Leitfaden.
+See [DATA_TYPE_IMPLEMENTATION.md](docs/DATA_TYPE_IMPLEMENTATION.md) for a detailed implementation guide.
 
-## 📦 Technologie-Stack
+## 📦 Technology Stack
 
 - **Frontend**: React Native, Expo, TypeScript
 - **Navigation**: React Navigation
@@ -128,21 +128,21 @@ Siehe [DATA_TYPE_IMPLEMENTATION.md](docs/DATA_TYPE_IMPLEMENTATION.md) für einen
 - **Storage**: Expo SecureStore, AsyncStorage
 - **Testing**: Jest, React Native Testing Library
 
-## 📄 Lizenz
+## 📄 License
 
-GPL-3.0 - Siehe [LICENSE](LICENSE) für Details.
+GPL-3.0 - See [LICENSE](LICENSE) for details.
 
 ## 🔗 Links
 
 - [Pimcore](https://pimcore.com/)
-- [Pimcore Studio UI Bundle](https://github.com/pimcore/studio-ui-bundle) (Referenz-Implementierung)
+- [Pimcore Studio UI Bundle](https://github.com/pimcore/studio-ui-bundle) (reference implementation)
 - [React Native](https://reactnative.dev/)
 - [Expo](https://expo.dev/)
 
-## 📧 Kontakt
+## 📧 Contact
 
-Bei Fragen oder Anregungen erstelle bitte ein [Issue](https://github.com/dpfaffenbauer/PimcoreVoyager/issues) oder kontaktiere @dpfaffenbauer.
+For questions or suggestions, please create an [Issue](https://github.com/dpfaffenbauer/PimcoreVoyager/issues) or contact @dpfaffenbauer.
 
-## Entwicklung
+## Development
 
-> **Note**: Dies ist ein aktives Entwicklungsprojekt. Die App befindet sich in einem frühen Stadium. Contributions und Feedback sind sehr willkommen!
+> **Note**: This is an active development project. The app is at an early stage. Contributions and feedback are very welcome!

@@ -1,57 +1,57 @@
 # Contributing to Pimcore Voyager
 
-Willkommen bei Pimcore Voyager! Diese Anleitung hilft dir beim Einstieg in die Entwicklung.
+Welcome to Pimcore Voyager! This guide helps you get started with development.
 
-## Entwicklungsumgebung Setup
+## Development Environment Setup
 
-### Voraussetzungen
+### Prerequisites
 
-- Node.js (v18 oder höher)
-- npm oder yarn
+- Node.js (v18 or higher)
+- npm or yarn
 - Expo CLI
-- Für iOS: Xcode (nur macOS)
-- Für Android: Android Studio
+- For iOS: Xcode (macOS only)
+- For Android: Android Studio
 
 ### Installation
 
 ```bash
-# Repository klonen
+# Clone the repository
 git clone https://github.com/dpfaffenbauer/PimcoreVoyager.git
 cd PimcoreVoyager
 
-# Dependencies installieren
+# Install dependencies
 npm install
 
-# Expo CLI installieren (falls nicht vorhanden)
+# Install Expo CLI (if not already installed)
 npm install -g expo-cli
 
-# App starten
+# Start the app
 npm start
 ```
 
-## Projektstruktur
+## Project Structure
 
 ```
 PimcoreVoyager/
 ├── src/
-│   ├── components/          # React Native Komponenten
-│   │   ├── dataTypes/      # Data Object Type Komponenten
-│   │   ├── forms/          # Formular-Komponenten
-│   │   └── ui/             # UI-Basis-Komponenten
-│   ├── screens/            # App-Screens
-│   ├── services/           # API Services
-│   │   └── pimcore/        # Pimcore API Client
-│   ├── store/              # State Management (Redux/Zustand)
-│   ├── types/              # TypeScript Definitionen
-│   └── utils/              # Hilfsfunktionen
-├── assets/                 # Bilder, Fonts, etc.
-├── docs/                   # Dokumentation
+│   ├── components/          # React Native components
+│   │   ├── dataTypes/      # Data object type components
+│   │   ├── forms/          # Form components
+│   │   └── ui/             # Base UI components
+│   ├── screens/            # App screens
+│   ├── services/           # API services
+│   │   └── pimcore/        # Pimcore API client
+│   ├── store/              # State management (Redux/Zustand)
+│   ├── types/              # TypeScript definitions
+│   └── utils/              # Helper functions
+├── assets/                 # Images, fonts, etc.
+├── docs/                   # Documentation
 └── __tests__/              # Tests
 ```
 
-## Data Object Types Implementierung
+## Data Object Types Implementation
 
-Jeder Pimcore Data Object Type benötigt:
+Each Pimcore data object type requires:
 
 ### 1. Type Definition
 
@@ -120,7 +120,7 @@ export const dataTypeRegistry = {
     display: InputDisplay,
     edit: InputEdit,
   },
-  // ... weitere Typen
+  // ... more types
 };
 ```
 
@@ -128,41 +128,41 @@ export const dataTypeRegistry = {
 
 ### TypeScript
 
-- Verwende TypeScript für alle neuen Dateien
-- Definiere explizite Types für Props und State
-- Vermeide `any` wo möglich
+- Use TypeScript for all new files
+- Define explicit types for props and state
+- Avoid `any` where possible
 
 ### React Native Best Practices
 
-- Nutze funktionale Komponenten mit Hooks
-- Implementiere React.memo für Performance-kritische Komponenten
-- Verwende StyleSheet.create für Styles
+- Use functional components with hooks
+- Implement React.memo for performance-critical components
+- Use StyleSheet.create for styles
 
-### Mobile Optimierung
+### Mobile Optimization
 
-- Touch-Targets mindestens 44x44 Pixel
-- Berücksichtige verschiedene Bildschirmgrößen
-- Teste auf iOS und Android
-- Implementiere Loading States
-- Handle Offline-Szenarien
+- Touch targets at least 44x44 pixels
+- Account for different screen sizes
+- Test on iOS and Android
+- Implement loading states
+- Handle offline scenarios
 
 ## Testing
 
 ```bash
-# Unit Tests
+# Unit tests
 npm test
 
-# E2E Tests
+# E2E tests
 npm run test:e2e
 
-# Type Check
+# Type check
 npm run type-check
 
 # Linting
 npm run lint
 ```
 
-### Test-Struktur für Data Types
+### Test Structure for Data Types
 
 ```typescript
 // __tests__/dataTypes/Input.test.tsx
@@ -181,29 +181,29 @@ describe('Input Data Type', () => {
 });
 ```
 
-## Pull Request Prozess
+## Pull Request Process
 
-1. Fork das Repository
-2. Erstelle einen Feature Branch (`git checkout -b feature/input-type`)
-3. Committe deine Änderungen (`git commit -am 'Add Input type implementation'`)
-4. Push zum Branch (`git push origin feature/input-type`)
-5. Erstelle einen Pull Request
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/input-type`)
+3. Commit your changes (`git commit -am 'Add Input type implementation'`)
+4. Push to the branch (`git push origin feature/input-type`)
+5. Create a pull request
 
 ### PR Checklist
 
-- [ ] Code folgt den Coding Standards
-- [ ] Tests sind hinzugefügt/aktualisiert
-- [ ] Dokumentation ist aktualisiert
-- [ ] Build läuft ohne Fehler
-- [ ] Mobile UX ist getestet (iOS & Android)
+- [ ] Code follows the coding standards
+- [ ] Tests are added/updated
+- [ ] Documentation is updated
+- [ ] Build runs without errors
+- [ ] Mobile UX is tested (iOS & Android)
 
-## Referenzen
+## References
 
-- [Pimcore Studio UI Bundle](https://github.com/pimcore/studio-ui-bundle) - Referenz-Implementierung
-- [React Native Dokumentation](https://reactnative.dev/)
-- [Expo Dokumentation](https://docs.expo.dev/)
-- [Pimcore API Dokumentation](https://pimcore.com/docs/)
+- [Pimcore Studio UI Bundle](https://github.com/pimcore/studio-ui-bundle) - Reference implementation
+- [React Native Documentation](https://reactnative.dev/)
+- [Expo Documentation](https://docs.expo.dev/)
+- [Pimcore API Documentation](https://pimcore.com/docs/)
 
-## Fragen?
+## Questions?
 
-Bei Fragen erstelle ein Issue oder kontaktiere @dpfaffenbauer.
+If you have questions, create an issue or contact @dpfaffenbauer.

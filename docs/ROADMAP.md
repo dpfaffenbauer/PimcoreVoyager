@@ -1,21 +1,21 @@
 # Pimcore Voyager - Roadmap
 
-Status: 27.12.2025
+Status: December 27, 2025
 
-## Übersicht
+## Overview
 
-Dieser Roadmap beschreibt die geplante Entwicklung von Pimcore Voyager - einer generischen Mobile Companion App für Pimcore.
+This roadmap describes the planned development of Pimcore Voyager - a generic mobile companion app for Pimcore.
 
 ## Phase 1: Foundation (Sprint 1-2)
 
-### 1.1 Projekt Setup ✅
-- [x] Repository initialisiert
-- [x] React Native/Expo Projektstruktur aufgesetzt
-- [x] Build-Konfiguration (package.json, tsconfig.json)
-- [x] Linting & Formatting (ESLint, Prettier)
-- [x] Git Ignore & CI/CD Basis
+### 1.1 Project Setup ✅
+- [x] Repository initialized
+- [x] React Native/Expo project structure set up
+- [x] Build configuration (package.json, tsconfig.json)
+- [x] Linting & formatting (ESLint, Prettier)
+- [x] Git ignore & CI/CD basics
 
-### 1.2 Dokumentation ✅
+### 1.2 Documentation ✅
 - [x] README.md
 - [x] CONTRIBUTING.md
 - [x] ARCHITECTURE.md
@@ -51,11 +51,11 @@ Dieser Roadmap beschreibt die geplante Entwicklung von Pimcore Voyager - einer g
 ### 2.3 Testing
 - [ ] API Client Tests
 - [ ] Authentication Flow Tests
-- [ ] Mock API Server für Tests
+- [ ] Mock API server for tests
 
 ## Phase 3: Basic Data Types (Sprint 5-8)
 
-Implementierung der grundlegenden Text- und Eingabe-Typen:
+Implementation of the basic text and input types:
 
 ### 3.1 Text Input Types (Priority: High)
 - [ ] #43 Input
@@ -75,7 +75,7 @@ Implementierung der grundlegenden Text- und Eingabe-Typen:
 - [ ] #24 Consent
 
 ### 3.4 Testing & Documentation
-- [ ] Unit Tests für alle Typen
+- [ ] Unit tests for all types
 - [ ] Integration Tests
 - [ ] User Documentation
 
@@ -99,7 +99,7 @@ Implementierung der grundlegenden Text- und Eingabe-Typen:
 - [ ] Validation Display
 
 ### 4.3 Testing
-- [ ] E2E Tests für List & Detail Flow
+- [ ] E2E tests for list & detail flow
 - [ ] Performance Tests
 
 ## Phase 5: Selection & Date Types (Sprint 11-13)
@@ -249,7 +249,7 @@ Implementierung der grundlegenden Text- und Eingabe-Typen:
 - [ ] Final Bug Fixes
 - [ ] Production Deployment
 
-## Prioritäten
+## Priorities
 
 ### Must Have (MVP)
 - Authentication
@@ -272,7 +272,7 @@ Implementierung der grundlegenden Text- und Eingabe-Typen:
 - Advanced Offline Sync
 - Analytics
 
-## Metriken & Erfolg
+## Metrics & Success
 
 ### Development Metrics
 - Code Coverage > 80%
@@ -291,34 +291,34 @@ Implementierung der grundlegenden Text- und Eingabe-Typen:
 - User Satisfaction > 4.5/5
 - Bug Resolution < 48h
 
-## Risiken & Abhängigkeiten
+## Risks & Dependencies
 
-### Technische Risiken
-- Expo/React Native Breaking Changes
-- Pimcore API Änderungen
-- Performance auf älteren Geräten
-- iOS/Android Platform Unterschiede
+### Technical Risks
+- Expo/React Native breaking changes
+- Pimcore API changes
+- Performance on older devices
+- iOS/Android platform differences
 
-### Abhängigkeiten
-- Pimcore REST/GraphQL API Verfügbarkeit
+### Dependencies
+- Pimcore REST/GraphQL API availability
 - Expo EAS Build Service
-- App Store/Play Store Review Prozess
+- App Store/Play Store review process
 
-## Nächste Schritte
+## Next Steps
 
-1. ✅ Projekt Setup & Dokumentation
+1. ✅ Project setup & documentation
 2. 🔄 Core Architecture Implementation
 3. ⏳ Authentication & API Integration
 4. ⏳ Basic Data Types Implementation
 
-## Ressourcen
+## Resources
 
-- **Team Size**: 1-2 Entwickler
-- **Sprint Länge**: 2 Wochen
-- **Geschätzte Dauer**: 6-9 Monate bis MVP
-- **Geschätzte Dauer**: 12-14 Monate bis v1.0
+- **Team Size**: 1-2 developers
+- **Sprint Length**: 2 weeks
+- **Estimated Duration**: 6-9 months to MVP
+- **Estimated Duration**: 12-14 months to v1.0
 
 ## Updates
 
-- **27.12.2025**: Initial Roadmap erstellt
-- **27.12.2025**: Phase 1 (Setup & Dokumentation) abgeschlossen
+- **December 27, 2025**: Initial roadmap created
+- **December 27, 2025**: Phase 1 (setup & documentation) completed

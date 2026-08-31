@@ -1,54 +1,54 @@
-# Signierung und Zertifikate
+# Signing and Certificates
 
-Dieses Dokument erklärt die Signierung von Android und iOS Builds im Detail.
+This document explains the signing of Android and iOS builds in detail.
 
-## Warum Signierung?
+## Why Signing?
 
 **Android:**
-- Jede APK/AAB muss signiert sein
-- Keystore identifiziert den Publisher
-- Gleicher Keystore für alle App-Updates erforderlich
-- Verlust des Keystores = keine Updates mehr möglich
+- Every APK/AAB must be signed
+- The keystore identifies the publisher
+- The same keystore is required for all app updates
+- Losing the keystore = no more updates possible
 
 **iOS:**
-- Nur signierte Apps können auf Geräten installiert werden
-- Certificate identifiziert Entwickler
-- Provisioning Profile verknüpft App, Certificate und Geräte
-- Jährliche Erneuerung erforderlich (Apple Developer Programm)
+- Only signed apps can be installed on devices
+- The certificate identifies the developer
+- The provisioning profile links the app, certificate, and devices
+- Annual renewal required (Apple Developer Program)
 
-## Android Signierung
+## Android Signing
 
-### Option 1: EAS Managed Keystore (Empfohlen)
+### Option 1: EAS Managed Keystore (recommended)
 
-EAS generiert und verwaltet automatisch Keystores.
+EAS automatically generates and manages keystores.
 
 #### Setup
 
 ```bash
-# Credentials-Manager starten
+# Start the credentials manager
 eas credentials
 
-# Im Menü:
+# In the menu:
 # 1. Select platform: Android
 # 2. Select action: Set up new Android Keystore
-# 3. Wähle "Generate new keystore"
+# 3. Choose "Generate new keystore"
 ```
 
-**Vorteile:**
-- ✅ Automatische Generierung
-- ✅ Sichere Speicherung
-- ✅ Keine lokale Keystore-Datei nötig
-- ✅ Zugriff über Expo Account
+**Advantages:**
+- ✅ Automatic generation
+- ✅ Secure storage
+- ✅ No local keystore file needed
+- ✅ Access via your Expo account
 
-**Nachteile:**
-- ⚠️ Gebunden an Expo Account
-- ⚠️ Migration zu anderem Build-System schwieriger
+**Disadvantages:**
+- ⚠️ Tied to your Expo account
+- ⚠️ Migrating to another build system is harder
 
-### Option 2: Eigener Keystore
+### Option 2: Your Own Keystore
 
-Für vollständige Kontrolle über den Keystore.
+For full control over the keystore.
 
-#### 1. Keystore generieren
+#### 1. Generate a keystore
 
 ```bash
 keytool -genkeypair -v -storetype PKCS12 \
@@ -62,196 +62,196 @@ keytool -genkeypair -v -storetype PKCS12 \
   -dname "CN=Pimcore Voyager, OU=Mobile, O=Pimcore, L=City, ST=State, C=DE"
 ```
 
-**Parameter:**
-- `keystore`: Dateiname des Keystores
-- `alias`: Eindeutiger Name für das Key-Paar
-- `keyalg`: Algorithmus (RSA empfohlen)
-- `keysize`: Schlüsselgröße (2048 Bit minimum)
-- `validity`: Gültigkeitsdauer in Tagen (10000 = ~27 Jahre)
-- `storepass`: Passwort für Keystore-Datei
-- `keypass`: Passwort für Private Key
-- `dname`: Distinguished Name mit Organisations-Info
+**Parameters:**
+- `keystore`: File name of the keystore
+- `alias`: Unique name for the key pair
+- `keyalg`: Algorithm (RSA recommended)
+- `keysize`: Key size (2048 bit minimum)
+- `validity`: Validity period in days (10000 = ~27 years)
+- `storepass`: Password for the keystore file
+- `keypass`: Password for the private key
+- `dname`: Distinguished name with organization info
 
-#### 2. Keystore-Informationen anzeigen
+#### 2. Display keystore information
 
 ```bash
 keytool -list -v -keystore pimcore-voyager-release.keystore
 ```
 
-#### 3. Keystore zu EAS hochladen
+#### 3. Upload the keystore to EAS
 
 ```bash
-# Credentials-Manager starten
+# Start the credentials manager
 eas credentials
 
-# Im Menü:
+# In the menu:
 # 1. Select platform: Android
 # 2. Select action: Set up new Android Keystore
-# 3. Wähle "Upload existing keystore"
-# 4. Pfad zum Keystore: pimcore-voyager-release.keystore
-# 5. Keystore Password: [dein-storepass]
+# 3. Choose "Upload existing keystore"
+# 4. Path to the keystore: pimcore-voyager-release.keystore
+# 5. Keystore Password: [your-storepass]
 # 6. Key Alias: pimcore-voyager
-# 7. Key Password: [dein-keypass]
+# 7. Key Password: [your-keypass]
 ```
 
-#### 4. Keystore sicher speichern
+#### 4. Store the keystore securely
 
-**WICHTIG:** Sichere Backups erstellen!
+**IMPORTANT:** Create secure backups!
 
 ```bash
-# Verschlüsseltes Backup erstellen (empfohlen)
+# Create an encrypted backup (recommended)
 gpg -c pimcore-voyager-release.keystore
 
-# Oder in Passwort-Manager speichern
-# - Keystore-Datei
-# - Keystore Password
-# - Key Alias
-# - Key Password
+# Or store in a password manager
+# - Keystore file
+# - Keystore password
+# - Key alias
+# - Key password
 ```
 
-### Keystore-Informationen
+### Keystore Information
 
-Nach der Generierung notieren:
+Record the following after generation:
 
 ```
-Keystore-Datei: pimcore-voyager-release.keystore
-Keystore Password: [dein-storepass]
+Keystore file: pimcore-voyager-release.keystore
+Keystore Password: [your-storepass]
 Key Alias: pimcore-voyager
-Key Password: [dein-keypass]
-SHA-1: XX:XX:XX:... (aus keytool -list)
-SHA-256: XX:XX:XX:... (aus keytool -list)
+Key Password: [your-keypass]
+SHA-1: XX:XX:XX:... (from keytool -list)
+SHA-256: XX:XX:XX:... (from keytool -list)
 ```
 
 ### Play Store Setup
 
-Für Play Store Deployment:
+For Play Store deployment:
 
-#### 1. App in Play Console erstellen
+#### 1. Create the app in the Play Console
 
-1. Gehe zu [play.google.com/console](https://play.google.com/console)
-2. Erstelle neue App
-3. Package Name: `com.pimcore.voyager` (muss mit app.json übereinstimmen)
+1. Go to [play.google.com/console](https://play.google.com/console)
+2. Create a new app
+3. Package name: `com.pimcore.voyager` (must match app.json)
 
-#### 2. App Signing aktivieren
+#### 2. Enable app signing
 
-**Option A: Google Play App Signing (Empfohlen)**
+**Option A: Google Play App Signing (recommended)**
 
-Google verwaltet den finalen Signing Key:
+Google manages the final signing key:
 
-1. In Play Console → Setup → App Integrity
-2. App Signing aktivieren
-3. Upload Key Certificate (.der) hochladen:
+1. In the Play Console → Setup → App Integrity
+2. Enable app signing
+3. Upload the upload key certificate (.der):
 
 ```bash
-# Certificate aus Keystore extrahieren
+# Extract the certificate from the keystore
 keytool -export -rfc \
   -keystore pimcore-voyager-release.keystore \
   -alias pimcore-voyager \
   -file upload-cert.pem
 ```
 
-4. Google generiert App Signing Key automatisch
+4. Google generates the app signing key automatically
 
-**Option B: Traditionelles App Signing**
+**Option B: Traditional app signing**
 
-Du behältst Kontrolle über Signing Key (nicht empfohlen).
+You keep control over the signing key (not recommended).
 
-#### 3. Service Account erstellen (für automatischen Upload)
+#### 3. Create a service account (for automatic upload)
 
-1. In Play Console → Setup → API Access
-2. Service Account erstellen
-3. JSON Key herunterladen
-4. Als GitHub Secret `GOOGLE_PLAY_SERVICE_ACCOUNT` speichern
+1. In the Play Console → Setup → API Access
+2. Create a service account
+3. Download the JSON key
+4. Store it as the GitHub Secret `GOOGLE_PLAY_SERVICE_ACCOUNT`
 
-## iOS Signierung
+## iOS Signing
 
-### Voraussetzungen
+### Prerequisites
 
-- Apple Developer Account ($99/Jahr)
-- Bundle ID registriert: `com.pimcore.voyager`
+- Apple Developer account ($99/year)
+- Bundle ID registered: `com.pimcore.voyager`
 
-### Option 1: EAS Managed Certificates (Empfohlen)
+### Option 1: EAS Managed Certificates (recommended)
 
-EAS kann iOS Certificates automatisch generieren.
+EAS can generate iOS certificates automatically.
 
 #### Setup
 
 ```bash
-# Credentials-Manager starten
+# Start the credentials manager
 eas credentials --platform ios
 
-# Im Menü:
+# In the menu:
 # 1. Set up a new iOS distribution certificate
-# 2. Wähle "Generate new certificate"
-# 3. Gib Apple ID und Passwort ein
-# 4. EAS erstellt Distribution Certificate
+# 2. Choose "Generate new certificate"
+# 3. Enter your Apple ID and password
+# 4. EAS creates the distribution certificate
 ```
 
-**Vorteile:**
-- ✅ Automatische Generierung
-- ✅ Automatische Provisioning Profile
-- ✅ Renewal-Erinnerungen
-- ✅ Push Notification Keys automatisch
+**Advantages:**
+- ✅ Automatic generation
+- ✅ Automatic provisioning profiles
+- ✅ Renewal reminders
+- ✅ Push notification keys handled automatically
 
-**Nachteile:**
-- ⚠️ Benötigt Apple ID Credentials
-- ⚠️ 2FA kann Setup verkomplizieren
+**Disadvantages:**
+- ⚠️ Requires Apple ID credentials
+- ⚠️ 2FA can complicate the setup
 
-### Option 2: Manuelle Certificates
+### Option 2: Manual Certificates
 
-Für vollständige Kontrolle.
+For full control.
 
-#### 1. Certificate Signing Request (CSR) erstellen
+#### 1. Create a Certificate Signing Request (CSR)
 
-**Auf macOS:**
+**On macOS:**
 
-1. Öffne Keychain Access
+1. Open Keychain Access
 2. Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority
-3. User Email: deine Apple ID
+3. User Email: your Apple ID
 4. Common Name: "Pimcore Voyager Distribution"
 5. Saved to disk
-6. Speichere als `PimcoreVoyager.certSigningRequest`
+6. Save as `PimcoreVoyager.certSigningRequest`
 
-**Auf Linux/Windows:**
+**On Linux/Windows:**
 
 ```bash
-# Private Key generieren
+# Generate a private key
 openssl genrsa -out ios-distribution.key 2048
 
-# CSR erstellen
+# Create the CSR
 openssl req -new -key ios-distribution.key \
   -out PimcoreVoyager.certSigningRequest \
   -subj "/emailAddress=your-email@example.com, CN=Pimcore Voyager Distribution, C=DE"
 ```
 
-#### 2. Distribution Certificate erstellen
+#### 2. Create the distribution certificate
 
-1. Gehe zu [developer.apple.com/account/resources/certificates](https://developer.apple.com/account/resources/certificates)
-2. Klicke auf "+"
-3. Wähle "Apple Distribution"
-4. Weiter
-5. Upload CSR-Datei
-6. Certificate herunterladen als `distribution.cer`
+1. Go to [developer.apple.com/account/resources/certificates](https://developer.apple.com/account/resources/certificates)
+2. Click "+"
+3. Select "Apple Distribution"
+4. Continue
+5. Upload the CSR file
+6. Download the certificate as `distribution.cer`
 
-#### 3. Certificate zu .p12 konvertieren
+#### 3. Convert the certificate to .p12
 
-**Auf macOS:**
+**On macOS:**
 
-1. Doppelklick auf `distribution.cer` (importiert in Keychain)
-2. In Keychain Access: Finde "Apple Distribution: ..."
-3. Rechtsklick → Export
+1. Double-click `distribution.cer` (imports it into Keychain)
+2. In Keychain Access: find "Apple Distribution: ..."
+3. Right-click → Export
 4. Format: Personal Information Exchange (.p12)
-5. Passwort setzen
-6. Speichern als `distribution.p12`
+5. Set a password
+6. Save as `distribution.p12`
 
-**Auf Linux:**
+**On Linux:**
 
 ```bash
-# .cer zu .pem konvertieren
+# Convert .cer to .pem
 openssl x509 -in distribution.cer -inform DER \
   -out distribution.pem -outform PEM
 
-# .pem und .key zu .p12 bündeln
+# Bundle .pem and .key into .p12
 openssl pkcs12 -export \
   -out distribution.p12 \
   -inkey ios-distribution.key \
@@ -259,122 +259,122 @@ openssl pkcs12 -export \
   -password pass:YOUR_P12_PASSWORD
 ```
 
-#### 4. App ID registrieren
+#### 4. Register the App ID
 
-1. Gehe zu [developer.apple.com/account/resources/identifiers](https://developer.apple.com/account/resources/identifiers)
-2. Klicke auf "+"
-3. Wähle "App IDs"
-4. Typ: App
+1. Go to [developer.apple.com/account/resources/identifiers](https://developer.apple.com/account/resources/identifiers)
+2. Click "+"
+3. Select "App IDs"
+4. Type: App
 5. Bundle ID: `com.pimcore.voyager` (Explicit)
-6. Capabilities auswählen (z.B. Push Notifications)
-7. Registrieren
+6. Select capabilities (e.g. Push Notifications)
+7. Register
 
-#### 5. Provisioning Profile erstellen
+#### 5. Create a provisioning profile
 
-1. Gehe zu [developer.apple.com/account/resources/profiles](https://developer.apple.com/account/resources/profiles)
-2. Klicke auf "+"
-3. Wähle "App Store" (für Production) oder "Ad Hoc" (für Preview)
-4. Wähle App ID: `com.pimcore.voyager`
-5. Wähle Certificate: dein Distribution Certificate
-6. (Bei Ad Hoc) Wähle Test-Geräte
-7. Name: "Pimcore Voyager App Store" oder "Pimcore Voyager AdHoc"
-8. Generate und download als `PimcoreVoyager.mobileprovision`
+1. Go to [developer.apple.com/account/resources/profiles](https://developer.apple.com/account/resources/profiles)
+2. Click "+"
+3. Select "App Store" (for production) or "Ad Hoc" (for preview)
+4. Select the App ID: `com.pimcore.voyager`
+5. Select the certificate: your distribution certificate
+6. (For Ad Hoc) select the test devices
+7. Name: "Pimcore Voyager App Store" or "Pimcore Voyager AdHoc"
+8. Generate and download as `PimcoreVoyager.mobileprovision`
 
-#### 6. Credentials zu EAS hochladen
+#### 6. Upload the credentials to EAS
 
 ```bash
-# Credentials-Manager starten
+# Start the credentials manager
 eas credentials --platform ios
 
-# Im Menü:
+# In the menu:
 # 1. Set up a new iOS distribution certificate
-# 2. Wähle "Upload existing certificate"
+# 2. Choose "Upload existing certificate"
 # 3. Path to P12: distribution.p12
-# 4. P12 Password: [dein-p12-password]
+# 4. P12 Password: [your-p12-password]
 # 
 # 5. Set up a new iOS provisioning profile
-# 6. Wähle "Upload existing provisioning profile"
+# 6. Choose "Upload existing provisioning profile"
 # 7. Path to profile: PimcoreVoyager.mobileprovision
 ```
 
 ### App Store Connect Setup
 
-#### 1. App erstellen
+#### 1. Create the app
 
-1. Gehe zu [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
-2. Meine Apps → +
+1. Go to [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
+2. My Apps → +
 3. Name: "Pimcore Voyager"
 4. Bundle ID: `com.pimcore.voyager`
-5. SKU: beliebige eindeutige ID (z.B. "pimcore-voyager-001")
+5. SKU: any unique ID (e.g. "pimcore-voyager-001")
 
-#### 2. App-Informationen ausfüllen
+#### 2. Fill in the app information
 
-- Screenshots (alle erforderlichen Größen)
-- App-Beschreibung
+- Screenshots (all required sizes)
+- App description
 - Keywords
-- Support-URL
-- Marketing-URL (optional)
+- Support URL
+- Marketing URL (optional)
 
-#### 3. App Store Connect API Key (für automatischen Upload)
+#### 3. App Store Connect API key (for automatic upload)
 
 1. App Store Connect → Users and Access → Keys
-2. Klicke auf "+"
+2. Click "+"
 3. Name: "EAS Submit"
 4. Access: "App Manager"
 5. Generate
-6. Download Key-Datei (AuthKey_XXXXXX.p8)
-7. Notiere:
+6. Download the key file (AuthKey_XXXXXX.p8)
+7. Record:
    - Issuer ID
    - Key ID
-   - Key-Datei
+   - Key file
 
-Für EAS Submit benötigt:
+Needed for EAS Submit:
 
 ```bash
 eas submit --platform ios
-# Fragt nach:
+# Asks for:
 # - Apple ID
 # - App-specific password
-# ODER
+# OR
 # - ASC API Key
 ```
 
-## Credential-Rotation
+## Credential Rotation
 
 ### Android
 
-**Jährliche Rotation nicht erforderlich**, aber empfohlen alle 2-3 Jahre:
+**Annual rotation is not required**, but recommended every 2-3 years:
 
-1. Neuen Keystore generieren
-2. Alte und neue App-Version mit neuem Keystore signieren
-3. Play Store akzeptiert Update (bei Google Play App Signing)
+1. Generate a new keystore
+2. Sign the old and new app versions with the new keystore
+3. The Play Store accepts the update (with Google Play App Signing)
 
 ### iOS
 
-**Jährliche Rotation erforderlich:**
+**Annual rotation is required:**
 
-1. Certificate läuft nach 1 Jahr ab
-2. Provisioning Profiles laufen nach 1 Jahr ab
-3. Erneuerung:
+1. The certificate expires after 1 year
+2. Provisioning profiles expire after 1 year
+3. Renewal:
 
 ```bash
-# Alte Credentials anzeigen
+# Show the old credentials
 eas credentials --platform ios
 
-# Neue Credentials generieren oder upload
+# Generate new credentials or upload them
 eas credentials --platform ios
-# Wähle "Set up a new iOS distribution certificate"
+# Choose "Set up a new iOS distribution certificate"
 ```
 
 ## Troubleshooting
 
 ### Android: "Keystore was tampered with, or password was incorrect"
 
-**Ursache:** Falsches Keystore- oder Key-Passwort
+**Cause:** Wrong keystore or key password
 
-**Lösung:**
+**Solution:**
 ```bash
-# Passwort zurücksetzen (nur möglich wenn du aktuelles Passwort kennst)
+# Reset the password (only possible if you know the current password)
 keytool -storepasswd -keystore pimcore-voyager-release.keystore
 keytool -keypasswd -alias pimcore-voyager \
   -keystore pimcore-voyager-release.keystore
@@ -382,56 +382,56 @@ keytool -keypasswd -alias pimcore-voyager \
 
 ### iOS: "No valid certificate found"
 
-**Ursache:** Certificate abgelaufen oder nicht hochgeladen
+**Cause:** Certificate expired or not uploaded
 
-**Lösung:**
+**Solution:**
 ```bash
 eas credentials --platform ios
-# Upload neues Certificate
+# Upload a new certificate
 ```
 
 ### iOS: "Provisioning profile doesn't include signing certificate"
 
-**Ursache:** Provisioning Profile passt nicht zu Certificate
+**Cause:** Provisioning profile does not match the certificate
 
-**Lösung:**
-1. Lösche altes Provisioning Profile in developer.apple.com
-2. Erstelle neues Provisioning Profile mit aktuellem Certificate
-3. Upload zu EAS
+**Solution:**
+1. Delete the old provisioning profile at developer.apple.com
+2. Create a new provisioning profile with the current certificate
+3. Upload it to EAS
 
 ### "Certificate already in use"
 
-**iOS:** Nur 2 Distribution Certificates pro Account erlaubt
+**iOS:** Only 2 distribution certificates are allowed per account
 
-**Lösung:**
-1. Revoke altes Certificate in developer.apple.com
-2. Erstelle neues Certificate
-3. Aktualisiere alle Provisioning Profiles
+**Solution:**
+1. Revoke the old certificate at developer.apple.com
+2. Create a new certificate
+3. Update all provisioning profiles
 
 ## Best Practices
 
-### Sicherheit
+### Security
 
-1. ✅ **Niemals Keystores/Certificates in Git committen**
-2. ✅ **Sichere Backups erstellen (verschlüsselt)**
-3. ✅ **Passwörter in Passwort-Manager speichern**
-4. ✅ **Separate Keystores für Debug/Release**
-5. ✅ **2FA für Apple Developer Account aktivieren**
+1. ✅ **Never commit keystores/certificates to Git**
+2. ✅ **Create secure backups (encrypted)**
+3. ✅ **Store passwords in a password manager**
+4. ✅ **Use separate keystores for debug/release**
+5. ✅ **Enable 2FA for your Apple Developer account**
 
-### Credential-Management
+### Credential Management
 
-1. ✅ **Dokumentiere alle Credentials**
-2. ✅ **Setze Kalender-Reminder für Renewals**
-3. ✅ **Teste Signing nach jeder Rotation**
-4. ✅ **Halte EAS Credentials aktuell**
+1. ✅ **Document all credentials**
+2. ✅ **Set calendar reminders for renewals**
+3. ✅ **Test signing after every rotation**
+4. ✅ **Keep the EAS credentials up to date**
 
-### Team-Access
+### Team Access
 
-1. ✅ **Nutze EAS für geteilten Credential-Zugriff**
-2. ✅ **Begrenze Zugriff auf Production-Keystores**
-3. ✅ **Dokumentiere wer Zugriff hat**
+1. ✅ **Use EAS for shared credential access**
+2. ✅ **Restrict access to production keystores**
+3. ✅ **Document who has access**
 
-## Weitere Ressourcen
+## Further Resources
 
 - [Android App Signing](https://developer.android.com/studio/publish/app-signing)
 - [iOS Code Signing Guide](https://developer.apple.com/support/code-signing/)

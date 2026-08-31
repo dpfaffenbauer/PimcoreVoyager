@@ -1,34 +1,34 @@
-# Setup-Checkliste: Pimcore Voyager CI/CD
+# Setup Checklist: Pimcore Voyager CI/CD
 
-Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeline.
+This checklist guides you through the complete setup process for the CI/CD pipeline.
 
-## Phase 1: Vorbereitungen (15 Minuten)
+## Phase 1: Preparations (15 minutes)
 
-### 1.1 Accounts erstellen
+### 1.1 Create Accounts
 
 - [ ] **Expo Account**
-  - Registrierung: https://expo.dev
-  - Email verifiziert
-  - Account-Name notiert: `_______________`
+  - Registration: https://expo.dev
+  - Email verified
+  - Account name noted: `_______________`
 
-- [ ] **Apple Developer Account** (für iOS, $99/Jahr)
-  - Registrierung: https://developer.apple.com
-  - Account verifiziert
-  - Team ID notiert: `_______________`
+- [ ] **Apple Developer Account** (for iOS, $99/year)
+  - Registration: https://developer.apple.com
+  - Account verified
+  - Team ID noted: `_______________`
 
-- [ ] **Google Play Console Account** (für Android, $25 einmalig)
-  - Registrierung: https://play.google.com/console
-  - Account verifiziert
-  - Developer Account ID notiert: `_______________`
+- [ ] **Google Play Console Account** (for Android, $25 one-time)
+  - Registration: https://play.google.com/console
+  - Account verified
+  - Developer Account ID noted: `_______________`
 
-### 1.2 Lokale Tools installieren
+### 1.2 Install Local Tools
 
 - [ ] **Node.js** (v18+)
   ```bash
-  node --version  # Sollte v18+ sein
+  node --version  # Should be v18+
   ```
 
-- [ ] **npm** oder **yarn**
+- [ ] **npm** or **yarn**
   ```bash
   npm --version
   ```
@@ -44,45 +44,45 @@ Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeli
   eas --version
   ```
 
-- [ ] **Expo CLI** (optional, für lokale Entwicklung)
+- [ ] **Expo CLI** (optional, for local development)
   ```bash
   npm install -g expo-cli
   expo --version
   ```
 
-## Phase 2: Repository Setup (10 Minuten)
+## Phase 2: Repository Setup (10 minutes)
 
-### 2.1 Repository vorbereiten
+### 2.1 Prepare the Repository
 
-- [ ] Repository geklont
+- [ ] Repository cloned
   ```bash
   git clone https://github.com/dpfaffenbauer/PimcoreVoyager.git
   cd PimcoreVoyager
   ```
 
-- [ ] Dependencies installiert
+- [ ] Dependencies installed
   ```bash
   npm install
   ```
 
-- [ ] App lokal getestet
+- [ ] App tested locally
   ```bash
   npm start
   ```
 
-### 2.2 EAS initialisieren
+### 2.2 Initialize EAS
 
-- [ ] Bei Expo angemeldet
+- [ ] Signed in to Expo
   ```bash
   eas login
   ```
 
-- [ ] Projekt initialisiert
+- [ ] Project initialized
   ```bash
   eas init
   ```
 
-- [ ] Projekt-ID in `app.json` aktualisiert
+- [ ] Project ID updated in `app.json`
   ```json
   {
     "expo": {
@@ -95,32 +95,32 @@ Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeli
   }
   ```
 
-- [ ] Bundle Identifiers angepasst (falls nötig)
+- [ ] Bundle identifiers adjusted (if necessary)
   - iOS: `app.json` → `expo.ios.bundleIdentifier`
   - Android: `app.json` → `expo.android.package`
 
-## Phase 3: GitHub Secrets (10 Minuten)
+## Phase 3: GitHub Secrets (10 minutes)
 
-### 3.1 Expo Token erstellen
+### 3.1 Create Expo Token
 
-- [ ] Expo Access Token generiert
+- [ ] Expo access token generated
   - Website: https://expo.dev/accounts/[username]/settings/access-tokens
-  - Token-Name: `GitHub Actions`
-  - Token kopiert: `_______________`
+  - Token name: `GitHub Actions`
+  - Token copied: `_______________`
 
-- [ ] GitHub Secret hinzugefügt
+- [ ] GitHub Secret added
   - Repository → Settings → Secrets → Actions
   - Name: `EXPO_TOKEN`
-  - Value: [dein-token]
+  - Value: [your-token]
 
-### 3.2 Apple Secrets (Optional - für TestFlight)
+### 3.2 Apple Secrets (Optional - for TestFlight)
 
 - [ ] `EXPO_APPLE_ID`
-  - Value: deine Apple ID Email
+  - Value: your Apple ID email
 
 - [ ] `EXPO_APPLE_APP_SPECIFIC_PASSWORD`
-  - Generiert bei: https://appleid.apple.com
-  - Sicherheit → App-spezifische Passwörter
+  - Generated at: https://appleid.apple.com
+  - Security → App-Specific Passwords
   - Value: xxxx-xxxx-xxxx-xxxx
 
 ### 3.3 Repository Variable (Optional)
@@ -130,25 +130,25 @@ Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeli
   - Name: `ENABLE_TESTFLIGHT_DEPLOY`
   - Value: `true`
 
-## Phase 4: Android Setup (20 Minuten)
+## Phase 4: Android Setup (20 minutes)
 
-### 4.1 Keystore erstellen
+### 4.1 Create Keystore
 
-**Option A: EAS Managed (Empfohlen)**
+**Option A: EAS Managed (Recommended)**
 
-- [ ] Credentials Manager gestartet
+- [ ] Credentials manager started
   ```bash
   eas credentials --platform android
   ```
 
-- [ ] "Set up new Android Keystore" gewählt
-- [ ] "Generate new keystore" gewählt
-- [ ] Keystore erfolgreich generiert
-- [ ] Keystore-Details notiert
+- [ ] "Set up new Android Keystore" selected
+- [ ] "Generate new keystore" selected
+- [ ] Keystore generated successfully
+- [ ] Keystore details noted
 
-**Option B: Eigener Keystore**
+**Option B: Custom Keystore**
 
-- [ ] Keystore generiert
+- [ ] Keystore generated
   ```bash
   keytool -genkeypair -v -storetype PKCS12 \
     -keystore pimcore-voyager-release.keystore \
@@ -156,162 +156,162 @@ Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeli
     -keyalg RSA -keysize 2048 -validity 10000
   ```
 
-- [ ] Keystore gesichert (Backup erstellt)
-- [ ] Keystore-Details notiert:
+- [ ] Keystore secured (backup created)
+- [ ] Keystore details noted:
   - Keystore Password: `_______________`
   - Key Alias: `_______________`
   - Key Password: `_______________`
 
-- [ ] Keystore zu EAS hochgeladen
+- [ ] Keystore uploaded to EAS
   ```bash
   eas credentials --platform android
-  # "Upload existing keystore" wählen
+  # Select "Upload existing keystore"
   ```
 
 ### 4.2 Play Console Setup (Optional)
 
-- [ ] App in Play Console erstellt
-  - Package Name: `com.pimcore.voyager` (muss mit app.json übereinstimmen)
-  - App-Name: `Pimcore Voyager`
+- [ ] App created in Play Console
+  - Package name: `com.pimcore.voyager` (must match app.json)
+  - App name: `Pimcore Voyager`
 
-- [ ] App Signing aktiviert (Google Play App Signing empfohlen)
+- [ ] App signing enabled (Google Play App Signing recommended)
 
-- [ ] Service Account erstellt (für automatischen Upload)
+- [ ] Service account created (for automatic upload)
   - Play Console → Setup → API Access
-  - Service Account Key (.json) heruntergeladen
+  - Service account key (.json) downloaded
 
-## Phase 5: iOS Setup (30 Minuten)
+## Phase 5: iOS Setup (30 minutes)
 
 ### 5.1 Apple Developer Portal
 
-- [ ] Bundle ID registriert
+- [ ] Bundle ID registered
   - Portal: https://developer.apple.com/account/resources/identifiers
   - Bundle ID: `com.pimcore.voyager`
-  - Capabilities ausgewählt
+  - Capabilities selected
 
 ### 5.2 Certificates & Profiles
 
-**Option A: EAS Managed (Empfohlen)**
+**Option A: EAS Managed (Recommended)**
 
-- [ ] Credentials Manager gestartet
+- [ ] Credentials manager started
   ```bash
   eas credentials --platform ios
   ```
 
-- [ ] "Set up new iOS distribution certificate" gewählt
-- [ ] Apple ID und Passwort eingegeben
-- [ ] Certificate generiert
-- [ ] Provisioning Profile generiert
-- [ ] Credentials-Details notiert
+- [ ] "Set up new iOS distribution certificate" selected
+- [ ] Apple ID and password entered
+- [ ] Certificate generated
+- [ ] Provisioning profile generated
+- [ ] Credentials details noted
 
-**Option B: Manuelle Certificates**
+**Option B: Manual Certificates**
 
-- [ ] Distribution Certificate erstellt
-  - CSR generiert (via Keychain oder OpenSSL)
-  - Certificate bei developer.apple.com erstellt
-  - Als .p12 exportiert
-  - .p12 Password notiert: `_______________`
+- [ ] Distribution certificate created
+  - CSR generated (via Keychain or OpenSSL)
+  - Certificate created at developer.apple.com
+  - Exported as .p12
+  - .p12 password noted: `_______________`
 
-- [ ] Provisioning Profile erstellt
-  - Typ: App Store oder Ad Hoc
-  - Bundle ID: `com.pimcore.voyager` ausgewählt
-  - Certificate ausgewählt
-  - .mobileprovision heruntergeladen
+- [ ] Provisioning profile created
+  - Type: App Store or Ad Hoc
+  - Bundle ID: `com.pimcore.voyager` selected
+  - Certificate selected
+  - .mobileprovision downloaded
 
-- [ ] Credentials zu EAS hochgeladen
+- [ ] Credentials uploaded to EAS
   ```bash
   eas credentials --platform ios
-  # "Upload existing certificate" wählen
-  # "Upload existing provisioning profile" wählen
+  # Select "Upload existing certificate"
+  # Select "Upload existing provisioning profile"
   ```
 
 ### 5.3 App Store Connect
 
-- [ ] App erstellt
+- [ ] App created
   - Website: https://appstoreconnect.apple.com
   - Name: `Pimcore Voyager`
   - Bundle ID: `com.pimcore.voyager`
-  - SKU: eindeutige ID
+  - SKU: unique ID
 
-- [ ] App-Informationen ausgefüllt (optional, für späteren Submit)
-  - Screenshots vorbereitet
-  - Beschreibung geschrieben
-  - Keywords definiert
+- [ ] App information filled in (optional, for a later submit)
+  - Screenshots prepared
+  - Description written
+  - Keywords defined
 
-## Phase 6: Erster Build-Test (10 Minuten)
+## Phase 6: First Build Test (10 minutes)
 
-### 6.1 Lokaler Test-Build
+### 6.1 Local Test Build
 
-- [ ] Development Build gestartet (optional)
+- [ ] Development build started (optional)
   ```bash
   eas build --platform android --profile development
   ```
 
-- [ ] Build erfolgreich
-- [ ] Build-ID notiert: `_______________`
+- [ ] Build successful
+- [ ] Build ID noted: `_______________`
 
 ### 6.2 GitHub Actions Test
 
-- [ ] GitHub Actions UI geöffnet
-  - Repository → Actions Tab
+- [ ] GitHub Actions UI opened
+  - Repository → Actions tab
 
-- [ ] "Build and Deploy" Workflow geöffnet
+- [ ] "Build and Deploy" workflow opened
 
-- [ ] Workflow manuell gestartet
-  - "Run workflow" geklickt
-  - Platform: `android` gewählt
-  - Profile: `preview` gewählt
-  - Workflow gestartet
+- [ ] Workflow started manually
+  - Clicked "Run workflow"
+  - Platform: `android` selected
+  - Profile: `preview` selected
+  - Workflow started
 
-- [ ] Workflow erfolgreich abgeschlossen
-- [ ] Keine Fehler in Logs
-- [ ] Build-ID in Logs gefunden
+- [ ] Workflow completed successfully
+- [ ] No errors in logs
+- [ ] Build ID found in logs
 
-### 6.3 EAS Dashboard prüfen
+### 6.3 Check EAS Dashboard
 
-- [ ] EAS Dashboard geöffnet
+- [ ] EAS dashboard opened
   - https://expo.dev/accounts/[username]/projects/pimcore-voyager/builds
 
-- [ ] Build-Status: Success
-- [ ] Build heruntergeladen (optional)
-- [ ] Auf Gerät getestet (optional)
+- [ ] Build status: Success
+- [ ] Build downloaded (optional)
+- [ ] Tested on a device (optional)
 
-## Phase 7: Vollständiger Workflow-Test (20 Minuten)
+## Phase 7: Full Workflow Test (20 minutes)
 
-### 7.1 Beide Platforms testen
+### 7.1 Test Both Platforms
 
-- [ ] Android Build erfolgreich
+- [ ] Android build successful
   ```bash
-  # Via GitHub Actions oder:
+  # Via GitHub Actions or:
   eas build --platform android --profile preview
   ```
 
-- [ ] iOS Build erfolgreich
+- [ ] iOS build successful
   ```bash
-  # Via GitHub Actions oder:
+  # Via GitHub Actions or:
   eas build --platform ios --profile preview
   ```
 
-### 7.2 Artifact-Workflow testen
+### 7.2 Test the Artifact Workflow
 
-- [ ] "Build with Artifacts" Workflow gestartet
+- [ ] "Build with Artifacts" workflow started
   - Actions → "Build with Artifacts" → "Run workflow"
   - Platform: `android`
   - Profile: `preview`
 
-- [ ] Workflow abgeschlossen (kann 20-60 Min dauern)
-- [ ] Artifact in Actions verfügbar
-- [ ] Artifact heruntergeladen
-- [ ] APK getestet
+- [ ] Workflow completed (can take 20-60 min)
+- [ ] Artifact available in Actions
+- [ ] Artifact downloaded
+- [ ] APK tested
 
-### 7.3 Automatische Builds testen
+### 7.3 Test Automatic Builds
 
-- [ ] Branch erstellen
+- [ ] Create a branch
   ```bash
   git checkout -b test/ci-build
   ```
 
-- [ ] Kleine Änderung machen (z.B. README editieren)
+- [ ] Make a small change (e.g. edit the README)
   ```bash
   echo "# Test" >> README.md
   git add README.md
@@ -319,74 +319,74 @@ Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeli
   git push origin test/ci-build
   ```
 
-- [ ] Pull Request erstellen
-- [ ] CI-Build automatisch gestartet
-- [ ] Build erfolgreich
-- [ ] PR-Kommentar mit Build-Status erhalten
+- [ ] Pull request created
+- [ ] CI build started automatically
+- [ ] Build successful
+- [ ] PR comment with build status received
 
-## Phase 8: Dokumentation & Team (15 Minuten)
+## Phase 8: Documentation & Team (15 minutes)
 
-### 8.1 Credentials dokumentieren
+### 8.1 Document Credentials
 
-- [ ] `docs/CREDENTIALS-TEMPLATE.md` ausgefüllt
-- [ ] In Passwort-Manager gespeichert
-- [ ] Team-Zugriff konfiguriert (falls Team-Setup)
+- [ ] `docs/CREDENTIALS-TEMPLATE.md` filled in
+- [ ] Stored in a password manager
+- [ ] Team access configured (if a team setup)
 
-### 8.2 Backups erstellen
+### 8.2 Create Backups
 
-- [ ] Android Keystore gesichert
-  - Verschlüsseltes Backup erstellt
-  - An sicherem Ort gespeichert
-  - Backup-Location dokumentiert: `_______________`
+- [ ] Android keystore backed up
+  - Encrypted backup created
+  - Stored in a secure location
+  - Backup location documented: `_______________`
 
-- [ ] iOS Certificates gesichert
-  - .p12 Datei gesichert
-  - .mobileprovision gesichert
-  - An sicherem Ort gespeichert
+- [ ] iOS certificates backed up
+  - .p12 file backed up
+  - .mobileprovision backed up
+  - Stored in a secure location
 
-### 8.3 Team informieren
+### 8.3 Inform the Team
 
-- [ ] Team über neuen CI/CD-Prozess informiert
-- [ ] Dokumentation geteilt
+- [ ] Team informed about the new CI/CD process
+- [ ] Documentation shared
   - [docs/CI-CD-SETUP.md](./CI-CD-SETUP.md)
   - [docs/SECRETS-SETUP.md](./SECRETS-SETUP.md)
-- [ ] Quick-Start-Guide erstellt (optional)
+- [ ] Quick-start guide created (optional)
 
-## Phase 9: Monitoring & Wartung Setup (10 Minuten)
+## Phase 9: Monitoring & Maintenance Setup (10 minutes)
 
-### 9.1 Monitoring einrichten
+### 9.1 Set Up Monitoring
 
-- [ ] GitHub Actions Notifications aktiviert
+- [ ] GitHub Actions notifications enabled
   - Settings → Notifications → Actions
-  - Email-Benachrichtigungen bei Failures
+  - Email notifications on failures
 
-- [ ] EAS Build Notifications (optional)
+- [ ] EAS build notifications (optional)
   - Expo Dashboard → Project Settings → Notifications
 
-### 9.2 Kalender-Reminder setzen
+### 9.2 Set Calendar Reminders
 
-- [ ] iOS Certificate Renewal (jährlich)
-  - Datum: `_______________`
+- [ ] iOS certificate renewal (annually)
+  - Date: `_______________`
 
-- [ ] iOS Provisioning Profile Renewal (jährlich)
-  - Datum: `_______________`
+- [ ] iOS provisioning profile renewal (annually)
+  - Date: `_______________`
 
-- [ ] Android Keystore Password Rotation (alle 2-3 Jahre)
-  - Datum: `_______________`
+- [ ] Android keystore password rotation (every 2-3 years)
+  - Date: `_______________`
 
-- [ ] Expo Token Rotation (alle 6-12 Monate)
-  - Datum: `_______________`
+- [ ] Expo token rotation (every 6-12 months)
+  - Date: `_______________`
 
-## Phase 10: Produktion & Store Deployment (Optional)
+## Phase 10: Production & Store Deployment (Optional)
 
 ### 10.1 Production Builds
 
-- [ ] Android Production Build
+- [ ] Android production build
   ```bash
   eas build --platform android --profile production
   ```
 
-- [ ] iOS Production Build
+- [ ] iOS production build
   ```bash
   eas build --platform ios --profile production
   ```
@@ -397,66 +397,66 @@ Diese Checkliste führt dich durch den kompletten Setup-Prozess der CI/CD-Pipeli
   ```bash
   eas submit --platform android
   ```
-  - Oder manueller Upload in Play Console
+  - Or manual upload in the Play Console
 
 - [ ] **Apple App Store / TestFlight** (optional)
   ```bash
   eas submit --platform ios
   ```
-  - Oder manueller Upload in App Store Connect
+  - Or manual upload in App Store Connect
 
 ### 10.3 Release Testing
 
-- [ ] TestFlight Beta Test (iOS)
-  - Interne Tester hinzugefügt
-  - Build getestet
-  - Feedback gesammelt
+- [ ] TestFlight beta test (iOS)
+  - Internal testers added
+  - Build tested
+  - Feedback collected
 
-- [ ] Internal Track Test (Android)
-  - Interne Tester hinzugefügt
-  - APK getestet
-  - Feedback gesammelt
+- [ ] Internal track test (Android)
+  - Internal testers added
+  - APK tested
+  - Feedback collected
 
-## ✅ Abschluss-Checkliste
+## ✅ Final Checklist
 
-Stelle sicher, dass alle kritischen Punkte abgehakt sind:
+Make sure all critical items are checked off:
 
-- [ ] ✅ EAS CLI installiert und funktioniert
-- [ ] ✅ Projekt mit EAS initialisiert
-- [ ] ✅ GitHub Secret `EXPO_TOKEN` gesetzt
-- [ ] ✅ Android Keystore konfiguriert
-- [ ] ✅ iOS Certificates konfiguriert (falls iOS-Deployment gewünscht)
-- [ ] ✅ Mindestens ein erfolgreicher Build auf EAS
-- [ ] ✅ GitHub Actions Workflow erfolgreich durchgelaufen
-- [ ] ✅ Credentials gesichert und dokumentiert
-- [ ] ✅ Team informiert
-- [ ] ✅ Monitoring/Notifications eingerichtet
+- [ ] ✅ EAS CLI installed and working
+- [ ] ✅ Project initialized with EAS
+- [ ] ✅ GitHub Secret `EXPO_TOKEN` set
+- [ ] ✅ Android keystore configured
+- [ ] ✅ iOS certificates configured (if iOS deployment is desired)
+- [ ] ✅ At least one successful build on EAS
+- [ ] ✅ GitHub Actions workflow completed successfully
+- [ ] ✅ Credentials backed up and documented
+- [ ] ✅ Team informed
+- [ ] ✅ Monitoring/notifications set up
 
-## 🎉 Fertig!
+## 🎉 Done!
 
-Die CI/CD-Pipeline ist jetzt vollständig eingerichtet und betriebsbereit.
+The CI/CD pipeline is now fully set up and ready for operation.
 
-### Nächste Schritte
+### Next Steps
 
-1. **Regelmäßige Builds:** Push zu `main`/`develop` triggert automatische Builds
-2. **Manuelle Builds:** Nutze GitHub Actions UI für On-Demand-Builds
-3. **Releases:** Erstelle GitHub Releases für automatische Store-Builds
-4. **TestFlight/Beta:** Nutze Preview-Builds für interne Tests
-5. **Production:** Deploy zu Stores mit Production-Profil
+1. **Regular builds:** Pushing to `main`/`develop` triggers automatic builds
+2. **Manual builds:** Use the GitHub Actions UI for on-demand builds
+3. **Releases:** Create GitHub Releases for automatic store builds
+4. **TestFlight/Beta:** Use preview builds for internal tests
+5. **Production:** Deploy to the stores with the production profile
 
 ### Support
 
-Bei Problemen:
-- 📖 Siehe [Troubleshooting](./CI-CD-SETUP.md#troubleshooting)
-- 💬 Erstelle Issue auf GitHub
-- 🔍 Prüfe [Expo Forums](https://forums.expo.dev/)
+If you run into problems:
+- 📖 See [Troubleshooting](./CI-CD-SETUP.md#troubleshooting)
+- 💬 Create an issue on GitHub
+- 🔍 Check the [Expo Forums](https://forums.expo.dev/)
 
 ---
 
-**Setup abgeschlossen am:** `_______________`
+**Setup completed on:** `_______________`
 
-**Setup durchgeführt von:** `_______________`
+**Setup performed by:** `_______________`
 
-**Build-Status:** ✅ Funktioniert
+**Build status:** ✅ Working
 
-**Notizen:** `_____________________________________`
+**Notes:** `_____________________________________`
