@@ -1,6 +1,6 @@
 # Pimcore Voyager
 
-**Pimcore Voyager** is a generic mobile companion app (React Native, Expo) for Pimcore – the enterprise open source data and experience management system.
+**Pimcore Voyager** is a generic mobile companion app (React Native, Expo) for Pimcore – the enterprise open core data and experience management system.
 
 ## 🎯 Goal
 
