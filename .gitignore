@@ -100,3 +100,4 @@ yarn-error.*
 # Local configuration
 *.local
 /.maestro/tests/.maestro/
+.claude/
